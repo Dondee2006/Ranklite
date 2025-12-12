@@ -18,9 +18,36 @@ interface CMSIntegration {
 }
 
 const CMS_TYPES = [
-  { id: "wordpress", name: "WordPress", icon: "W" },
-  { id: "shopify", name: "Shopify", icon: "S" },
-  { id: "notion", name: "Notion", icon: "N" },
+  { 
+    id: "wordpress", 
+    name: "WordPress", 
+    logo: "https://s.w.org/style/images/about/WordPress-logotype-wmark.png"
+  },
+  { 
+    id: "shopify", 
+    name: "Shopify", 
+    logo: "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-primary-logo-456baa801ee66a0a435671082365958316831c9960c480451dd0330bcdae304f.svg"
+  },
+  { 
+    id: "notion", 
+    name: "Notion", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png"
+  },
+  { 
+    id: "wix", 
+    name: "Wix", 
+    logo: "https://static.wixstatic.com/media/9ab0d1_8bc30b692fb5449ab8c86bf2e26409b1~mv2.png"
+  },
+  { 
+    id: "webflow", 
+    name: "Webflow", 
+    logo: "https://assets-global.website-files.com/5d3e265ac89f6a3e64292efc/5d5b7b18c3cd6d73e836c3bb_logo%20webflow.svg"
+  },
+  { 
+    id: "feather", 
+    name: "Feather", 
+    logo: "https://www.feather.so/favicon.ico"
+  },
 ];
 
 export default function IntegrationsPage() {
@@ -354,7 +381,7 @@ export default function IntegrationsPage() {
                           : "border-gray-200 hover:border-gray-300"
                       )}
                     >
-                      <span className="text-xl">{type.icon}</span>
+                      <img src={type.logo} alt={type.name} className="h-8 w-8" />
                       <span className="text-xs font-medium">{type.name}</span>
                     </button>
                   ))}
