@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { syncGSCData } from "@/lib/gsc/sync";
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,6 +96,7 @@ export async function GET(request: NextRequest) {
         refresh_token: tokens.refresh_token,
         token_expires_at: expiresAt.toISOString(),
         scope: tokens.scope,
+        auto_refresh_enabled: true,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: "site_id",
@@ -106,6 +108,10 @@ export async function GET(request: NextRequest) {
         new URL("/dashboard/settings?tab=gsc&error=db_error", request.url)
       );
     }
+
+    syncGSCData(sites.id).catch((error) => {
+      console.error("Initial GSC sync failed:", error);
+    });
 
     return NextResponse.redirect(
       new URL("/dashboard/settings?tab=gsc&success=true", request.url)

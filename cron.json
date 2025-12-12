@@ -7,6 +7,10 @@
     {
       "path": "/api/cms/cron/daily-sync",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/gsc/cron/daily-sync",
+      "schedule": "0 9 * * *"
     }
   ]
 }
