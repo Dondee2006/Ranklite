@@ -40,8 +40,12 @@ export async function parseSitemap(url: string): Promise<ParsedSitemap> {
         
         const response = await fetch(normalizedUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-                'Accept': 'application/xml, text/xml, */*; q=0.01',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                'Accept': 'application/xml, text/xml, application/rss+xml, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
             },
         });
 
