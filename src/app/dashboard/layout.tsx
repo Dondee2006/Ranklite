@@ -141,6 +141,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const isActive = (href: string) => pathname === href;
+  const isInactive = (id: string) => id === "seo-tools" || id === "human-curated";
 
   return (
     <div className="flex min-h-screen bg-[#FAFAFA]">
@@ -207,50 +208,91 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {expandedSections.includes(item.id) && item.children && (
                     <div className="ml-4 space-y-0.5">
                       {item.children.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.href}
-                          className={cn(
-                            "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                            isActive(child.href)
-                              ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
-                              : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            {child.icon && <child.icon className="h-4 w-4" />}
-                            {child.label}
-                          </div>
-                          {child.badge && (
-                            <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                              {child.badge}
-                            </span>
-                          )}
-                        </Link>
+                        isInactive(child.id) ? (
+                          <button
+                            key={child.id}
+                            onClick={(e) => e.preventDefault()}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-not-allowed opacity-50",
+                              "text-muted-foreground"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              {child.icon && <child.icon className="h-4 w-4" />}
+                              {child.label}
+                            </div>
+                            {child.badge && (
+                              <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                {child.badge}
+                              </span>
+                            )}
+                          </button>
+                        ) : (
+                          <Link
+                            key={child.id}
+                            href={child.href}
+                            className={cn(
+                              "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                              isActive(child.href)
+                                ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
+                                : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              {child.icon && <child.icon className="h-4 w-4" />}
+                              {child.label}
+                            </div>
+                            {child.badge && (
+                              <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                {child.badge}
+                              </span>
+                            )}
+                          </Link>
+                        )
                       ))}
                     </div>
                   )}
                 </>
               ) : (
-                <Link
-                  href={item.href || "#"}
-                  className={cn(
-                    "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                    isActive(item.href || "")
-                      ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
-                      : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    {item.icon && <item.icon className="h-4 w-4" />}
-                    {item.label}
-                  </div>
-                  {item.badge && (
-                    <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
+                isInactive(item.id) ? (
+                  <button
+                    onClick={(e) => e.preventDefault()}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-not-allowed opacity-50",
+                      "text-muted-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon && <item.icon className="h-4 w-4" />}
+                      {item.label}
+                    </div>
+                    {item.badge && (
+                      <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href || "#"}
+                    className={cn(
+                      "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                      isActive(item.href || "")
+                        ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
+                        : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon && <item.icon className="h-4 w-4" />}
+                      {item.label}
+                    </div>
+                    {item.badge && (
+                      <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                )
               )}
             </div>
           ))}
