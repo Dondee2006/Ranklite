@@ -25,7 +25,7 @@ interface LinkSuggestion {
 
 export function LinkingConfigurationPage() {
   const [linkSource, setLinkSource] = useState<LinkSource>("sitemap");
-  const [sitemapUrl, setSitemapUrl] = useState("https://outranksmart.com/sitemap.xml");
+  const [sitemapUrl, setSitemapUrl] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedLinks, setDetectedLinks] = useState<DetectedLink[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -190,7 +190,7 @@ export function LinkingConfigurationPage() {
                   type="text"
                   value={sitemapUrl}
                   onChange={(e) => setSitemapUrl(e.target.value)}
-                  placeholder="https://outranksmart.com/sitemap.xml"
+                  placeholder="Enter your sitemap URL (e.g., https://example.com/sitemap.xml)"
                   className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 />
                 <p className="mt-2 text-xs text-gray-500">
