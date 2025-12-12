@@ -43,11 +43,6 @@ const CMS_TYPES = [
     name: "Webflow", 
     logo: "https://cdn.simpleicons.org/webflow"
   },
-  { 
-    id: "feather", 
-    name: "Feather", 
-    logo: "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/feather-blog-icon.svg"
-  },
 ];
 
 export default function IntegrationsPage() {
