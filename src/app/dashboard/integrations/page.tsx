@@ -64,6 +64,14 @@ export default function IntegrationsPage() {
   const [notionAccessToken, setNotionAccessToken] = useState("");
   const [notionDatabaseId, setNotionDatabaseId] = useState("");
 
+  const [wixAppId, setWixAppId] = useState("");
+  const [wixAppSecret, setWixAppSecret] = useState("");
+  const [wixInstanceId, setWixInstanceId] = useState("");
+  const [wixSiteUrl, setWixSiteUrl] = useState("");
+
+  const [webflowAccessToken, setWebflowAccessToken] = useState("");
+  const [webflowSiteId, setWebflowSiteId] = useState("");
+
   useEffect(() => {
     loadIntegrations();
   }, []);
@@ -171,6 +179,36 @@ export default function IntegrationsPage() {
             database_id: notionDatabaseId || undefined,
           }),
         });
+      } else if (selectedType === 'wix') {
+        if (!wixAppId || !wixAppSecret || !wixInstanceId) {
+          setAlert({ type: 'error', message: 'Please fill all Wix fields' });
+          setSaving(false);
+          return;
+        }
+        response = await fetch("/api/cms/wix/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            app_id: wixAppId,
+            app_secret: wixAppSecret,
+            instance_id: wixInstanceId,
+            site_url: wixSiteUrl || undefined,
+          }),
+        });
+      } else if (selectedType === 'webflow') {
+        if (!webflowAccessToken) {
+          setAlert({ type: 'error', message: 'Please fill Webflow access token' });
+          setSaving(false);
+          return;
+        }
+        response = await fetch("/api/cms/webflow/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            access_token: webflowAccessToken,
+            site_id: webflowSiteId || undefined,
+          }),
+        });
       }
 
       if (response && response.ok) {
@@ -199,6 +237,12 @@ export default function IntegrationsPage() {
     setShopifyAccessToken("");
     setNotionAccessToken("");
     setNotionDatabaseId("");
+    setWixAppId("");
+    setWixAppSecret("");
+    setWixInstanceId("");
+    setWixSiteUrl("");
+    setWebflowAccessToken("");
+    setWebflowSiteId("");
   };
 
   const formatDate = (dateString: string | null) => {
@@ -347,7 +391,7 @@ export default function IntegrationsPage() {
           <Info className="h-5 w-5 text-gray-400 mt-0.5 shrink-0" />
           <div className="text-sm text-gray-600">
             <span>Connect your CMS platform to sync content and publish articles automatically. </span>
-            <span>Supported platforms: WordPress, Shopify, and Notion.</span>
+            <span>Supported platforms: WordPress, Shopify, Notion, Wix, and Webflow.</span>
           </div>
         </div>
       </div>
@@ -449,6 +493,72 @@ export default function IntegrationsPage() {
                       value={notionDatabaseId}
                       onChange={(e) => setNotionDatabaseId(e.target.value)}
                       placeholder="Notion database ID for publishing"
+                      className="h-11"
+                    />
+                  </div>
+                </>
+              )}
+
+              {selectedType === 'wix' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">App ID *</label>
+                    <Input
+                      value={wixAppId}
+                      onChange={(e) => setWixAppId(e.target.value)}
+                      placeholder="Your Wix App ID"
+                      className="h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">App Secret *</label>
+                    <Input
+                      type="password"
+                      value={wixAppSecret}
+                      onChange={(e) => setWixAppSecret(e.target.value)}
+                      placeholder="Your Wix App Secret"
+                      className="h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Instance ID *</label>
+                    <Input
+                      value={wixInstanceId}
+                      onChange={(e) => setWixInstanceId(e.target.value)}
+                      placeholder="Your Wix Instance ID"
+                      className="h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Site URL (optional)</label>
+                    <Input
+                      value={wixSiteUrl}
+                      onChange={(e) => setWixSiteUrl(e.target.value)}
+                      placeholder="https://yoursite.wixsite.com/mysite"
+                      className="h-11"
+                    />
+                  </div>
+                </>
+              )}
+
+              {selectedType === 'webflow' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Access Token *</label>
+                    <Input
+                      type="password"
+                      value={webflowAccessToken}
+                      onChange={(e) => setWebflowAccessToken(e.target.value)}
+                      placeholder="Your Webflow API token"
+                      className="h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Site ID (optional)</label>
+                    <Input
+                      value={webflowSiteId}
+                      onChange={(e) => setWebflowSiteId(e.target.value)}
+                      placeholder="Webflow site ID"
                       className="h-11"
                     />
                   </div>

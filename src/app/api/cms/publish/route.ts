@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createCMSClient } from '@/lib/cms';
+import { WixService } from '@/lib/cms/wix';
+import { WebflowService } from '@/lib/cms/webflow';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { integration_id, title, content, excerpt, status, blog_id } = await request.json();
+    const { integration_id, title, content, excerpt, status, blog_id, seo_title, seo_description, cover_image, collection_id } = await request.json();
 
     if (!integration_id || !title || !content) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -79,6 +81,49 @@ export async function POST(request: NextRequest) {
         children: blocks,
       });
       publishedUrl = result.url;
+    } else if (integration.cms_type === 'wix') {
+      const wixService = new WixService({
+        appId: integration.settings?.app_id,
+        appSecret: '',
+        instanceId: integration.settings?.instance_id,
+      });
+      result = await wixService.createBlogPost(integration.access_token, {
+        title,
+        content,
+        excerpt,
+        coverImage: cover_image,
+        seoTitle: seo_title,
+        seoDescription: seo_description,
+        publish: status === 'publish',
+      });
+      publishedUrl = result.url || `${integration.site_url}/post/${result.slug}`;
+    } else if (integration.cms_type === 'webflow') {
+      const webflowService = new WebflowService({ accessToken: integration.access_token });
+      const siteId = integration.settings?.site_id;
+      
+      if (!collection_id) {
+        return NextResponse.json({ 
+          error: 'Webflow collection ID required',
+          message: 'Please provide collection_id for publishing'
+        }, { status: 400 });
+      }
+
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      result = await webflowService.createCollectionItem(collection_id, {
+        name: title,
+        slug,
+        'post-body': content,
+        'post-summary': excerpt,
+        'meta-title': seo_title || title,
+        'meta-description': seo_description || excerpt,
+      }, status !== 'publish');
+
+      if (status === 'publish' && !result.isDraft) {
+        await webflowService.publishCollectionItem(collection_id, result.id);
+      }
+
+      publishedUrl = result.url || `${integration.site_url}/${slug}`;
     }
 
     return NextResponse.json({ 

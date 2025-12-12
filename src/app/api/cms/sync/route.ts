@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createCMSClient } from '@/lib/cms';
+import { WixService } from '@/lib/cms/wix';
+import { WebflowService } from '@/lib/cms/webflow';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,6 +52,29 @@ export async function POST(request: NextRequest) {
       const databases = await client.searchDatabases();
       syncedItems = databases.length;
       syncedContent = databases;
+    } else if (integration.cms_type === 'wix') {
+      const wixService = new WixService({
+        appId: integration.settings?.app_id,
+        appSecret: '',
+        instanceId: integration.settings?.instance_id,
+      });
+      const [pages, posts] = await Promise.all([
+        wixService.fetchPages(integration.access_token),
+        wixService.fetchBlogPosts(integration.access_token),
+      ]);
+      syncedContent = [...pages, ...posts];
+      syncedItems = syncedContent.length;
+    } else if (integration.cms_type === 'webflow') {
+      const webflowService = new WebflowService({ accessToken: integration.access_token });
+      const siteId = integration.settings?.site_id;
+      if (siteId) {
+        const collections = await webflowService.getCollections(siteId);
+        for (const collection of collections) {
+          const items = await webflowService.getCollectionItems(collection.id);
+          syncedContent.push(...items);
+        }
+        syncedItems = syncedContent.length;
+      }
     }
 
     await supabase
