@@ -26,7 +26,7 @@ const CMS_TYPES = [
   { 
     id: "shopify", 
     name: "Shopify", 
-    logo: "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-primary-logo-456baa801ee66a0a435671082365958316831c9960c480451dd0330bcdae304f.svg"
+    logo: "https://www.svgrepo.com/show/303503/shopify-logo.svg"
   },
   { 
     id: "notion", 
@@ -36,17 +36,17 @@ const CMS_TYPES = [
   { 
     id: "wix", 
     name: "Wix", 
-    logo: "https://static.wixstatic.com/media/9ab0d1_8bc30b692fb5449ab8c86bf2e26409b1~mv2.png"
+    logo: "https://upload.wikimedia.org/wikipedia/commons/f/ff/WiX_logo.svg"
   },
   { 
     id: "webflow", 
     name: "Webflow", 
-    logo: "https://assets-global.website-files.com/5d3e265ac89f6a3e64292efc/5d5b7b18c3cd6d73e836c3bb_logo%20webflow.svg"
+    logo: "https://cdn.worldvectorlogo.com/logos/webflow-logo.svg"
   },
   { 
     id: "feather", 
     name: "Feather", 
-    logo: "https://www.feather.so/favicon.ico"
+    logo: "https://cdn.jsdelivr.net/gh/feathericons/feather@4.29.0/icons/feather.svg"
   },
 ];
 
