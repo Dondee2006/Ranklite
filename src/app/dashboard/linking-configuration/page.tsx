@@ -291,7 +291,14 @@ export function LinkingConfigurationPage() {
                     <h4 className="text-sm font-medium text-gray-900 mb-1">
                       {link.title}
                     </h4>
-                    <p className="text-xs text-gray-500 truncate">{link.url}</p>
+                    <a 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline truncate block"
+                    >
+                      {link.url}
+                    </a>
                   </div>
                 ))}
                 <p className="text-xs text-gray-500 text-center pt-2">
@@ -328,11 +335,25 @@ export function LinkingConfigurationPage() {
                 <tbody>
                   {linkSuggestions.map((suggestion) => (
                     <tr key={suggestion.id} className="bg-white border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900 truncate max-w-xs" title={suggestion.source_url}>
-                        {suggestion.source_url}
+                      <td className="px-6 py-4 font-medium truncate max-w-xs" title={suggestion.source_url}>
+                        <a 
+                          href={suggestion.source_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {suggestion.source_url}
+                        </a>
                       </td>
                       <td className="px-6 py-4 truncate max-w-xs" title={suggestion.target_url}>
-                        {suggestion.target_url}
+                        <a 
+                          href={suggestion.target_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {suggestion.target_url}
+                        </a>
                       </td>
                       <td className="px-6 py-4 text-blue-600 font-medium">
                         {suggestion.anchor_text}
