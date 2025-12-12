@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     : generateKeywordsForNiche(niche || site.name, TARGET_ARTICLE_COUNT);
 
   const articles = [];
-  let currentDate = new Date(startDate);
+  const currentDate = new Date(startDate);
   while (articles.length < TARGET_ARTICLE_COUNT) {
     const dateStr = formatDate(currentDate);
     if (usedDates.has(dateStr)) {
@@ -99,8 +99,8 @@ export async function POST(request: Request) {
       title,
       slug: generateSlug(title),
       keyword: typeof keyword === "string" ? keyword : keyword.primary,
-      secondary_keywords: typeof keyword === "string" 
-        ? generateSecondaryKeywords(keyword) 
+      secondary_keywords: typeof keyword === "string"
+        ? generateSecondaryKeywords(keyword)
         : keyword.secondary || [],
       search_intent: searchIntent,
       article_type: articleType,
@@ -243,7 +243,7 @@ function generateTitle(keyword: string, articleType: string): string {
       `${capitalizeFirst(keyword)} Not Working? Try This`,
     ],
   };
-  
+
   const options = templates[articleType] || templates.guide;
   return options[Math.floor(Math.random() * options.length)];
 }

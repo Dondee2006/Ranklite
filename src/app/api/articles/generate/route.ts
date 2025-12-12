@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { articleId, regenerate = false } = body;
+  const { articleId } = body;
 
   const { data: site } = await supabase
     .from("sites")
@@ -40,14 +40,12 @@ export async function POST(request: Request) {
     .neq("id", articleId)
     .not("content", "is", null);
 
-  const outline = generateOutline(article.title, article.keyword, article.article_type, article.secondary_keywords);
+  const outline = generateOutline(article.title, article.keyword, article.article_type);
   const content = generateArticleContent(
     article.title,
     article.keyword,
     article.secondary_keywords || [],
-    outline,
-    article.article_type,
-    article.word_count || 1500
+    outline
   );
 
   const internalLinks = detectInternalLinks(content, existingArticles || [], site.domain);
@@ -56,7 +54,7 @@ export async function POST(request: Request) {
 
   const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
   const markdownContent = generateMarkdown(content, article.title, images, internalLinks, externalLinks);
-  const metaDescription = generateMetaDescription(article.keyword, article.title);
+  const metaDescription = generateMetaDescription(article.keyword);
   const slug = article.slug || generateSlug(article.title);
 
   const cmsExports = {
@@ -124,7 +122,7 @@ export async function POST(request: Request) {
   });
 }
 
-function generateOutline(title: string, keyword: string, articleType: string, secondaryKeywords: string[] = []): object {
+function generateOutline(title: string, keyword: string, articleType: string): object {
   const outlines: Record<string, object> = {
     listicle: {
       sections: [
@@ -233,9 +231,7 @@ function generateArticleContent(
   title: string,
   keyword: string,
   secondaryKeywords: string[],
-  outline: object,
-  articleType: string,
-  targetWordCount: number
+  outline: object
 ): string {
   const sections = (outline as { sections: { title: string; wordCount: number }[] }).sections;
   let content = "";
@@ -267,7 +263,7 @@ function generateSectionContent(sectionTitle: string, keyword: string, secondary
   for (let i = 0; i < paragraphs; i++) {
     const template = templates[i % templates.length];
     content += template + "\n\n";
-    
+
     if (secondaryKeywords.length > 0 && i % 2 === 0) {
       const secondaryKw = secondaryKeywords[i % secondaryKeywords.length];
       content += `Additionally, considering ${secondaryKw} can further enhance your results. Integrating these complementary concepts creates a more comprehensive approach that addresses multiple aspects of the challenge.\n\n`;
@@ -279,7 +275,7 @@ function generateSectionContent(sectionTitle: string, keyword: string, secondary
 
 function detectInternalLinks(content: string, existingArticles: { id: string; title: string; slug: string; keyword: string }[], domain: string): object[] {
   const links: object[] = [];
-  
+
   for (const article of existingArticles.slice(0, 5)) {
     links.push({
       title: article.title,
@@ -347,11 +343,11 @@ function generateHTML(content: string, title: string, images: object[], internal
   for (let i = 1; i < sections.length; i++) {
     const [heading, ...paragraphs] = sections[i].split("\n\n");
     html += `<h2>${heading}</h2>\n`;
-    
+
     if (i === 1 && (images as { url: string }[])[0]) {
       html += `<figure><img src="${(images as { url: string }[])[0].url}" alt="${(images as { alt: string }[])[0].alt}"><figcaption>${(images as { caption: string }[])[0].caption}</figcaption></figure>\n`;
     }
-    
+
     for (const p of paragraphs) {
       if (p.trim()) {
         html += `<p>${p.trim()}</p>\n`;
@@ -381,7 +377,7 @@ function generateHTML(content: string, title: string, images: object[], internal
 
 function generateMarkdown(content: string, title: string, images: object[], internalLinks: object[], externalLinks: object[]): string {
   let md = `# ${title}\n\n`;
-  
+
   if ((images as { url: string; alt: string }[])[0]) {
     md += `![${(images as { alt: string }[])[0].alt}](${(images as { url: string }[])[0].url})\n\n`;
   }
@@ -405,7 +401,7 @@ function generateMarkdown(content: string, title: string, images: object[], inte
   return md;
 }
 
-function generateMetaDescription(keyword: string, title: string): string {
+function generateMetaDescription(keyword: string): string {
   const templates = [
     `Discover everything you need to know about ${keyword}. Our comprehensive guide covers tips, strategies, and expert insights to help you succeed.`,
     `Learn ${keyword} with our detailed guide. Get actionable tips, best practices, and proven strategies from industry experts.`,

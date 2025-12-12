@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   Settings,
   FileText,
@@ -18,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   Sun,
+  Moon,
   Pencil,
   Send,
   LogOut,
@@ -100,6 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [siteName, setSiteName] = useState("My Site");
   const [siteUrl, setSiteUrl] = useState("");
   const [logoError, setLogoError] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     async function loadUserData() {
@@ -114,13 +117,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (data.site) {
           setSiteName(data.site.name || "My Site");
           setSiteUrl(data.site.url || "");
+        } else {
+          // If no site found, redirect to onboarding
+          router.push("/onboarding");
         }
       } catch (error) {
         console.error("Failed to load site:", error);
       }
     }
     loadUserData();
-  }, [supabase.auth]);
+  }, [supabase.auth, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -143,8 +149,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard">
             <RankliteLogo />
           </Link>
-          <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100">
-            <Sun className="h-4 w-4" />
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 dark:hover:bg-neutral-800"
+          >
+            {theme === "dark" ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
           </button>
         </div>
 
@@ -220,7 +233,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </>
               ) : (
                 <Link
-                  href={item.href || "#" }
+                  href={item.href || "#"}
                   className={cn(
                     "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
                     isActive(item.href || "")

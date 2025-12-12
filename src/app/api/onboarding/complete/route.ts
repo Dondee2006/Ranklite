@@ -1,4 +1,3 @@
-import { supabaseServer } from "@/lib/supabaseServer";
 import { generate30DayPlan } from "@/lib/generatePlan";
 
 export async function POST(req: Request) {

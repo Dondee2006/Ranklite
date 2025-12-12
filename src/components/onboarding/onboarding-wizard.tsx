@@ -158,19 +158,19 @@ export function OnboardingWizard() {
 
   const fetchBusinessInfo = async () => {
     if (!formData.websiteUrl.trim()) return;
-    
+
     setFetching(true);
     setFetchError("");
-    
+
     try {
       const response = await fetch("/api/scrape-website", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: formData.websiteUrl }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         setFormData(prev => ({
           ...prev,
@@ -178,8 +178,8 @@ export function OnboardingWizard() {
           description: data.data.description || prev.description,
           language: data.data.language || prev.language,
           country: data.data.country || prev.country,
-          targetAudiences: data.data.suggestedAudiences?.length > 0 
-            ? data.data.suggestedAudiences 
+          targetAudiences: data.data.suggestedAudiences?.length > 0
+            ? data.data.suggestedAudiences
             : prev.targetAudiences,
           sitemapUrl: data.data.sitemapUrl || prev.sitemapUrl,
           blogAddress: data.data.blogUrl || prev.blogAddress,
@@ -241,10 +241,14 @@ export function OnboardingWizard() {
           router.push("/login");
           return;
         }
-        throw new Error(data.error || "Failed to save onboarding data");
+        // Use the exact error from the server if available
+        const errorMessage = data.error || data.message || "Failed to save onboarding data";
+        console.error("Server returned error:", errorMessage, data);
+        setError(errorMessage);
+        return; // Ensure we stop execution here
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard/content-planner?welcome=true");
       router.refresh();
     } catch (error) {
       console.error("Onboarding error:", error);
@@ -266,13 +270,13 @@ export function OnboardingWizard() {
     return (
       <div className="flex items-center justify-center gap-2 border-b border-border pb-6">
         {displaySteps.map((step, index) => {
-          const isActive = 
+          const isActive =
             (index === 0 && (currentStep === 0 || currentStep === 1)) ||
             (index === 1 && currentStep === 2) ||
             (index === 2 && currentStep === 3) ||
             (index === 3 && currentStep === 4) ||
             (index === 4 && currentStep === 5);
-          
+
           return (
             <div key={index} className="flex items-center gap-2">
               <div className="flex items-center gap-2">
@@ -282,8 +286,8 @@ export function OnboardingWizard() {
                     step.completed
                       ? "bg-[#22C55E] text-white"
                       : isActive
-                      ? "bg-[#22C55E] text-white"
-                      : "border border-border text-muted-foreground"
+                        ? "bg-[#22C55E] text-white"
+                        : "border border-border text-muted-foreground"
                   )}
                 >
                   {step.completed ? <Check className="h-3 w-3" /> : null}
@@ -506,7 +510,7 @@ export function OnboardingWizard() {
                 Add
               </Button>
             </div>
-            
+
             {suggestedCompetitors.length > 0 && (
               <div className="mb-4">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
@@ -537,7 +541,7 @@ export function OnboardingWizard() {
                 </div>
               </div>
             )}
-            
+
             <div className="flex flex-wrap gap-2">
               {formData.competitors.map((competitor, index) => (
                 <div

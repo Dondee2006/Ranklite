@@ -12,108 +12,112 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const { data: site, error: siteError } = await supabase
-    .from("sites")
-    .insert({
-      user_id: user.id,
-      name: body.businessName || "My Site",
-      url: body.websiteUrl,
-      language: body.language || "en",
-      country: body.country || "US",
-      description: body.businessDescription,
-    })
-    .select()
-    .single();
+  try {
 
-  if (siteError) {
-    return NextResponse.json({ error: siteError.message }, { status: 500 });
-  }
+    const { data: site, error: siteError } = await supabase
+      .from("sites")
+      .insert({
+        user_id: user.id,
+        name: body.businessName || "My Site",
+        url: body.websiteUrl,
+        language: body.language || "en",
+        country: body.country || "US",
+        description: body.businessDescription,
+      })
+      .select()
+      .single();
 
-  if (body.targetAudience) {
-    await supabase.from("target_audiences").insert({
+    if (siteError) {
+      return NextResponse.json({ error: siteError.message }, { status: 500 });
+    }
+
+    if (body.targetAudience) {
+      await supabase.from("target_audiences").insert({
+        site_id: site.id,
+        name: body.targetAudience,
+        description: body.targetAudience,
+      });
+    }
+
+    if (body.competitors && Array.isArray(body.competitors)) {
+      const competitorInserts = body.competitors.map((url: string) => ({
+        site_id: site.id,
+        url,
+      }));
+      await supabase.from("competitors").insert(competitorInserts);
+    }
+
+    await supabase.from("article_settings").insert({
       site_id: site.id,
-      name: body.targetAudience,
-      description: body.targetAudience,
     });
-  }
 
-  if (body.competitors && Array.isArray(body.competitors)) {
-    const competitorInserts = body.competitors.map((url: string) => ({
+    await supabase.from("autopilot_settings").upsert({
       site_id: site.id,
-      url,
-    }));
-    await supabase.from("competitors").insert(competitorInserts);
-  }
+      enabled: true,
+      publish_time_start: 7,
+      publish_time_end: 9,
+      timezone: "UTC",
+      articles_per_day: 1,
+      preferred_article_types: [],
+      tone: "natural",
+      style_preferences: {},
+      cms_targets: [],
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "site_id" });
 
-  await supabase.from("article_settings").insert({
-    site_id: site.id,
-  });
+    await seedThirtyDayPlan(supabase, site, body);
 
-  await supabase.from("autopilot_settings").upsert({
-    site_id: site.id,
-    enabled: true,
-    publish_time_start: 7,
-    publish_time_end: 9,
-    timezone: "UTC",
-    articles_per_day: 1,
-    preferred_article_types: [],
-    tone: "natural",
-    style_preferences: {},
-    cms_targets: [],
-    updated_at: new Date().toISOString(),
-  }, { onConflict: "site_id" });
-
-  await seedThirtyDayPlan(supabase, site, body);
-
-  await supabase.from("backlink_campaigns").insert({
-    user_id: user.id,
-    website_url: body.websiteUrl,
-    status: "active",
-    agent_status: "scanning",
-    current_step: "Creating submission tasks",
-    total_backlinks: 0,
-    unique_sources: 0,
-    avg_domain_rating: 0,
-    this_month_backlinks: 0,
-    is_paused: false,
-    daily_submission_count: 0,
-    pending_tasks: 0,
-    manual_review_count: 0,
-    failed_tasks: 0,
-    max_daily_submissions: 10,
-    min_domain_rating: 30,
-    last_scan_at: new Date().toISOString(),
-    next_scan_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  });
-
-  const taskResults = await createTasksForUser(
-    user.id,
-    body.websiteUrl,
-    body.businessName || "My Site",
-    body.businessDescription || ""
-  );
-
-  await supabase
-    .from("backlink_campaigns")
-    .update({
-      pending_tasks: taskResults.created,
-      manual_review_count: taskResults.blocked,
-      current_step: "Scanning directories",
+    await supabase.from("backlink_campaigns").insert({
+      user_id: user.id,
+      website_url: body.websiteUrl,
+      status: "active",
       agent_status: "scanning",
-    })
-    .eq("user_id", user.id);
+      current_step: "Creating submission tasks",
+      total_backlinks: 0,
+      unique_sources: 0,
+      avg_domain_rating: 0,
+      this_month_backlinks: 0,
+      is_paused: false,
+      daily_submission_count: 0,
+      pending_tasks: 0,
+      manual_review_count: 0,
+      failed_tasks: 0,
+      max_daily_submissions: 10,
+      min_domain_rating: 30,
+      last_scan_at: new Date().toISOString(),
+      next_scan_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    });
 
-  await logAction(user.id, "onboarding_completed", {
-    website_url: body.websiteUrl,
-    tasks_created: taskResults.created,
-    tasks_blocked: taskResults.blocked,
-  });
+    const taskResults = await createTasksForUser(
+      user.id,
+      body.websiteUrl,
+      body.businessName || "My Site",
+      body.businessDescription || ""
+    );
 
-  return NextResponse.json({
-    success: true,
-    site,
-    backlink_tasks: taskResults,
-  });
+    await supabase
+      .from("backlink_campaigns")
+      .update({
+        pending_tasks: taskResults.created,
+        manual_review_count: taskResults.blocked,
+        current_step: "Scanning directories",
+        agent_status: "scanning",
+      })
+      .eq("user_id", user.id);
+
+    await logAction(user.id, "onboarding_completed", {
+      website_url: body.websiteUrl,
+      tasks_created: taskResults.created,
+      tasks_blocked: taskResults.blocked,
+    });
+
+  } catch (error) {
+    console.error("Onboarding API Critical Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
 
 async function seedThirtyDayPlan(supabase: any, site: any, body: any) {
@@ -144,6 +148,7 @@ async function seedThirtyDayPlan(supabase: any, site: any, body: any) {
     const title = generateTitle(keywordText, articleType);
     return {
       site_id: site.id,
+      user_id: site.user_id,
       title,
       slug: generateSlug(title),
       keyword: keywordText,

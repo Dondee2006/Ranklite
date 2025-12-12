@@ -23,6 +23,18 @@ export async function createClient() {
           }
         },
       },
+      db: {
+        schema: 'public',
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      global: {
+        headers: {
+          'x-client-info': 'ranklite-server',
+        },
+      },
     }
   );
 }

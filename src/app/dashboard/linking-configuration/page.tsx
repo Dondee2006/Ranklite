@@ -13,36 +13,114 @@ interface DetectedLink {
   detected_at: string;
 }
 
+interface LinkSuggestion {
+  id: string;
+  source_url: string;
+  target_url: string;
+  anchor_text: string;
+  relevance_score: number;
+  reasoning: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 export function LinkingConfigurationPage() {
   const [linkSource, setLinkSource] = useState<LinkSource>("sitemap");
   const [sitemapUrl, setSitemapUrl] = useState("https://outranksmart.com/sitemap.xml");
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedLinks, setDetectedLinks] = useState<DetectedLink[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [linkSuggestions, setLinkSuggestions] = useState<LinkSuggestion[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load saved links and suggestions on mount
+  useEffect(() => {
+    loadDetectedLinks();
+    loadLinkSuggestions();
+  }, []);
+
+  const loadDetectedLinks = async () => {
+    try {
+      const response = await fetch('/api/linking/get-detected-links');
+      if (!response.ok) {
+        throw new Error('Failed to load detected links');
+      }
+      const data = await response.json();
+      setDetectedLinks(data.links || []);
+    } catch (err) {
+      console.error('Error loading detected links:', err);
+    }
+  };
 
   const handleDetectLinks = async () => {
     setIsDetecting(true);
+    setError(null);
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // Mock detected links
-      setDetectedLinks([
-        {
-          id: "1",
-          url: "https://outranksmart.com/article-1",
-          title: "SEO Best Practices 2025",
-          detected_at: new Date().toISOString(),
+      const response = await fetch('/api/linking/scan-sitemap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: "2",
-          url: "https://outranksmart.com/article-2",
-          title: "Content Marketing Strategies",
-          detected_at: new Date().toISOString(),
-        },
-      ]);
-    } catch (error) {
-      console.error("Failed to detect links:", error);
+        body: JSON.stringify({ sitemapUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to scan sitemap');
+      }
+
+      const data = await response.json();
+
+      // Reload detected links from database
+      await loadDetectedLinks();
+
+      setError(null);
+    } catch (err) {
+      console.error('Failed to detect links:', err);
+      setError(err instanceof Error ? err.message : 'Failed to scan sitemap. Please check the URL and try again.');
     } finally {
       setIsDetecting(false);
+    }
+  };
+
+  const loadLinkSuggestions = async () => {
+    try {
+      const response = await fetch('/api/linking/get-link-suggestions');
+      if (!response.ok) {
+        throw new Error('Failed to load link suggestions');
+      }
+      const data = await response.json();
+      setLinkSuggestions(data.suggestions || []);
+    } catch (err) {
+      console.error('Error loading link suggestions:', err);
+    }
+  };
+
+  const handleGenerateSuggestions = async () => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      // Pass empty object to let backend use user's site
+      const response = await fetch('/api/linking/generate-internal-links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to generate suggestions');
+      }
+
+      await loadLinkSuggestions();
+    } catch (err) {
+      console.error('Failed to generate suggestions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate suggestions');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -128,6 +206,15 @@ export function LinkingConfigurationPage() {
                 </p>
               </div>
 
+              {error && (
+                <div className="rounded-lg bg-red-50 border border-red-100 p-3 flex gap-3">
+                  <Info className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-red-700 leading-relaxed">
+                    {error}
+                  </p>
+                </div>
+              )}
+
               <Button
                 onClick={handleDetectLinks}
                 disabled={isDetecting}
@@ -142,6 +229,29 @@ export function LinkingConfigurationPage() {
                   "Detect Links"
                 )}
               </Button>
+
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Internal Linking</h3>
+                <Button
+                  onClick={handleGenerateSuggestions}
+                  disabled={isGenerating || detectedLinks.length < 2}
+                  className="w-full bg-purple-600 text-white hover:bg-purple-700 rounded-lg py-5 text-sm font-medium transition-colors"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Generating Suggestions...
+                    </>
+                  ) : (
+                    "Generate Link Suggestions"
+                  )}
+                </Button>
+                {detectedLinks.length < 2 && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Detect at least 2 pages to generate linking suggestions.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -191,6 +301,60 @@ export function LinkingConfigurationPage() {
             )}
           </div>
         </div>
+
+
+        {/* Link Suggestions Section */}
+        {linkSuggestions.length > 0 && (
+          <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
+                <LinkIcon className="h-4 w-4 text-blue-600" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Internal Link Suggestions
+              </h2>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3">Source Page</th>
+                    <th className="px-6 py-3">Target Page</th>
+                    <th className="px-6 py-3">Suggested Anchor</th>
+                    <th className="px-6 py-3">Format</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {linkSuggestions.map((suggestion) => (
+                    <tr key={suggestion.id} className="bg-white border-b hover:bg-gray-50">
+                      <td className="px-6 py-4 font-medium text-gray-900 truncate max-w-xs" title={suggestion.source_url}>
+                        {suggestion.source_url}
+                      </td>
+                      <td className="px-6 py-4 truncate max-w-xs" title={suggestion.target_url}>
+                        {suggestion.target_url}
+                      </td>
+                      <td className="px-6 py-4 text-blue-600 font-medium">
+                        {suggestion.anchor_text}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${suggestion.relevance_score > 80 ? 'bg-green-100 text-green-800' :
+                            suggestion.relevance_score > 50 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                            {suggestion.relevance_score}% Match
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{suggestion.reasoning}</p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

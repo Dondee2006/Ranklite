@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FileText, Flame, Video, ArrowRight, ChevronRight, Check } from 'lucide-react';
+import { FileText, Flame, Video, ArrowRight, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 const articles = [
@@ -57,7 +57,7 @@ export default function WritingExamples() {
   return (
     <section className="py-16 lg:py-24 bg-white relative overflow-hidden" id="examples">
       <div className="container mx-auto px-4 md:px-6 max-w-[1376px]">
-        
+
         {/* Header Section */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-16">
           <div className="lg:col-span-5 flex flex-col justify-center">
@@ -67,18 +67,18 @@ export default function WritingExamples() {
             <h2 className="text-4xl lg:text-[56px] font-bold text-black leading-[1.1] tracking-[-1.44px] mb-6 font-display">
               Smart content that <span className="text-green-500">readers actually enjoy.</span>
             </h2>
-            
+
             <div className="hidden lg:flex items-center gap-2 mb-8 text-sm font-medium text-gray-500 italic transform -rotate-2 translate-x-4">
               <span className="font-handwriting">Browse samples</span>
-              <svg 
-                width="40" 
-                height="20" 
-                viewBox="0 0 40 20" 
-                fill="none" 
+              <svg
+                width="40"
+                height="20"
+                viewBox="0 0 40 20"
+                fill="none"
                 className="text-gray-400 rotate-12"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                 <path d="M2 10C10 15 25 18 38 5M38 5L28 2M38 5L32 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 10C10 15 25 18 38 5M38 5L28 2M38 5L32 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
 
@@ -88,8 +88,8 @@ export default function WritingExamples() {
                   key={article.id}
                   onClick={() => setActiveArticleId(article.id)}
                   className={`group text-left p-5 rounded-xl border transition-all duration-300 ease-in-out relative
-                    ${activeArticleId === article.id 
-                      ? 'bg-white border-green-500 shadow-lg scale-[1.02] z-10' 
+                    ${activeArticleId === article.id
+                      ? 'bg-white border-green-500 shadow-lg scale-[1.02] z-10'
                       : 'bg-white border-gray-100 hover:border-green-200 hover:shadow-md'
                     }
                   `}
@@ -100,7 +100,7 @@ export default function WritingExamples() {
                     `}>
                       {article.title}
                     </h3>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className={`p-1.5 rounded-full bg-gray-50 group-hover:bg-white transition-colors`}>
@@ -108,13 +108,13 @@ export default function WritingExamples() {
                         </div>
                         <span className="text-sm font-semibold text-gray-700">{article.source}</span>
                       </div>
-                      
+
                       <span className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full tracking-wide ${article.color}`}>
                         {article.type}
                       </span>
                     </div>
                   </div>
-                  
+
                   {activeArticleId === article.id && (
                     <div className="absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:block text-green-500">
                       <div className="bg-white rounded-full p-1 shadow-sm border border-green-100">
@@ -125,45 +125,45 @@ export default function WritingExamples() {
                 </button>
               ))}
             </div>
-            
-             {/* CTA for Blog - Mobile */}
-             <div className="mt-8 lg:mt-12 lg:hidden flex flex-col items-center text-center">
-               <p className="text-gray-600 mb-4 text-sm md:text-base">
-                 Explore our blog where every article is crafted with Ranklite:
-               </p>
-               <Link 
+
+            {/* CTA for Blog - Mobile */}
+            <div className="mt-8 lg:mt-12 lg:hidden flex flex-col items-center text-center">
+              <p className="text-gray-600 mb-4 text-sm md:text-base">
+                Explore our blog where every article is crafted with Ranklite:
+              </p>
+              <Link
                 href="/blog"
                 className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
-               >
-                 Explore the Blog
-                 <ArrowRight size={16} />
-               </Link>
+              >
+                Explore the Blog
+                <ArrowRight size={16} />
+              </Link>
             </div>
           </div>
 
           <div className="lg:col-span-7 mt-8 lg:mt-0">
             {/* Article Preview Card */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden h-full flex flex-col">
-              
+
               {/* Preview Header / Image */}
               <div className="relative h-48 sm:h-64 md:h-80 w-full bg-gray-100 overflow-hidden group">
                 {activeArticle.content.image && (
-                   <Image
-                     src={activeArticle.content.image}
-                     alt={activeArticle.title}
-                     fill
-                     className="object-cover transition-transform duration-700 group-hover:scale-105"
-                     sizes="(max-width: 768px) 100vw, 800px"
-                   />
+                  <Image
+                    src={activeArticle.content.image}
+                    alt={activeArticle.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 800px"
+                  />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                
+
                 {/* Overlay Text on Image */}
-                 <div className="absolute bottom-6 left-6 right-6 text-white">
-                   <div className="inline-block px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-md mb-3 shadow-sm">
-                      Productivity Tips
-                   </div>
-                 </div>
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                  <div className="inline-block px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-md mb-3 shadow-sm">
+                    Productivity Tips
+                  </div>
+                </div>
               </div>
 
               {/* Preview Content */}
@@ -171,7 +171,7 @@ export default function WritingExamples() {
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 font-display leading-tight">
                   {activeArticle.content.headline}
                 </h3>
-                
+
                 <div className="space-y-6 text-gray-600 leading-relaxed md:text-lg font-light">
                   <p>
                     {activeArticle.content.paragraph1}
@@ -182,25 +182,25 @@ export default function WritingExamples() {
                 </div>
 
                 <div className="mt-8 pt-8 border-t border-gray-100 flex items-center justify-between">
-                   <div className="flex items-center gap-4">
-                      <div className="flex -space-x-3">
-                         {[1, 2, 3].map((i) => (
-                           <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                             <Image 
-                               src={`https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/fea97de9-5ced-4a93-bc36-1e44268f618e-22.jpg`}
-                               alt="Reader"
-                               fill
-                               className="object-cover"
-                             />
-                           </div>
-                         ))}
-                      </div>
-                      <span className="text-sm text-gray-500 font-medium">+3.1k views</span>
-                   </div>
-                   
-                   <span className="text-sm font-semibold text-green-500 flex items-center gap-1 cursor-pointer hover:underline">
-                     Continue Reading <ArrowRight size={14} />
-                   </span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
+                          <Image
+                            src={`https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/fea97de9-5ced-4a93-bc36-1e44268f618e-22.jpg`}
+                            alt="Reader"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-500 font-medium">+3.1k views</span>
+                  </div>
+
+                  <span className="text-sm font-semibold text-green-500 flex items-center gap-1 cursor-pointer hover:underline">
+                    Continue Reading <ArrowRight size={14} />
+                  </span>
                 </div>
               </div>
             </div>
@@ -209,16 +209,16 @@ export default function WritingExamples() {
 
         {/* Bottom CTA Section - Desktop */}
         <div className="hidden lg:flex flex-col items-center justify-center mt-16 text-center">
-            <p className="text-gray-500 text-lg mb-6">
-              Explore our blog where every article is crafted with Ranklite:
-            </p>
-            <Link 
-              href="/blog"
-              className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            >
-              Explore the Blog
-              <ArrowRight size={18} />
-            </Link>
+          <p className="text-gray-500 text-lg mb-6">
+            Explore our blog where every article is crafted with Ranklite:
+          </p>
+          <Link
+            href="/blog"
+            className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+          >
+            Explore the Blog
+            <ArrowRight size={18} />
+          </Link>
         </div>
 
       </div>

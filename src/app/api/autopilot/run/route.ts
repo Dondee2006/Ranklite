@@ -73,7 +73,7 @@ export async function POST() {
 
   const seedsNeeded = remaining - (candidates?.length || 0);
   const seedKeywords = generateKeywordsForNiche(site.name || "your niche", seedsNeeded);
-  const newArticles = [] as any[];
+  const newArticles: Array<{ id: string; title: string; slug: string; keyword: string; status: string }> = [];
 
   for (let i = 0; i < seedsNeeded; i++) {
     const articleType = pickArticleType(settings.preferred_article_types);
@@ -103,13 +103,13 @@ export async function POST() {
     }
   }
 
-  const toPublish = [ ...(candidates || []), ...newArticles ].slice(0, remaining);
+  const toPublish = [...(candidates || []), ...newArticles].slice(0, remaining);
 
   if (!toPublish.length) {
     return NextResponse.json({ success: false, message: "Nothing to publish" });
   }
 
-  const published: any[] = [];
+  const published: Array<Record<string, unknown>> = [];
 
   for (const article of toPublish) {
     const { data: existingArticles } = await supabase
@@ -119,14 +119,12 @@ export async function POST() {
       .neq("id", article.id)
       .not("content", "is", null);
 
-    const outline = generateOutline(article.title, article.keyword, article.article_type, article.secondary_keywords || []);
+    const outline = generateOutline(article.title, article.keyword, article.article_type);
     const content = article.content && article.status === "generated" ? article.content : generateArticleContent(
       article.title,
       article.keyword,
       article.secondary_keywords || [],
-      outline,
-      article.article_type,
-      article.word_count || 1500
+      outline
     );
 
     const internalLinks = detectInternalLinks(content, existingArticles || [], site.domain || site.url || "");
@@ -134,7 +132,7 @@ export async function POST() {
     const images = generateImagePlaceholders(article.title, article.keyword);
     const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
     const markdownContent = generateMarkdown(content, article.title, images, internalLinks, externalLinks);
-    const metaDescription = generateMetaDescription(article.keyword, article.title);
+    const metaDescription = generateMetaDescription(article.keyword);
     const slug = article.slug || generateSlug(article.title);
 
     const cmsExports = {
@@ -335,7 +333,7 @@ function capitalizeFirst(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function generateOutline(title: string, keyword: string, articleType: string, secondaryKeywords: string[] = []): object {
+function generateOutline(title: string, keyword: string, articleType: string): object {
   const outlines: Record<string, object> = {
     listicle: {
       sections: [
@@ -444,9 +442,7 @@ function generateArticleContent(
   title: string,
   keyword: string,
   secondaryKeywords: string[],
-  outline: object,
-  articleType: string,
-  targetWordCount: number
+  outline: object
 ): string {
   const sections = (outline as { sections: { title: string; wordCount: number }[] }).sections;
   let content = "";
@@ -616,7 +612,7 @@ function generateMarkdown(content: string, title: string, images: object[], inte
   return md;
 }
 
-function generateMetaDescription(keyword: string, title: string): string {
+function generateMetaDescription(keyword: string): string {
   const templates = [
     `Discover everything you need to know about ${keyword}. Our comprehensive guide covers tips, strategies, and expert insights to help you succeed.`,
     `Learn ${keyword} with our detailed guide. Get actionable tips, best practices, and proven strategies from industry experts.`,

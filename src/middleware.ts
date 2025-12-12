@@ -33,17 +33,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let hasSite = false;
-
-  if (user) {
-    const { data: sites } = await supabase
-      .from("sites")
-      .select("id")
-      .eq("user_id", user.id)
-      .limit(1);
-    hasSite = Boolean(sites?.length);
-  }
-
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -56,19 +45,13 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = hasSite ? "/dashboard" : "/onboarding";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && request.nextUrl.pathname === "/onboarding" && hasSite) {
-    const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  if (user && request.nextUrl.pathname.startsWith("/dashboard") && !hasSite) {
+  if (user && request.nextUrl.pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = "/onboarding";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
