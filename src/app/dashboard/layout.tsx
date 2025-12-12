@@ -141,7 +141,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const isActive = (href: string) => pathname === href;
-  const isInactive = (id: string) => id === "seo-tools" || id === "human-curated";
+  const isInactive = (id: string) => id === "seo-tools" || id === "human-curated" || id === "backlinks";
 
   return (
     <div className="flex min-h-screen bg-[#FAFAFA]">
