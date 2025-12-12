@@ -58,7 +58,7 @@ export async function parseSitemap(url: string): Promise<ParsedSitemap> {
 
         return extractUrlsFromXml(xml);
     } catch (error) {
-        throw new Error(`Error parsing sitemap ${normalizedUrl || url}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(`Error parsing sitemap ${url}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
 
