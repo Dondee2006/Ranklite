@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/publish-today",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}
