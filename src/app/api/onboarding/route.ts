@@ -111,6 +111,8 @@ export async function POST(request: Request) {
       tasks_blocked: taskResults.blocked,
     });
 
+    return NextResponse.json({ success: true, site }, { status: 200 });
+
   } catch (error) {
     console.error("Onboarding API Critical Error:", error);
     return NextResponse.json(
