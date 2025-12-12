@@ -49,7 +49,7 @@ const NAV_ITEMS = [
       { id: "articles-settings", label: "Articles Settings", href: "/dashboard/articles-settings", icon: Sliders },
       { id: "integrations", label: "Integrations", href: "/dashboard/integrations", icon: Link2 },
       { id: "linking-config", label: "Linking Configuration", href: "/dashboard/linking-configuration", icon: LinkIcon },
-      { id: "backlink-generator", label: "Backlink Generator", href: "/dashboard/backlink-generator", icon: ArrowLeftRight, badge: "BETA" },
+      { id: "backlink-generator", label: "Backlink Generator", href: "/dashboard/backlink-generator", icon: ArrowLeftRight },
     ],
   },
   {
@@ -57,7 +57,7 @@ const NAV_ITEMS = [
     label: "SEO Tools",
     href: "/dashboard/seo-tools",
     icon: Wrench,
-    badge: "BETA",
+    badge: "NEW",
   },
   {
     id: "add-ons",
@@ -65,7 +65,7 @@ const NAV_ITEMS = [
     icon: Sparkles,
     expandable: true,
     children: [
-      { id: "human-curated", label: "Human Curated Service", href: "/dashboard/human-curated", icon: Users, badge: "BETA" },
+      { id: "human-curated", label: "Human Curated Service", href: "/dashboard/human-curated", icon: Users },
       { id: "backlinks", label: "Get 350+ Backlinks", href: "/dashboard/backlinks", icon: LinkIcon },
     ],
   },
@@ -204,15 +204,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
                           )}
                         >
-                          <div className="flex items-center gap-3 flex-1">
-                            {child.icon && <child.icon className="h-4 w-4" />}
-                            {child.label}
-                          </div>
-                          {child.badge && (
-                            <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                              {child.badge}
-                            </span>
-                          )}
+                          {child.icon && <child.icon className="h-4 w-4" />}
+                          {child.label}
                         </Link>
                       ))}
                     </div>

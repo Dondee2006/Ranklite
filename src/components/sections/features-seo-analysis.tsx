@@ -7,14 +7,9 @@ export default function FeaturesSeoAnalysis() {
       <div className="flex flex-col gap-3 py-8 sm:grid sm:grid-cols-2 md:flex md:flex-row md:items-center md:justify-between">
         <div className="space-y-4 rounded-[40px] bg-gradient-to-br from-[#F0FDF4] to-[#BBF7D0] px-5 py-6 md:max-w-[451px] lg:max-w-[531px] lg:space-y-8 lg:px-10 lg:py-11">
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <h4 className="font-['Plus_Jakarta_Sans',sans-serif] text-2xl font-semibold leading-[1.3] tracking-[-1.2px] text-black lg:text-[40px]">
-                Find high-value keywords & grow traffic effortlessly
-              </h4>
-              <span className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#16A34A] shadow-sm lg:text-xs">
-                Beta
-              </span>
-            </div>
+            <h4 className="font-['Plus_Jakarta_Sans',sans-serif] text-2xl font-semibold leading-[1.3] tracking-[-1.2px] text-black lg:text-[40px]">
+              Find high-value keywords & grow traffic effortlessly
+            </h4>
             <p className="font-['Inter',sans-serif] text-base font-normal leading-[1.6] tracking-[-0.09px] text-[#64748B] lg:text-lg">
               Get instant keyword suggestions, content ideas, and SEO improvement tips — powered by real-time AI intelligence.
             </p>
