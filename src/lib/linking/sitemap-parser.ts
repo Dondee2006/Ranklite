@@ -17,11 +17,28 @@ export interface ParsedSitemap {
 }
 
 /**
+ * Normalize URL by replacing special characters
+ */
+export function normalizeUrl(url: string): string {
+  // Replace non-breaking hyphen (U+2011) with regular hyphen
+  // Replace various dash-like characters with regular hyphen
+  return url
+    .replace(/\u2011/g, '-')  // non-breaking hyphen
+    .replace(/\u2013/g, '-')  // en dash
+    .replace(/\u2014/g, '-')  // em dash
+    .replace(/\u2212/g, '-')  // minus sign
+    .trim();
+}
+
+/**
  * Fetch and parse a sitemap from a URL
  */
 export async function parseSitemap(url: string): Promise<ParsedSitemap> {
     try {
-        const response = await fetch(url, {
+        // Normalize URL to handle special characters
+        const normalizedUrl = normalizeUrl(url);
+        
+        const response = await fetch(normalizedUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
                 'Accept': 'application/xml, text/xml, */*; q=0.01',
@@ -41,7 +58,7 @@ export async function parseSitemap(url: string): Promise<ParsedSitemap> {
 
         return extractUrlsFromXml(xml);
     } catch (error) {
-        throw new Error(`Error parsing sitemap ${url}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(`Error parsing sitemap ${normalizedUrl || url}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
 
