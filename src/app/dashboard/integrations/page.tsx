@@ -46,7 +46,7 @@ const CMS_TYPES = [
   { 
     id: "feather", 
     name: "Feather", 
-    logo: "https://cdn.simpleicons.org/feather"
+    logo: "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/feather-blog-icon.svg"
   },
 ];
 
