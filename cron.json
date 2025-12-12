@@ -3,6 +3,10 @@
     {
       "path": "/api/publish-today",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cms/cron/daily-sync",
+      "schedule": "0 8 * * *"
     }
   ]
 }
