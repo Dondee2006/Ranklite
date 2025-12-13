@@ -24,9 +24,11 @@ import {
   Send,
   LogOut,
   Globe,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
@@ -102,6 +104,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [siteName, setSiteName] = useState("My Site");
   const [siteUrl, setSiteUrl] = useState("");
   const [logoError, setLogoError] = useState(false);
+  const [allSites, setAllSites] = useState<Array<{ id: string; name: string; url: string }>>([]);
+  const [currentSiteId, setCurrentSiteId] = useState("");
+  const [sitePopoverOpen, setSitePopoverOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -117,6 +122,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (data.site) {
           setSiteName(data.site.name || "My Site");
           setSiteUrl(data.site.url || "");
+          setCurrentSiteId(data.site.id || "");
+          
+          // Fetch all sites for the dropdown
+          const sitesResponse = await supabase
+            .from("sites")
+            .select("id, name, url")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          
+          if (sitesResponse.data) {
+            setAllSites(sitesResponse.data);
+          }
         } else {
           // If no site found, redirect to onboarding
           router.push("/onboarding");
@@ -127,6 +144,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     loadUserData();
   }, [supabase.auth, router]);
+
+  const handleSiteSwitch = async (siteId: string) => {
+    const selectedSite = allSites.find(s => s.id === siteId);
+    if (selectedSite) {
+      setCurrentSiteId(siteId);
+      setSiteName(selectedSite.name);
+      setSiteUrl(selectedSite.url);
+      setLogoError(false);
+      setSitePopoverOpen(false);
+      
+      // Update the default site in the backend if needed
+      try {
+        await fetch("/api/sites", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ siteId }),
+        });
+        
+        // Refresh the page to load data for the new site
+        router.refresh();
+      } catch (error) {
+        console.error("Failed to switch site:", error);
+      }
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -163,26 +205,66 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="px-3">
-          <button className="flex w-full items-center justify-between rounded-xl bg-white border border-border px-3 py-2.5 text-left hover:bg-gray-50">
-            <div className="flex items-center gap-2">
-              {siteUrl && !logoError ? (
-                <img
-                  src={getWebsiteLogo(siteUrl)}
-                  alt=""
-                  className="h-6 w-6 rounded"
-                  onError={() => setLogoError(true)}
-                />
-              ) : (
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">
-                  {siteName.charAt(0).toUpperCase()}
+          <Popover open={sitePopoverOpen} onOpenChange={setSitePopoverOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex w-full items-center justify-between rounded-xl bg-white border border-border px-3 py-2.5 text-left hover:bg-gray-50">
+                <div className="flex items-center gap-2">
+                  {siteUrl && !logoError ? (
+                    <img
+                      src={getWebsiteLogo(siteUrl)}
+                      alt=""
+                      className="h-6 w-6 rounded"
+                      onError={() => setLogoError(true)}
+                    />
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">
+                      {siteName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-sm font-medium text-foreground">{siteName}</div>
+                  </div>
                 </div>
-              )}
-              <div>
-                <div className="text-sm font-medium text-foreground">{siteName}</div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[234px] p-2" align="start">
+              <div className="space-y-1">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Your Sites
+                </div>
+                {allSites.map((site) => (
+                  <button
+                    key={site.id}
+                    onClick={() => handleSiteSwitch(site.id)}
+                    className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <img
+                        src={getWebsiteLogo(site.url)}
+                        alt=""
+                        className="h-5 w-5 rounded flex-shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-foreground truncate">
+                          {site.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {site.url.replace(/^https?:\/\//, '')}
+                        </div>
+                      </div>
+                    </div>
+                    {currentSiteId === site.id && (
+                      <Check className="h-4 w-4 text-[#16A34A] flex-shrink-0" />
+                    )}
+                  </button>
+                ))}
               </div>
-            </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </button>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <nav className="mt-4 flex-1 overflow-y-auto px-3">
