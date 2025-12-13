@@ -57,8 +57,12 @@ export default function Pricing() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FAFFFE] to-white py-20 lg:py-32" id="pricing">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -left-20 top-1/3 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-[#DCFCE7] to-transparent opacity-30 blur-3xl" />
-        <div className="absolute -right-20 bottom-1/4 h-[400px] w-[400px] rounded-full bg-gradient-to-bl from-[#D1FAE5] to-transparent opacity-20 blur-3xl" />
+        <img 
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/pexels-pixabay-270637-1765655773146.jpg?width=8000&height=8000&resize=contain"
+          alt="SEO background"
+          className="h-full w-full object-cover opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
       </div>
 
       <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
