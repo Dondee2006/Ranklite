@@ -25,7 +25,7 @@ export default function AIInSEO() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Column - New Text */}
               <div className="z-10">
-                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
+                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#22C55E] tracking-tight">
                   How AI decides what to recommend
                 </h3>
                 <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6]">
@@ -38,7 +38,7 @@ export default function AIInSEO() {
                 <div className="w-12 h-12 bg-[#F0FDF4] rounded-[14px] flex items-center justify-center mb-6 sm:mb-8 border border-[#BBF7D0]">
                   <Rocket className="w-6 h-6 text-[#4ADE80]" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
+                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#22C55E] tracking-tight">
                   SEO that works beyond search
                 </h3>
                 <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6]">
