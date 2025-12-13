@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Rocket, Menu, X } from "lucide-react";
+import { Send, Menu, X } from "lucide-react";
 
 function RankliteLogo() {
   return (
     <div className="flex items-center gap-2.5">
       <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-lg shadow-green-500/20">
-        <Rocket className="h-5 w-5 text-white" />
+        <Send className="h-5 w-5 text-white" />
       </div>
       <span className="text-[22px] font-bold tracking-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
         Ranklite
