@@ -22,7 +22,7 @@ const articles = [
   },
   {
     id: 'threadpro',
-    title: 'Building a Profitable Personal Brand on Social Media in 2024',
+    title: 'Top 5 SEO Tips Every Small Business Should Know in 2026',
     source: 'ThreadPro',
     type: 'Guide',
     icon: <Flame className="w-5 h-5 text-orange-500" />,
