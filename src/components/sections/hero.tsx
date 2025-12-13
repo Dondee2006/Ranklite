@@ -133,17 +133,7 @@ export default function HeroSection() {
               </div>
 
               <h1 className="font-display text-[42px] font-extrabold leading-[1.08] tracking-[-1.5px] text-foreground sm:text-[52px] lg:text-[68px]">
-                Supercharge Your
-                <span className="relative mx-2 inline-block">
-                  <span className="relative z-10 bg-gradient-to-r from-[#22C55E] to-[#16A34A] bg-clip-text text-transparent">
-                    Organic Traffic
-                  </span>
-                  <svg className="absolute -bottom-1 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
-                    <path d="M2 6C50 2 150 2 198 6" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.3" />
-                  </svg>
-                </span>
-                <br className="hidden sm:block" />
-                With Smart Content
+                Automated Backlinks - Without Exchanges
               </h1>
 
               <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-relaxed text-muted-foreground sm:text-[19px] lg:mt-8">
