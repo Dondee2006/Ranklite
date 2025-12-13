@@ -7,10 +7,10 @@ export default function FeaturesAutopilotPublishing() {
       <div className="w-full xl:max-w-[598px]">
         <Image
           alt="feature image"
-          width={800}
-          height={600}
+          width={1000}
+          height={750}
           className="h-auto w-full max-w-full rounded-2xl"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-4-1765618864662.png?width=8000&height=8000&resize=contain"
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-4-1765619038962.png?width=8000&height=8000&resize=contain"
         />
       </div>
 
