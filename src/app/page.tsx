@@ -1,6 +1,5 @@
 import Header from "@/components/sections/header";
 import HeroSection from "@/components/sections/hero";
-import VideoSection from "@/components/sections/video-section";
 import ProblemsSolution from "@/components/sections/problems-solution";
 import HowItWorks from "@/components/sections/how-it-works";
 import FeaturesSeoAnalysis from "@/components/sections/features-seo-analysis";
@@ -23,7 +22,6 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
-        <VideoSection />
         <ProblemsSolution />
         <HowItWorks />
         <section className="container mx-auto max-w-[1320px] px-5 md:px-8">
