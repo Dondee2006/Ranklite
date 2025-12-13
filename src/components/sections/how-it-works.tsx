@@ -15,7 +15,7 @@ const steps = [
     number: "02",
     title: "Strategic 30-day content plan",
     description: "Get a data-driven content calendar where each day targets a key phrase with maximum ranking potential.",
-    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/how-2_755a4920-9.webp",
+    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-1-1765615114345.png?width=8000&height=8000&resize=contain",
     gradient: "from-[#10B981] to-[#059669]",
   },
   {
