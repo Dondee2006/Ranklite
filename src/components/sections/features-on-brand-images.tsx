@@ -8,7 +8,7 @@ export default function FeaturesOnBrandImages() {
             Create branded visuals instantly
           </h4>
           <p className="font-body text-white/90 lg:text-lg leading-relaxed tracking-[-0.09px]">
-            Enrich articles with unique visuals. Choose styles and add brand colors. We auto-insert them into content & as featured images.
+            Enhance your articles with unique, on-brand images. Pick your preferred style and colors, and Ranklite automatically inserts them into your content as featured images.
           </p>
         </div>
         
