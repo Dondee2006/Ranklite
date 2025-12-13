@@ -53,15 +53,46 @@ export function LinkingConfigurationPage() {
         
         if (site?.url) {
           const baseUrl = site.url.replace(/\/$/, '');
-          setSitemapUrl(`${baseUrl}/sitemap.xml`);
+          const defaultSitemapUrl = `${baseUrl}/sitemap.xml`;
+          setSitemapUrl(defaultSitemapUrl);
+          
+          // Automatically detect links from default sitemap
+          detectLinksFromUrl(defaultSitemapUrl);
         }
       }
     };
 
     fetchUserSite();
-    loadDetectedLinks();
     loadLinkSuggestions();
   }, []);
+
+  const detectLinksFromUrl = async (url: string) => {
+    setIsDetecting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/linking/scan-sitemap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sitemapUrl: url }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to scan sitemap');
+      }
+
+      await loadDetectedLinks();
+      setError(null);
+    } catch (err) {
+      console.error('Failed to detect links:', err);
+      setError(err instanceof Error ? err.message : 'Failed to scan sitemap. Please check the URL and try again.');
+    } finally {
+      setIsDetecting(false);
+    }
+  };
 
   const loadDetectedLinks = async () => {
     try {
@@ -77,35 +108,7 @@ export function LinkingConfigurationPage() {
   };
 
   const handleDetectLinks = async () => {
-    setIsDetecting(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/linking/scan-sitemap', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sitemapUrl }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || 'Failed to scan sitemap');
-      }
-
-      const data = await response.json();
-
-      // Reload detected links from database
-      await loadDetectedLinks();
-
-      setError(null);
-    } catch (err) {
-      console.error('Failed to detect links:', err);
-      setError(err instanceof Error ? err.message : 'Failed to scan sitemap. Please check the URL and try again.');
-    } finally {
-      setIsDetecting(false);
-    }
+    await detectLinksFromUrl(sitemapUrl);
   };
 
   const loadLinkSuggestions = async () => {
