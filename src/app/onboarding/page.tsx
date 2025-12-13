@@ -2,15 +2,21 @@
 
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const isAddingNewSite = searchParams.get("action") === "add";
 
   useEffect(() => {
     async function checkSite() {
+      if (isAddingNewSite) {
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -29,7 +35,15 @@ export default function OnboardingPage() {
       }
     }
     checkSite();
-  }, [supabase, router]);
+  }, [supabase, router, isAddingNewSite]);
 
-  return <OnboardingWizard />;
+  return <OnboardingWizard isAddingNewSite={isAddingNewSite} />;
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OnboardingContent />
+    </Suspense>
+  );
 }

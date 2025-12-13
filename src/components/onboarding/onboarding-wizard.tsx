@@ -77,7 +77,7 @@ function getCompetitorDomain(competitor: string): string {
   return competitor.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
 }
 
-export function OnboardingWizard() {
+export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?: boolean }) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -241,14 +241,17 @@ export function OnboardingWizard() {
           router.push("/login");
           return;
         }
-        // Use the exact error from the server if available
         const errorMessage = data.error || data.message || "Failed to save onboarding data";
         console.error("Server returned error:", errorMessage, data);
         setError(errorMessage);
-        return; // Ensure we stop execution here
+        return;
       }
 
-      router.push("/dashboard/content-planner?welcome=true");
+      if (isAddingNewSite) {
+        router.push("/dashboard/settings");
+      } else {
+        router.push("/dashboard/content-planner?welcome=true");
+      }
       router.refresh();
     } catch (error) {
       console.error("Onboarding error:", error);
@@ -890,7 +893,7 @@ export function OnboardingWizard() {
                 className="h-11 rounded-xl bg-[#22C55E] px-6 font-semibold text-white hover:bg-[#16A34A]"
               >
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Skip & Get Started
+                {isAddingNewSite ? "Add Site" : "Skip & Get Started"}
               </Button>
             ) : (
               <Button

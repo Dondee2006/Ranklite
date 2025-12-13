@@ -25,6 +25,7 @@ import {
   LogOut,
   Globe,
   Check,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -170,6 +171,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
+  const handleAddNewSite = () => {
+    setSitePopoverOpen(false);
+    router.push("/onboarding?action=add");
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -262,6 +268,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     )}
                   </button>
                 ))}
+                <div className="border-t border-border my-1 pt-1">
+                  <button
+                    onClick={handleAddNewSite}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#16A34A] hover:bg-green-50 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add New Site
+                  </button>
+                </div>
               </div>
             </PopoverContent>
           </Popover>
