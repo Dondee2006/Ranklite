@@ -29,13 +29,7 @@ export default function FeaturesArticleStyle() {
       </div>
 
       <div className="w-full xl:max-w-[598px]">
-        <Image
-          alt="feature image"
-          width={800}
-          height={600}
-          className="h-auto w-full max-w-full"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/images_13.png"
-        />
+        {/* Image removed - blank space */}
       </div>
     </div>
   );
