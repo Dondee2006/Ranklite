@@ -10,32 +10,32 @@ interface FAQItem {
 
 const faqs: FAQItem[] = [
   {
-    question: "How does the article automation work?",
-    answer: "Our AI analyzes your niche, competitors, and target audience to discover high-potential keywords. It then automatically generates and publishes SEO-optimized articles daily, handling the entire content creation process."
+    question: "How does the automated backlink generation work?",
+    answer: "Ranklite generates backlinks by creating SEO tools and AI-discoverable content that naturally attracts links. Your content gets found and linked to by others - no exchanges, no trading, no waiting for other users."
   },
   {
-    question: "Will the content be SEO-friendly?",
-    answer: "Absolutely. Every article is built on powerful keywords and includes strategic internal and external links. The content reads naturally while satisfying search engine algorithms for high rankings."
+    question: "Do I need to exchange or trade links?",
+    answer: "No. Unlike traditional link-building platforms, Ranklite doesn't rely on exchanges or trades. We create valuable SEO tools and AI-optimized content that earns backlinks naturally through discovery and genuine value."
   },
   {
-    question: "Can I manage multiple websites?",
-    answer: "Yes! Each website gets its own dedicated setup with custom target audience settings and content preferences. We offer volume discounts based on the number of websites you manage."
+    question: "What types of backlinks will I get?",
+    answer: "You'll earn high-quality backlinks from AI tools, search engines, and content discovery platforms. The backlinks come from genuine sources that found your SEO tools and content valuable enough to reference."
   },
   {
-    question: "What integrations do you support?",
-    answer: "We seamlessly integrate with WordPress, Webflow, Shopify, Notion, Wix, Framer, and many others. The system handles everything from content generation to publication automatically."
+    question: "How long does it take to see backlinks?",
+    answer: "Unlike traditional methods where you wait for other users, our system starts generating backlink opportunities immediately. You can see early results within days as your SEO tools and content go live and get indexed."
   },
   {
-    question: "Does it support other languages?",
-    answer: "Yes, we support content generation in 150+ languages. Our AI creates articles in any language you need, allowing you to reach a global audience effectively."
+    question: "Can I track my backlink performance?",
+    answer: "Yes! Our dashboard provides detailed analytics showing all generated backlinks, their sources, domain authority, and the specific SEO tools or content pieces that earned them. Track your growth in real-time."
   },
   {
-    question: "How often are new articles generated?",
-    answer: "Our plan generates 30 articles per month per website, creating daily ranking content to foster consistent growth and topical authority for your domain."
+    question: "What makes this different from other backlink tools?",
+    answer: "We don't rely on user exchanges or reciprocal linking. Instead, we create valuable SEO resources that naturally attract backlinks. It's a sustainable, white-hat approach that builds genuine authority over time."
   },
   {
-    question: "Can I review articles before publication?",
-    answer: "Yes, you have full control. Review and edit articles to meet your exact expectations before they go live, ensuring every word aligns with your vision."
+    question: "Will this work for my niche?",
+    answer: "Yes! Our AI analyzes your specific niche, target audience, and market to create SEO tools and content that resonate with your industry. Whether you're in e-commerce, SaaS, or local services, we tailor the strategy to your needs."
   }
 ];
 
