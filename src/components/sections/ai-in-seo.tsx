@@ -20,7 +20,7 @@ export default function AIInSEO() {
         </div>
 
         {/* Feature Cards Grid */}
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 xl:gap-10">
+        <div className="grid grid-cols-1 gap-6 lg:gap-8 xl:gap-10">
           {/* Right Card - Light */}
           <div className="rounded-[24px] md:rounded-[32px] bg-white border border-gray-200 p-6 sm:p-8 md:p-10 lg:p-[48px] flex flex-col justify-between items-start text-left relative overflow-hidden group shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
             <div className="w-full z-10">
