@@ -39,7 +39,7 @@ export default function AIInSEO() {
             </div>
             <div className="w-full relative mt-auto pl-2">
               <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/images_27.png"
+                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ChatGPT-Image-Dec-13-2025-02_50_25-PM-1765628649047.png?width=8000&height=8000&resize=contain"
                 alt="Flowchart showing content distribution to various AI models like Claude, Bard and ChatGPT"
                 width={600}
                 height={400}
