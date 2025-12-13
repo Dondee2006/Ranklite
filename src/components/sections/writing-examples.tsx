@@ -195,7 +195,7 @@ export default function WritingExamples() {
                         </div>
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500 font-medium">+3.1k views</span>
+                    <span className="text-sm text-gray-500 font-medium">+10k</span>
                   </div>
 
                   <span className="text-sm font-semibold text-green-500 flex items-center gap-1 cursor-pointer hover:underline">
