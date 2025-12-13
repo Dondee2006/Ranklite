@@ -28,13 +28,10 @@ export default function AIInSEO() {
                 <Rocket className="w-6 h-6 text-[#4ADE80]" strokeWidth={1.5} />
               </div>
               <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
-                What we create for your SEO?
+                SEO that works beyond search
               </h3>
               <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6] mb-8 sm:mb-12 max-w-[95%]">
-                We create two types of content - articles and SEO tools based on
-                keywords that work for your business. One well-researched article
-                or SEO tool can appear in thousands of AI responses. It&apos;s
-                strategic promotion that works 24/7 worldwide.
+                We create optimized articles and SEO tools designed around proven keywords. One well-executed asset can power thousands of AI recommendations—giving your brand nonstop exposure across the web.
               </p>
             </div>
             <div className="w-full relative mt-auto pl-2">
