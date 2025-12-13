@@ -10,18 +10,18 @@ export default function FeaturesAutopilotPublishing() {
             Automate your content, effortlessly
           </h4>
           <p className="text-zinc-500 lg:text-lg">
-            Set up once and forget about manual work. Integrates with{" "}
+            Set it up once and let Ranklite handle the rest. Works seamlessly with{" "}
             <span className="font-semibold text-zinc-900">
               WordPress, Webflow, Shopify, Notion, Wix, Framer
             </span>{" "}
-            and many{" "}
+            and{" "}
             <Link
               className="text-[#4ADE80] underline hover:text-[#22C55E] transition-colors"
               href="/integrations"
             >
-              other platforms
+              more
             </Link>
-            . Your content goes live automatically.
+            . Your content goes live automatically — no manual work required.
           </p>
         </div>
         <Link
