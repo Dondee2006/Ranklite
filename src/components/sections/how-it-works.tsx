@@ -7,7 +7,7 @@ const steps = [
     number: "01",
     title: "Deep analysis of your niche",
     description: "We explore your market, competitors, and target audience to discover high-potential keywords with low competition.",
-    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/how-1_89ea1f80-8.webp",
+    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-1765614287806.png?width=8000&height=8000&resize=contain",
     gradient: "from-[#22C55E] to-[#16A34A]",
   },
   {
