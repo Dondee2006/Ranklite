@@ -17,6 +17,8 @@ import {
   Pause,
   Play,
   ClipboardList,
+  X,
+  Save,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -64,6 +66,7 @@ interface Campaign {
   failed_tasks: number;
   daily_submission_count: number;
   max_daily_submissions: number;
+  min_domain_rating?: number;
 }
 
 interface Stats {
@@ -176,6 +179,13 @@ export default function BacklinkGeneratorPage() {
   const [newBacklinkNotification, setNewBacklinkNotification] = useState<Backlink | null>(null);
   const [filterDR, setFilterDR] = useState<number | null>(null);
   const [togglingPause, setTogglingPause] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({
+    website_url: "",
+    min_domain_rating: 50,
+    max_daily_submissions: 10,
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const loadBacklinks = useCallback(async () => {
     try {
@@ -233,9 +243,41 @@ export default function BacklinkGeneratorPage() {
     }
   };
 
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const response = await fetch("/api/backlinks/campaign", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          min_domain_rating: settingsForm.min_domain_rating,
+          max_daily_submissions: settingsForm.max_daily_submissions,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to save settings");
+      await loadBacklinks();
+      setShowSettings(false);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      alert("Failed to save settings");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   useEffect(() => {
     loadBacklinks();
   }, [loadBacklinks]);
+
+  useEffect(() => {
+    if (campaign) {
+      setSettingsForm({
+        website_url: campaign.website_url || "",
+        min_domain_rating: campaign.min_domain_rating || 50,
+        max_daily_submissions: campaign.max_daily_submissions || 10,
+      });
+    }
+  }, [campaign]);
 
   useEffect(() => {
     if (!campaign?.is_paused && (campaign?.agent_status === "scanning" || campaign?.status === "active")) {
@@ -331,13 +373,93 @@ export default function BacklinkGeneratorPage() {
               )}
               {campaign?.is_paused ? "Resume" : "Pause"}
             </button>
-            <button className="flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-sm text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] transition-all">
+            <button 
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-sm text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] transition-all"
+            >
               <Settings className="h-4 w-4" />
-              Settings
+              {showSettings ? <X className="h-4 w-4" /> : "Settings"}
             </button>
           </div>
         </div>
       </header>
+
+      {showSettings && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-foreground">Campaign Settings</h2>
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Website URL
+                </label>
+                <input
+                  type="url"
+                  value={settingsForm.website_url}
+                  onChange={(e) => setSettingsForm({...settingsForm, website_url: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/30 focus:border-[#8B5CF6]"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Minimum Domain Rating
+                </label>
+                <input
+                  type="number"
+                  value={settingsForm.min_domain_rating}
+                  onChange={(e) => setSettingsForm({...settingsForm, min_domain_rating: parseInt(e.target.value) || 50})}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/30 focus:border-[#8B5CF6]"
+                  min="0"
+                  max="100"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Max Daily Submissions
+                </label>
+                <input
+                  type="number"
+                  value={settingsForm.max_daily_submissions}
+                  onChange={(e) => setSettingsForm({...settingsForm, max_daily_submissions: parseInt(e.target.value) || 10})}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/30 focus:border-[#8B5CF6]"
+                  min="1"
+                  max="100"
+                />
+              </div>
+              
+              <button
+                onClick={saveSettings}
+                disabled={savingSettings}
+                className="w-full bg-[#8B5CF6] text-white py-2.5 rounded-lg font-medium hover:bg-[#7C3AED] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {savingSettings ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Settings
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-8">
         {/* Queue Stats */}
