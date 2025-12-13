@@ -28,9 +28,9 @@ const articles = [
     icon: <Flame className="w-5 h-5 text-orange-500" />,
     color: 'bg-orange-50 text-orange-600 border-orange-100',
     content: {
-      headline: 'From Followers to Revenue',
-      paragraph1: "Social media has transformed from a broadcasting tool into a thriving economy. Creators who understand this shift are building sustainable businesses by cultivating engaged communities rather than chasing vanity metrics. The key lies in authenticity - audiences can spot manufactured content from miles away, but genuine expertise and unique perspectives create loyal followings.",
-      paragraph2: "Revenue streams for social creators have diversified dramatically. Beyond sponsored posts and affiliate deals, smart creators are launching membership communities, digital products, and consulting services. The most successful approach combines multiple income sources while maintaining the authentic voice that attracted your audience in the first place. It's a delicate balance, but entirely achievable with the right strategy.",
+      headline: 'SEO isn\'t just for big companies—small businesses can compete if they apply the right strategies. Target specific, niche keywords instead of broad terms. Ranklite\'s AI suggests optimal keywords for your business, helping you attract high-intent visitors.',
+      paragraph1: "Search engines favor active sites. Ranklite's automatic publishing ensures new content goes live regularly across multiple platforms. Medium-length articles (~1,200–1,500 words) tend to rank well. Ranklite's Pro plan generates in-depth content automatically, saving time while keeping articles SEO-friendly. Backlinks improve authority. Ranklite provides high-quality automated backlinks, giving your content credibility in the eyes of search engines.",
+      paragraph2: "Track rankings, traffic, and engagement. Ranklite's performance dashboard makes it easy to see what's working and tweak content accordingly. SEO success comes from combining strategy with the right tools. Ranklite empowers small businesses to implement these tips efficiently, turning SEO from a chore into a growth engine.",
       image: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/de7a13f1-36f5-4b3a-a7d8-62d4830d7d88-24.jpg',
     }
   },
