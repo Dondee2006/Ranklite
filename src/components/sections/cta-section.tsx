@@ -61,7 +61,7 @@ export default function CtaSection() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-              {["14-day free trial", "Cancel anytime", "Setup in 2 minutes"].map((item) => (
+              {["3-day free trial", "Cancel anytime", "Setup in 2 minutes"].map((item) => (
                 <div key={item} className="flex items-center gap-2 text-[14px] text-white/50">
                   <CheckCircle2 className="h-4 w-4 text-[#22C55E]" />
                   <span>{item}</span>
