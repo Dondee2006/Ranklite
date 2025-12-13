@@ -1,41 +1,41 @@
 "use client";
 
 import React from "react";
-import { Languages, Sparkles, KeyRound, Globe, Users, Headset, Layers } from "lucide-react";
+import { BookOpen, Wand2, Target, Server, MessageSquare, Shield, Layers } from "lucide-react";
 
 const features = [
   {
-    icon: Languages,
+    icon: BookOpen,
     title: "Write in 150+ languages",
     description: "Generate high-quality content in any language. Our AI creates native-sounding articles for global audiences.",
     gradient: "from-[#22C55E] to-[#16A34A]",
   },
   {
-    icon: Sparkles,
+    icon: Wand2,
     title: "AI-powered editing",
     description: "Refine your articles with intelligent editing tools. Every word aligns perfectly with your brand voice.",
     gradient: "from-[#10B981] to-[#059669]",
   },
   {
-    icon: KeyRound,
+    icon: Target,
     title: "Unlimited keywords",
     description: "Generate unlimited keyword sets until you find the perfect match for your content strategy.",
     gradient: "from-[#22C55E] to-[#10B981]",
   },
   {
-    icon: Globe,
+    icon: Server,
     title: "Multi-site support",
     description: "Scale your content strategy across multiple websites. Add more sites to your package anytime.",
     gradient: "from-[#10B981] to-[#22C55E]",
   },
   {
-    icon: Users,
+    icon: MessageSquare,
     title: "Team collaboration",
     description: "Invite editors to your organization. Collaborate seamlessly to create impactful content together.",
     gradient: "from-[#16A34A] to-[#22C55E]",
   },
   {
-    icon: Headset,
+    icon: Shield,
     title: "24/7 expert support",
     description: "Get assistance whenever you need it. Our team ensures smooth operation of all features.",
     gradient: "from-[#059669] to-[#10B981]",
