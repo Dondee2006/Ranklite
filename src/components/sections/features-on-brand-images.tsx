@@ -5,7 +5,7 @@ export default function FeaturesOnBrandImages() {
       <div className="order-1 flex flex-col justify-center space-y-4 rounded-[40px] bg-[linear-gradient(135deg,#86EFAC_0%,#4ADE80_100%)] px-5 py-6 shadow-card sm:order-2 md:max-w-[451px] lg:max-w-[531px] lg:space-y-8 lg:px-10 lg:py-11">
         <div className="space-y-4">
           <h4 className="font-display text-2xl font-bold leading-[1.3] text-white tracking-[-1.2px] lg:text-[40px]">
-            Generate on-brand images
+            Create branded visuals instantly
           </h4>
           <p className="font-body text-white/90 lg:text-lg leading-relaxed tracking-[-0.09px]">
             Enrich articles with unique visuals. Choose styles and add brand colors. We auto-insert them into content & as featured images.
