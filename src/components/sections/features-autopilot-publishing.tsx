@@ -40,7 +40,7 @@ export default function FeaturesAutopilotPublishing() {
       </div>
       <div className="flex-shrink-0">
         <Image
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/pexels-goumbik-590020-1765654378638.jpg?width=8000&height=8000&resize=contain"
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-5-1765655415546.png?width=8000&height=8000&resize=contain"
           alt="CMS platforms"
           width={531}
           height={400}
