@@ -4,6 +4,15 @@ import Link from "next/link";
 export default function FeaturesAutopilotPublishing() {
   return (
     <div className="flex flex-col gap-3 py-8 md:flex md:flex-row md:items-center md:justify-center w-full">
+      <div className="flex-shrink-0">
+        <Image
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-5-1765651850962.png?width=8000&height=8000&resize=contain"
+          alt="CMS platforms"
+          width={531}
+          height={400}
+          className="w-full md:max-w-[451px] lg:max-w-[531px]"
+        />
+      </div>
       <div className="space-y-4 rounded-[40px] bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] px-5 py-6 md:max-w-[451px] lg:max-w-[531px] lg:space-y-8 lg:px-10 lg:py-11">
         <div className="space-y-4">
           <h4 className="font-display text-2xl font-semibold leading-[1.3] tracking-[-1.2px] text-zinc-900 lg:text-[40px]">
