@@ -21,27 +21,31 @@ export default function AIInSEO() {
 
         {/* Feature Cards Grid */}
         <div className="grid grid-cols-1 gap-6 lg:gap-8 xl:gap-10">
-          {/* Right Card - Light */}
-          <div className="rounded-[24px] md:rounded-[32px] bg-white border border-gray-200 p-6 sm:p-8 md:p-10 lg:p-[48px] flex flex-col justify-between items-start text-left relative overflow-hidden group shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
-            <div className="w-full z-10">
-              <div className="w-12 h-12 bg-[#F0FDF4] rounded-[14px] flex items-center justify-center mb-6 sm:mb-8 border border-[#BBF7D0]">
-                <Rocket className="w-6 h-6 text-[#4ADE80]" strokeWidth={1.5} />
+          {/* Card - Two Column Layout */}
+          <div className="rounded-[24px] md:rounded-[32px] bg-white border border-gray-200 p-6 sm:p-8 md:p-10 lg:p-[48px] relative overflow-hidden group shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Left Column - New Text */}
+              <div className="z-10">
+                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
+                  How AI decides what to recommend
+                </h3>
+                <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6]">
+                  AI assistants rely on search engine results to answer questions. Websites that rank higher through strong SEO are more likely to be referenced and recommended in AI-generated responses.
+                </p>
               </div>
-              <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
-                SEO that works beyond search
-              </h3>
-              <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6] mb-8 sm:mb-12 max-w-[95%]">
-                We create optimized articles and SEO tools designed around proven keywords. One well-executed asset can power thousands of AI recommendations—giving your brand nonstop exposure across the web.
-              </p>
-            </div>
-            <div className="w-full relative mt-auto pl-2">
-              <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ChatGPT-Image-Dec-13-2025-02_50_25-PM-1765628649047.png?width=8000&height=8000&resize=contain"
-                alt="Flowchart showing content distribution to various AI models like Claude, Bard and ChatGPT"
-                width={600}
-                height={400}
-                className="w-full h-auto object-contain transform group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-              />
+
+              {/* Right Column - Existing Content */}
+              <div className="z-10">
+                <div className="w-12 h-12 bg-[#F0FDF4] rounded-[14px] flex items-center justify-center mb-6 sm:mb-8 border border-[#BBF7D0]">
+                  <Rocket className="w-6 h-6 text-[#4ADE80]" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#4ADE80] tracking-tight">
+                  SEO that works beyond search
+                </h3>
+                <p className="text-[#64748B] text-base sm:text-[17px] leading-[1.6]">
+                  We create optimized articles and SEO tools designed around proven keywords. One well-executed asset can power thousands of AI recommendations—giving your brand nonstop exposure across the web.
+                </p>
+              </div>
             </div>
           </div>
         </div>
