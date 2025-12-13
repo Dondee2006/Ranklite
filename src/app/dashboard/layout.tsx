@@ -179,7 +179,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
               <div>
                 <div className="text-sm font-medium text-foreground">{siteName}</div>
-                <div className="text-xs text-muted-foreground">{siteUrl || "No website set"}</div>
               </div>
             </div>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
