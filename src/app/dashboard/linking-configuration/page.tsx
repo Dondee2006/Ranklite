@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Link as LinkIcon, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { createClient } from "@/lib/supabase/client";
 
 type LinkSource = "sitemap" | "rss" | "manual";
 
@@ -35,8 +36,29 @@ export function LinkingConfigurationPage() {
   const [sourcePopoverOpen, setSourcePopoverOpen] = useState(false);
   const [detectedPopoverOpen, setDetectedPopoverOpen] = useState(false);
 
-  // Load saved links and suggestions on mount
+  // Load user's website URL and set default sitemap
   useEffect(() => {
+    const fetchUserSite = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: site } = await supabase
+          .from('sites')
+          .select('url')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (site?.url) {
+          const baseUrl = site.url.replace(/\/$/, '');
+          setSitemapUrl(`${baseUrl}/sitemap.xml`);
+        }
+      }
+    };
+
+    fetchUserSite();
     loadDetectedLinks();
     loadLinkSuggestions();
   }, []);
