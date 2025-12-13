@@ -7,8 +7,7 @@ export default function FeaturesAutopilotPublishing() {
       <div className="space-y-4 rounded-[40px] bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] px-5 py-6 md:max-w-[451px] lg:max-w-[531px] lg:space-y-8 lg:px-10 lg:py-11">
         <div className="space-y-4">
           <h4 className="font-display text-2xl font-semibold leading-[1.3] tracking-[-1.2px] text-zinc-900 lg:text-[40px]">
-            Publish content on <br />
-            auto-pilot
+            Automate your content, effortlessly
           </h4>
           <p className="text-zinc-500 lg:text-lg">
             Set up once and forget about manual work. Integrates with{" "}
