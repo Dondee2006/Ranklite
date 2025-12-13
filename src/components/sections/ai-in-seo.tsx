@@ -11,11 +11,10 @@ export default function AIInSEO() {
             AI IN SEO
           </p>
           <h2 className="font-display text-[32px] sm:text-[40px] md:text-5xl lg:text-[56px] font-bold leading-[1.15] tracking-tight mb-6 text-[#0D0D12]">
-            Make AI recommending <br className="hidden md:block" />
-            <span className="text-[#4ADE80]">Your Business</span>
+            Get Your Business Recommended by AI
           </h2>
           <p className="text-[#64748B] text-base sm:text-lg md:text-xl leading-relaxed max-w-[500px] mx-auto">
-            AI chooses businesses based on SEO. Learn how and get ahead
+            AI surfaces businesses with strong SEO signals. Learn how it works—and how to stay ahead.
           </p>
         </div>
 
