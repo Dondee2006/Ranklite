@@ -10,7 +10,7 @@ export default function FeaturesAutopilotPublishing() {
           width={800}
           height={600}
           className="h-auto w-full max-w-full rounded-2xl"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-3-1765616915808.png?width=8000&height=8000&resize=contain"
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-4-1765618864662.png?width=8000&height=8000&resize=contain"
         />
       </div>
 
