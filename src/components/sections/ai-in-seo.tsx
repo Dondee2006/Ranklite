@@ -28,12 +28,10 @@ export default function AIInSEO() {
                 <Sparkles className="w-6 h-6 text-white" strokeWidth={1.5} />
               </div>
               <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#FFD233] tracking-tight">
-                How AI chooses what to recommend?
+                How AI decides what to recommend
               </h3>
               <p className="text-white/70 text-base sm:text-[17px] leading-[1.6] mb-8 sm:mb-12 max-w-[90%]">
-                When users ask questions to AI assistants, these tools scan web
-                search results. Pages with better SEO rankings appear more often
-                in AI responses.
+                AI assistants rely on search engine results to answer questions. Websites that rank higher through strong SEO are more likely to be referenced and recommended in AI-generated responses.
               </p>
             </div>
             <div className="w-full relative rounded-xl overflow-hidden shadow-2xl border border-white/10 mt-auto">
