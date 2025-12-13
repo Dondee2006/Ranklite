@@ -38,7 +38,7 @@ export default function AIInSEO() {
             </div>
             <div className="w-full relative rounded-xl overflow-hidden shadow-2xl border border-white/10 mt-auto">
               <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ChatGPT-Image-Dec-13-2025-02_50_25-PM-1765626747602.png?width=8000&height=8000&resize=contain"
+                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/document-uploads/ChatGPT-Image-Dec-13-2025-02_50_25-PM-1765626747602.png"
                 alt="ChatGPT search result example showing top rankings"
                 width={600}
                 height={400}
