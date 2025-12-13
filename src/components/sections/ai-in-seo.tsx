@@ -11,7 +11,7 @@ export default function AIInSEO() {
             AI IN SEO
           </p>
           <h2 className="font-display text-[32px] sm:text-[40px] md:text-5xl lg:text-[56px] font-bold leading-[1.15] tracking-tight mb-6 text-[#0D0D12]">
-            Get Your Business Recommended by AI
+            Get <span className="text-[#22C55E]">Your Business</span> Recommended by <span className="text-[#22C55E]">AI</span>
           </h2>
           <p className="text-[#64748B] text-base sm:text-lg md:text-xl leading-relaxed max-w-[500px] mx-auto">
             AI surfaces businesses with strong SEO signals. Learn how it works—and how to stay ahead.
