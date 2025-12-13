@@ -36,7 +36,7 @@ const articles = [
   },
   {
     id: 'motionlab',
-    title: '8 Breakthrough AI Tools Reshaping Video Creation This Year',
+    title: 'Ranklite Backlink Generator vs Traditional Backlink Exchanges: Which Boosts Your SEO Faster?',
     source: 'MotionLab',
     type: 'Tools Listicle',
     icon: <Video className="w-5 h-5 text-emerald-600" />,
