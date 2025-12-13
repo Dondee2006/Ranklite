@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Link as LinkIcon, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 type LinkSource = "sitemap" | "rss" | "manual";
 
@@ -144,9 +145,23 @@ export function LinkingConfigurationPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Source Configuration
               </h2>
-              <button className="ml-auto text-gray-400 hover:text-gray-600">
-                <Info className="h-4 w-4" />
-              </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="ml-auto text-gray-400 hover:text-gray-600">
+                    <Info className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Source Configuration</h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Configure where to find pages on your website. You can scan your sitemap XML, 
+                      RSS feed, or manually add URLs. We'll analyze these pages to find internal linking 
+                      opportunities and build a page inventory for backlink exchanges.
+                    </p>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-4">
@@ -264,9 +279,23 @@ export function LinkingConfigurationPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Detected Links
               </h2>
-              <button className="ml-auto text-gray-400 hover:text-gray-600">
-                <Info className="h-4 w-4" />
-              </button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="ml-auto text-gray-400 hover:text-gray-600">
+                    <Info className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Detected Links</h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      All pages found from your sitemap or RSS feed. These pages are used to generate 
+                      internal linking suggestions and are available for backlink exchanges. The more 
+                      pages detected, the better our AI can suggest relevant internal links.
+                    </p>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {detectedLinks.length === 0 ? (
@@ -308,7 +337,6 @@ export function LinkingConfigurationPage() {
             )}
           </div>
         </div>
-
 
         {/* Link Suggestions Section */}
         {linkSuggestions.length > 0 && (
