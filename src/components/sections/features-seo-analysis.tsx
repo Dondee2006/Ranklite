@@ -29,14 +29,7 @@ export default function FeaturesSeoAnalysis() {
           </Link>
         </div>
         <div className="w-full xl:max-w-[598px]">
-          <Image
-            src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-2-1765615394881.png?width=8000&height=8000&resize=contain"
-            alt="feature image"
-            width={800}
-            height={600}
-            className="h-auto w-full max-w-full"
-            priority
-          />
+          {/* Image removed - blank space */}
         </div>
       </div>
     </section>
