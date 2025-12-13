@@ -32,6 +32,8 @@ export function LinkingConfigurationPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [linkSuggestions, setLinkSuggestions] = useState<LinkSuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [sourcePopoverOpen, setSourcePopoverOpen] = useState(false);
+  const [detectedPopoverOpen, setDetectedPopoverOpen] = useState(false);
 
   // Load saved links and suggestions on mount
   useEffect(() => {
@@ -145,13 +147,21 @@ export function LinkingConfigurationPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Source Configuration
               </h2>
-              <Popover>
+              <Popover open={sourcePopoverOpen} onOpenChange={setSourcePopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button className="ml-auto text-gray-400 hover:text-gray-600">
+                  <button 
+                    className="ml-auto text-gray-400 hover:text-gray-600"
+                    onMouseEnter={() => setSourcePopoverOpen(true)}
+                    onMouseLeave={() => setSourcePopoverOpen(false)}
+                  >
                     <Info className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80">
+                <PopoverContent 
+                  className="w-80"
+                  onMouseEnter={() => setSourcePopoverOpen(true)}
+                  onMouseLeave={() => setSourcePopoverOpen(false)}
+                >
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm">Source Configuration</h4>
                     <p className="text-xs text-gray-600 leading-relaxed">
@@ -279,13 +289,21 @@ export function LinkingConfigurationPage() {
               <h2 className="text-lg font-semibold text-gray-900">
                 Detected Links
               </h2>
-              <Popover>
+              <Popover open={detectedPopoverOpen} onOpenChange={setDetectedPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button className="ml-auto text-gray-400 hover:text-gray-600">
+                  <button 
+                    className="ml-auto text-gray-400 hover:text-gray-600"
+                    onMouseEnter={() => setDetectedPopoverOpen(true)}
+                    onMouseLeave={() => setDetectedPopoverOpen(false)}
+                  >
                     <Info className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80">
+                <PopoverContent 
+                  className="w-80"
+                  onMouseEnter={() => setDetectedPopoverOpen(true)}
+                  onMouseLeave={() => setDetectedPopoverOpen(false)}
+                >
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm">Detected Links</h4>
                     <p className="text-xs text-gray-600 leading-relaxed">
