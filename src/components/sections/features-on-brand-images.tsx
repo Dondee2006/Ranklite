@@ -1,17 +1,6 @@
 export default function FeaturesOnBrandImages() {
   return (
     <div className="flex flex-col gap-3 py-8 sm:grid sm:grid-cols-2 md:flex md:flex-row md:items-center md:justify-between w-full">
-      {/* Left: Image Section */}
-      <div className="order-2 w-full sm:order-1 xl:max-w-[598px]">
-        <img
-          alt="feature image"
-          width="800"
-          height="600"
-          className="h-auto w-full max-w-full rounded-xl"
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/images_14.png"
-        />
-      </div>
-
       {/* Right: Text Content Card */}
       <div className="order-1 flex flex-col justify-center space-y-4 rounded-[40px] bg-[linear-gradient(135deg,#86EFAC_0%,#4ADE80_100%)] px-5 py-6 shadow-card sm:order-2 md:max-w-[451px] lg:max-w-[531px] lg:space-y-8 lg:px-10 lg:py-11">
         <div className="space-y-4">
