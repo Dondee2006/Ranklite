@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         // Get user's site
         const { data: site, error: siteError } = await supabase
             .from('sites')
-            .select('id')
+            .select('id, url')
             .eq('user_id', user.id)
             .single();
 
@@ -36,12 +36,25 @@ export async function POST(request: Request) {
             );
         }
 
+        // Extract domain from user's site URL
+        const userDomain = new URL(site.url).hostname.replace(/^www\./, '');
+
         // Fetch all URLs from sitemap (including nested sitemaps)
         const sitemapUrls = await fetchAllUrls(sitemapUrl);
         const uniqueUrls = deduplicateUrls(sitemapUrls);
 
+        // Filter to only include URLs from the user's domain
+        const filteredUrls = uniqueUrls.filter(urlObj => {
+            try {
+                const urlDomain = new URL(urlObj.loc).hostname.replace(/^www\./, '');
+                return urlDomain === userDomain;
+            } catch {
+                return false;
+            }
+        });
+
         // Limit to first 100 URLs to avoid overwhelming the system
-        const urlsToProcess = uniqueUrls.slice(0, 100);
+        const urlsToProcess = filteredUrls.slice(0, 100);
 
         // Fetch page details for each URL (with concurrency limit)
         const detectedLinks = await fetchPageDetailsInBatches(urlsToProcess.map(u => u.loc), 5);
@@ -96,7 +109,8 @@ export async function POST(request: Request) {
                 title: l!.title,
             })),
             totalFound: detectedLinks.filter(l => l !== null).length,
-            totalInSitemap: uniqueUrls.length,
+            totalInSitemap: filteredUrls.length,
+            totalFiltered: uniqueUrls.length - filteredUrls.length,
         });
     } catch (error) {
         console.error('Error scanning sitemap:', error);
