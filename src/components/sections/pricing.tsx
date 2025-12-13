@@ -78,7 +78,7 @@ export default function Pricing() {
             </span>
           </h2>
           <p className="mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-muted-foreground lg:text-[18px]">
-            Compare plans and see how Ranklite stacks up against Outrank.so
+            Automated Backlinks-Without Exchanges
           </p>
         </div>
 
