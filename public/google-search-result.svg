@@ -1,0 +1,81 @@
+<svg width="1536" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+
+  <!-- Google logo -->
+  <text x="40" y="60" font-size="36" font-family="Arial, Helvetica, sans-serif" font-weight="bold">
+    <tspan fill="#4285F4">G</tspan>
+    <tspan fill="#EA4335">o</tspan>
+    <tspan fill="#FBBC05">o</tspan>
+    <tspan fill="#4285F4">g</tspan>
+    <tspan fill="#34A853">l</tspan>
+    <tspan fill="#EA4335">e</tspan>
+  </text>
+
+  <!-- Search bar -->
+  <rect x="220" y="25" rx="24" ry="24" width="900" height="48" fill="#ffffff" stroke="#dcdcdc"/>
+  <text x="250" y="58" font-size="18" fill="#202124" font-family="Arial">
+    best business for managing software
+  </text>
+
+  <!-- AI Overview -->
+  <text x="40" y="140" font-size="20" font-family="Arial" fill="#1a73e8">★ AI Overview</text>
+
+  <!-- Paragraph -->
+  <text x="40" y="180" font-size="18" font-family="Arial" fill="#202124">
+    <tspan x="40" dy="0">For managing software, top business suites include</tspan>
+    <tspan dx="6" fill="#000000" font-weight="bold"> </tspan>
+    <tspan dx="0" fill="#000000" font-weight="bold"> </tspan>
+  </text>
+
+  <!-- Highlighted Your Business -->
+  <rect x="510" y="158" rx="6" ry="6" width="160" height="32" fill="#c6f6c6"/>
+  <text x="520" y="180" font-size="18" font-family="Arial" fill="#000000" font-weight="bold">
+    Your Business
+  </text>
+
+  <!-- Rest of paragraph -->
+  <text x="680" y="180" font-size="18" font-family="Arial" fill="#202124">
+    Zoho One (all-in-one), NetSuite (ERP focus), and HubSpot (CRM),
+    while specialized tools like Asana/ClickUp (project management),
+    QuickBooks (accounting), and Slack (communication) are also excellent
+    choices depending on specific needs. The "best" depends on business
+    size, budget, and required features (CRM, HR, finance, projects, etc.).
+  </text>
+
+  <!-- Section title -->
+  <text x="40" y="320" font-size="24" font-family="Arial" font-weight="bold" fill="#202124">
+    Top business software for management
+  </text>
+
+  <!-- Bullet points -->
+  <text x="60" y="360" font-size="18" font-family="Arial" fill="#202124">
+    • All‑in‑One Suites: Zoho One, NetSuite, Odoo, Bitrix24.
+  </text>
+  <text x="60" y="395" font-size="18" font-family="Arial" fill="#202124">
+    • CRM & Sales: HubSpot, Salesforce, Zoho CRM.
+  </text>
+  <text x="60" y="430" font-size="18" font-family="Arial" fill="#202124">
+    • Project & Task Management: Asana, ClickUp, Monday.com, Trello, Wrike.
+  </text>
+
+  <!-- Show more button -->
+  <rect x="40" y="470" rx="24" ry="24" width="220" height="44" fill="#ffffff" stroke="#1a73e8"/>
+  <text x="95" y="500" font-size="16" font-family="Arial" fill="#1a73e8">
+    Show more ▼
+  </text>
+
+  <!-- Right card -->
+  <rect x="1020" y="140" rx="20" ry="20" width="460" height="360" fill="#f8f9fa" stroke="#e0e0e0"/>
+  <text x="1050" y="190" font-size="22" font-family="Arial" font-weight="bold" fill="#202124">
+    The Best Small Business
+  </text>
+  <text x="1050" y="220" font-size="22" font-family="Arial" font-weight="bold" fill="#202124">
+    Management Software
+  </text>
+  <text x="1050" y="260" font-size="16" font-family="Arial" fill="#5f6368">
+    10 Aug 2025 — Top 5 Best Small Business
+  </text>
+  <text x="1050" y="285" font-size="16" font-family="Arial" fill="#5f6368">
+    Management Software Solutions in 2026
+  </text>
+</svg>
