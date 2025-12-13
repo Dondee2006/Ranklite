@@ -21,30 +21,6 @@ export default function AIInSEO() {
 
         {/* Feature Cards Grid */}
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8 xl:gap-10">
-          {/* Left Card - Dark */}
-          <div className="rounded-[24px] md:rounded-[32px] bg-[#0B0F17] p-6 sm:p-8 md:p-10 lg:p-[48px] flex flex-col justify-between items-start text-left relative overflow-hidden group shadow-2xl transition-transform duration-300 hover:-translate-y-1">
-            <div className="w-full z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-[14px] flex items-center justify-center mb-6 sm:mb-8 backdrop-blur-md border border-white/5 shadow-inner">
-                <Sparkles className="w-6 h-6 text-white" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-display text-[24px] sm:text-[28px] lg:text-[32px] font-bold leading-[1.3] mb-4 text-[#FFD233] tracking-tight">
-                How AI decides what to recommend
-              </h3>
-              <p className="text-white/70 text-base sm:text-[17px] leading-[1.6] mb-8 sm:mb-12 max-w-[90%]">
-                AI assistants rely on search engine results to answer questions. Websites that rank higher through strong SEO are more likely to be referenced and recommended in AI-generated responses.
-              </p>
-            </div>
-            <div className="w-full relative rounded-xl overflow-hidden shadow-2xl border border-white/10 mt-auto">
-              <Image
-                src="/google-search-result.svg"
-                alt="ChatGPT search result example showing top rankings"
-                width={1536}
-                height={1024}
-                className="w-full h-auto object-cover transform group-hover:scale-[1.03] transition-transform duration-500 ease-out"
-              />
-            </div>
-          </div>
-
           {/* Right Card - Light */}
           <div className="rounded-[24px] md:rounded-[32px] bg-white border border-gray-200 p-6 sm:p-8 md:p-10 lg:p-[48px] flex flex-col justify-between items-start text-left relative overflow-hidden group shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
             <div className="w-full z-10">
