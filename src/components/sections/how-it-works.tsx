@@ -59,7 +59,7 @@ export default function HowItWorks() {
               href="/signup"
               className="group hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30 lg:flex"
             >
-              Start Growing Free
+              Start Generating Backlinks
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
@@ -102,7 +102,7 @@ export default function HowItWorks() {
             href="/signup"
             className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20"
           >
-            Start Growing Free
+            Start Generating Backlinks
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
