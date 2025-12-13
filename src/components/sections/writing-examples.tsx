@@ -8,7 +8,7 @@ import Link from 'next/link';
 const articles = [
   {
     id: 'cloudvault',
-    title: '7 Smart File Organization Strategies That Boost Productivity',
+    title: 'How Ranklite Automates Your SEO and Saves You Hours Every Week',
     source: 'CloudVault',
     type: 'Listicle',
     icon: <FileText className="w-5 h-5 text-blue-600" />,
