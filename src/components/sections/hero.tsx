@@ -133,7 +133,7 @@ export default function HeroSection() {
               </div>
 
               <h1 className="font-display text-[42px] font-extrabold leading-[1.08] tracking-[-1.5px] text-foreground sm:text-[52px] lg:text-[68px]">
-                Automated Backlinks - Without Exchanges
+                Automated <span className="text-[#22C55E]">Backlinks</span> - Without Exchanges
               </h1>
 
               <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-relaxed text-muted-foreground sm:text-[19px] lg:mt-8">
