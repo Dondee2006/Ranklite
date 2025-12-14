@@ -11,7 +11,7 @@ export async function POST() {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, name, domain, url")
+    .select("id, name, url")
     .eq("user_id", user.id)
     .single();
 
@@ -127,7 +127,7 @@ export async function POST() {
       outline
     );
 
-    const internalLinks = detectInternalLinks(content, existingArticles || [], site.domain || site.url || "");
+    const internalLinks = detectInternalLinks(content, existingArticles || [], site.url || "");
     const externalLinks = generateExternalLinks(article.keyword);
     const images = generateImagePlaceholders(article.title, article.keyword);
     const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
