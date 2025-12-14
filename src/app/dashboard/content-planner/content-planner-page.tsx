@@ -19,6 +19,11 @@ import {
     Filter,
     Search,
     ArrowUpDown,
+    Copy,
+    Link,
+    ExternalLink,
+    Image,
+    Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,6 +140,22 @@ function formatRelativeDate(dateStr: string) {
     return `${Math.floor(diffDays / 30)} months ago`;
 }
 
+function getArticleTypeIcon(type: string) {
+    const found = ARTICLE_TYPES.find(t => t.value === type);
+    return found?.icon || "📝";
+}
+
+function getStatusColor(status: string) {
+    const colors: Record<string, string> = {
+        planned: "bg-gray-100 text-gray-700",
+        scheduled: "bg-blue-100 text-blue-700",
+        generated: "bg-emerald-100 text-emerald-700",
+        published: "bg-green-100 text-green-700",
+        draft: "bg-gray-100 text-gray-700",
+    };
+    return colors[status] || colors.draft;
+}
+
 export default function ContentPlannerPage() {
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -169,7 +190,7 @@ export default function ContentPlannerPage() {
         cms_targets: [],
     });
     const [searchQuery, setSearchQuery] = useState("");
-    const [showCalendar, setShowCalendar] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
     const autopilotRunLock = useRef(false);
 
     const searchParams = useSearchParams();
@@ -382,6 +403,12 @@ export default function ContentPlannerPage() {
         }
     };
 
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
     const filteredArticles = articles.filter(article =>
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.keyword?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -428,6 +455,72 @@ export default function ContentPlannerPage() {
             </header>
 
             <div className="p-8">
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <button
+                            onClick={prevMonth}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                            {MONTHS[currentMonth]} {currentYear}
+                        </h2>
+                        <button
+                            onClick={nextMonth}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-2">
+                        {DAYS.map(day => (
+                            <div key={day} className="text-xs font-medium text-gray-500 text-center py-2">
+                                {day}
+                            </div>
+                        ))}
+                        {Array.from({ length: 35 }, (_, i) => {
+                            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                            const dayOfMonth = i - (firstDay === 0 ? 6 : firstDay - 1) + 1;
+                            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                            const isValidDay = dayOfMonth > 0 && dayOfMonth <= daysInMonth;
+                            const date = isValidDay ? new Date(currentYear, currentMonth, dayOfMonth) : null;
+                            const dateStr = date?.toISOString().split("T")[0];
+                            const dayArticles = isValidDay ? articles.filter(a => a.scheduled_date === dateStr) : [];
+
+                            return (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "min-h-[80px] rounded-lg border p-2",
+                                        isValidDay ? "bg-white border-gray-200 hover:border-emerald-300 cursor-pointer" : "bg-gray-50 border-transparent"
+                                    )}
+                                    onClick={() => isValidDay && date && handleAddArticle(date)}
+                                >
+                                    {isValidDay && (
+                                        <>
+                                            <div className="text-sm font-medium text-gray-900 mb-1">{dayOfMonth}</div>
+                                            {dayArticles.length > 0 && (
+                                                <div className="space-y-1">
+                                                    {dayArticles.slice(0, 2).map(article => (
+                                                        <div key={article.id} className="text-xs text-gray-600 truncate bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                            {article.title}
+                                                        </div>
+                                                    ))}
+                                                    {dayArticles.length > 2 && (
+                                                        <div className="text-xs text-gray-500">+{dayArticles.length - 2} more</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                     <div className="p-6 border-b border-gray-200">
                         <div className="flex items-center justify-between">
@@ -444,15 +537,6 @@ export default function ContentPlannerPage() {
                                 <Button variant="outline" size="sm" className="gap-2">
                                     <Filter className="h-4 w-4" />
                                     Filter
-                                </Button>
-                                <Button
-                                    onClick={() => setShowCalendar(!showCalendar)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2"
-                                >
-                                    <Calendar className="h-4 w-4" />
-                                    {showCalendar ? "Hide Calendar" : "Show Calendar"}
                                 </Button>
                             </div>
                         </div>
@@ -569,74 +653,6 @@ export default function ContentPlannerPage() {
                         </div>
                     </div>
                 </div>
-
-                {showCalendar && (
-                    <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <button
-                                onClick={prevMonth}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                {MONTHS[currentMonth]} {currentYear}
-                            </h2>
-                            <button
-                                onClick={nextMonth}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-7 gap-2">
-                            {DAYS.map(day => (
-                                <div key={day} className="text-xs font-medium text-gray-500 text-center py-2">
-                                    {day}
-                                </div>
-                            ))}
-                            {Array.from({ length: 35 }, (_, i) => {
-                                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-                                const dayOfMonth = i - (firstDay === 0 ? 6 : firstDay - 1) + 1;
-                                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                                const isValidDay = dayOfMonth > 0 && dayOfMonth <= daysInMonth;
-                                const date = isValidDay ? new Date(currentYear, currentMonth, dayOfMonth) : null;
-                                const dateStr = date?.toISOString().split("T")[0];
-                                const dayArticles = isValidDay ? articles.filter(a => a.scheduled_date === dateStr) : [];
-
-                                return (
-                                    <div
-                                        key={i}
-                                        className={cn(
-                                            "min-h-[80px] rounded-lg border p-2",
-                                            isValidDay ? "bg-white border-gray-200 hover:border-emerald-300 cursor-pointer" : "bg-gray-50 border-transparent"
-                                        )}
-                                        onClick={() => isValidDay && date && handleAddArticle(date)}
-                                    >
-                                        {isValidDay && (
-                                            <>
-                                                <div className="text-sm font-medium text-gray-900 mb-1">{dayOfMonth}</div>
-                                                {dayArticles.length > 0 && (
-                                                    <div className="space-y-1">
-                                                        {dayArticles.slice(0, 2).map(article => (
-                                                            <div key={article.id} className="text-xs text-gray-600 truncate bg-emerald-50 px-1.5 py-0.5 rounded">
-                                                                {article.title}
-                                                            </div>
-                                                        ))}
-                                                        {dayArticles.length > 2 && (
-                                                            <div className="text-xs text-gray-500">+{dayArticles.length - 2} more</div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
             </div>
 
             {showAddModal && (
