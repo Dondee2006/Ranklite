@@ -1,30 +1,24 @@
 import Link from "next/link";
-import { Search, Calendar, Rocket, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const steps = [
   {
-    icon: Search,
     number: "01",
-    title: "Deep analysis of your niche",
-    description: "We explore your market, competitors, and target audience to discover high-potential keywords with low competition.",
-    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-1765614287806.png?width=8000&height=8000&resize=contain",
-    gradient: "from-[#22C55E] to-[#16A34A]",
+    title: "AI creates & publishes content",
+    description: "Ranklite generates a 30-day SEO content plan and auto-publishes optimized blog posts directly to your site.",
+    subtext: "No writing. No scheduling. No CMS headaches.",
   },
   {
-    icon: Calendar,
     number: "02",
-    title: "Strategic 30-day content plan",
-    description: "Get a data-driven content calendar where each day targets a key phrase with maximum ranking potential.",
-    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Untitled-design-2-1765617598994.png?width=8000&height=8000&resize=contain",
-    gradient: "from-[#10B981] to-[#059669]",
+    title: "Every post gets promoted with backlinks",
+    description: "Each article is supported with automated, dofollow backlinks from real websites.",
+    subtext: "Not random links. Not exchanges. Backlinks tied directly to ranking pages.",
   },
   {
-    icon: Rocket,
     number: "03",
-    title: "Autopilot content generation",
-    description: "We create and publish SEO-optimized articles daily. Your blog grows automatically while you focus on business.",
-    image: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/images/how-3_f897c9e1-10.webp",
-    gradient: "from-[#22C55E] to-[#10B981]",
+    title: "QA, indexing & performance tracking",
+    description: "We verify links, check indexing, flag failures, and track quality — so you're never guessing if SEO \"worked\".",
+    subtext: "SEO with receipts.",
   },
 ];
 
@@ -75,23 +69,14 @@ export default function HowItWorks() {
                 {step.number}
               </div>
 
-              <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${step.gradient} shadow-lg`}>
-                <step.icon className="h-5 w-5 text-white" />
-              </div>
-
-              <div className="relative mb-5 overflow-hidden rounded-xl">
-                <img
-                  src={step.image}
-                  alt={step.title}
-                  className="aspect-[4/3] h-auto w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-
-              <h4 className="mb-2 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
+              <h4 className="mb-3 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
                 {step.title}
               </h4>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
+              <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
                 {step.description}
+              </p>
+              <p className="text-[14px] font-medium leading-relaxed text-[#22C55E]">
+                {step.subtext}
               </p>
             </div>
           ))}
