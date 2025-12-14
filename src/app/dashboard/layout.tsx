@@ -16,6 +16,7 @@ import {
   Flag,
   ClipboardList,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -58,6 +59,7 @@ const NAV_SECTIONS = [
     label: "CONFIGURATION",
     items: [
       { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
+      { id: "billing", label: "Billing", href: "/dashboard/billing", icon: CreditCard },
       { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
     ],
   },

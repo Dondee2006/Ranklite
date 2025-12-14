@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UpgradeCTA } from "@/components/dashboard/upgrade-cta";
 
 interface Activity {
   id: string;
@@ -60,6 +61,10 @@ export default function DashboardOverviewPage() {
       </header>
 
       <div className="p-8">
+        <div className="mb-6">
+          <UpgradeCTA />
+        </div>
+        
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
