@@ -10,10 +10,22 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { data: sites } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    const siteId = sites?.[0]?.id;
+
+    if (!siteId) {
+      return NextResponse.json({ posts: [] });
+    }
+
     const { data: articles } = await supabase
       .from("articles")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("site_id", siteId)
       .order("created_at", { ascending: false })
       .limit(50);
 
@@ -32,6 +44,6 @@ export async function GET() {
     return NextResponse.json({ posts });
   } catch (error) {
     console.error("Error loading posts:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ posts: [] });
   }
 }
