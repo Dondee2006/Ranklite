@@ -21,8 +21,8 @@ function RankliteLogo() {
           top: '-6px',
         }}
       >
-        <path d="M20 12L20 8L24 8" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
-        <path d="M28 16L28 12L32 12" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
+        <path d="M12 20L12 24L8 24" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
+        <path d="M4 16L4 20L0 20" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
       </svg>
     </div>
   );
