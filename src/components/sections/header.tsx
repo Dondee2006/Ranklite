@@ -11,7 +11,8 @@ function RankliteLogo() {
         ranklite
       </span>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-        <path d="M7 17L17 7M17 7H9M17 7V15" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M13 11V7H17" stroke="#10B981" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter"/>
+        <path d="M17 15V11H21" stroke="#10B981" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter"/>
       </svg>
     </div>
   );
