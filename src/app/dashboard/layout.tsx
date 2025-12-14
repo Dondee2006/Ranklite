@@ -3,112 +3,78 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import {
-  Settings,
+  LayoutDashboard,
+  RefreshCw,
   FileText,
-  Calendar,
-  History,
-  Sliders,
   Link2,
-  ArrowLeftRight,
-  Wrench,
-  Sparkles,
-  Users,
-  Link as LinkIcon,
-  ChevronDown,
-  ChevronUp,
-  Sun,
-  Moon,
-  Pencil,
-  Send,
+  ShieldCheck,
+  TrendingUp,
+  FileBarChart,
+  Plug,
+  Settings,
+  Flag,
+  ClipboardList,
   LogOut,
-  Globe,
-  Check,
-  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { createClient } from "@/lib/supabase/client";
 
-const NAV_ITEMS = [
+const NAV_SECTIONS = [
   {
-    id: "site-selector",
-    type: "site-selector",
-  },
-  {
-    id: "general-settings",
-    label: "General Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
-  {
-    id: "articles",
-    label: "Articles",
-    icon: FileText,
-    expandable: true,
-    children: [
-      { id: "content-planner", label: "Content Planner", href: "/dashboard/content-planner", icon: Calendar },
-      { id: "content-history", label: "Content History", href: "/dashboard/content-history", icon: History },
-      { id: "articles-settings", label: "Articles Settings", href: "/dashboard/articles-settings", icon: Sliders },
-      { id: "integrations", label: "Integrations", href: "/dashboard/integrations", icon: Link2 },
-      { id: "linking-config", label: "Linking Configuration", href: "/dashboard/linking-configuration", icon: LinkIcon },
-      { id: "backlink-generator", label: "Backlink Generator", href: "/dashboard/backlink-generator", icon: ArrowLeftRight },
+    id: "overview",
+    label: "OVERVIEW",
+    items: [
+      { id: "dashboard", label: "Dashboard", href: "/dashboard/overview", icon: LayoutDashboard },
     ],
   },
   {
-    id: "seo-tools",
-    label: "SEO Tools",
-    href: "/dashboard/seo-tools",
-    icon: Wrench,
-    badge: "Beta",
+    id: "seo-engine",
+    label: "SEO ENGINE",
+    items: [
+      { id: "seo-cycle", label: "SEO Cycle", href: "/dashboard/seo-cycle", icon: RefreshCw },
+      { id: "content", label: "Content", href: "/dashboard/content", icon: FileText },
+      { id: "backlinks", label: "Backlinks", href: "/dashboard/backlinks", icon: Link2 },
+      { id: "qa-validation", label: "QA & Validation", href: "/dashboard/qa-validation", icon: ShieldCheck },
+    ],
   },
   {
-    id: "add-ons",
-    label: "Add-ons",
-    icon: Sparkles,
-    expandable: true,
-    children: [
-      { id: "human-curated", label: "Human Curated Service", href: "/dashboard/human-curated", icon: Users, badge: "Beta" },
-      { id: "backlinks", label: "Get 350+ Backlinks", href: "/dashboard/backlinks", icon: LinkIcon },
+    id: "performance",
+    label: "PERFORMANCE",
+    items: [
+      { id: "performance", label: "Performance", href: "/dashboard/performance", icon: TrendingUp },
+      { id: "reports", label: "Reports", href: "/dashboard/reports", icon: FileBarChart },
+    ],
+  },
+  {
+    id: "resources",
+    label: "RESOURCES",
+    items: [
+      { id: "integrations", label: "Integrations", href: "/dashboard/integrations", icon: Plug },
+    ],
+  },
+  {
+    id: "configuration",
+    label: "CONFIGURATION",
+    items: [
+      { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
+      { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
+    ],
+  },
+  {
+    id: "audit",
+    label: "AUDIT",
+    items: [
+      { id: "audit-logs", label: "Audit Logs", href: "/dashboard/audit-logs", icon: ClipboardList },
     ],
   },
 ];
-
-function getWebsiteLogo(url: string): string {
-  if (!url) return "";
-  const domain = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-}
-
-function RankliteLogo() {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-md shadow-green-500/20">
-        <Send className="h-3.5 w-3.5 text-white" />
-        <div className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#10B981] ring-2 ring-white" />
-      </div>
-      <span className="text-lg font-bold tracking-tight text-foreground">
-        Ranklite
-      </span>
-    </div>
-  );
-}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const [expandedSections, setExpandedSections] = useState<string[]>(["articles", "add-ons"]);
   const [userEmail, setUserEmail] = useState("");
-  const [siteName, setSiteName] = useState("My Site");
-  const [siteUrl, setSiteUrl] = useState("");
-  const [logoError, setLogoError] = useState(false);
-  const [allSites, setAllSites] = useState<Array<{ id: string; name: string; url: string }>>([]);
-  const [currentSiteId, setCurrentSiteId] = useState("");
-  const [sitePopoverOpen, setSitePopoverOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     async function loadUserData() {
@@ -116,65 +82,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (user) {
         setUserEmail(user.email || "");
       }
-
-      try {
-        const response = await fetch("/api/sites");
-        const data = await response.json();
-        if (data.site) {
-          setSiteName(data.site.name || "My Site");
-          setSiteUrl(data.site.url || "");
-          setCurrentSiteId(data.site.id || "");
-          
-          // Fetch all sites for the dropdown
-          const sitesResponse = await supabase
-            .from("sites")
-            .select("id, name, url")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false });
-          
-          if (sitesResponse.data) {
-            setAllSites(sitesResponse.data);
-          }
-        } else {
-          // If no site found, redirect to onboarding
-          router.push("/onboarding");
-        }
-      } catch (error) {
-        console.error("Failed to load site:", error);
-      }
     }
     loadUserData();
-  }, [supabase.auth, router]);
-
-  const handleSiteSwitch = async (siteId: string) => {
-    const selectedSite = allSites.find(s => s.id === siteId);
-    if (selectedSite) {
-      setCurrentSiteId(siteId);
-      setSiteName(selectedSite.name);
-      setSiteUrl(selectedSite.url);
-      setLogoError(false);
-      setSitePopoverOpen(false);
-      
-      // Update the default site in the backend if needed
-      try {
-        await fetch("/api/sites", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ siteId }),
-        });
-        
-        // Refresh the page to load data for the new site
-        router.refresh();
-      } catch (error) {
-        console.error("Failed to switch site:", error);
-      }
-    }
-  };
-
-  const handleAddNewSite = () => {
-    setSitePopoverOpen(false);
-    router.push("/onboarding?action=add");
-  };
+  }, [supabase.auth]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -182,258 +92,72 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.refresh();
   };
 
-  const toggleSection = (id: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
-
   const isActive = (href: string) => pathname === href;
-  const isInactive = (id: string) => id === "seo-tools" || id === "human-curated" || id === "backlinks";
 
   return (
     <div className="flex min-h-screen bg-[#FAFAFA]">
-      <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-border bg-white">
-        <div className="flex items-center justify-between px-5 py-4">
-          <Link href="/dashboard">
-            <RankliteLogo />
-          </Link>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-gray-100 dark:hover:bg-neutral-800"
-          >
-            {theme === "dark" ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
-          </button>
+      <aside className="fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-[#F7F7F7] border-r border-[#E5E5E5]">
+        <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-md bg-[#10B981] flex items-center justify-center">
+              <span className="text-white text-xs font-bold">O</span>
+            </div>
+            <span className="text-sm font-semibold text-[#1A1A1A]">Admin</span>
+          </div>
         </div>
 
-        <div className="px-3">
-          <Popover open={sitePopoverOpen} onOpenChange={setSitePopoverOpen}>
-            <PopoverTrigger asChild>
-              <button className="flex w-full items-center justify-between rounded-xl bg-white border border-border px-3 py-2.5 text-left hover:bg-gray-50">
-                <div className="flex items-center gap-2">
-                  {siteUrl && !logoError ? (
-                    <img
-                      src={getWebsiteLogo(siteUrl)}
-                      alt=""
-                      className="h-6 w-6 rounded"
-                      onError={() => setLogoError(true)}
-                    />
-                  ) : (
-                    <div className="flex h-6 w-6 items-center justify-center rounded bg-gray-100 text-xs font-bold text-gray-600">
-                      {siteName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{siteName}</div>
-                  </div>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[234px] p-2" align="start">
-              <div className="space-y-1">
-                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                  Your Sites
-                </div>
-                {allSites.map((site) => (
-                  <button
-                    key={site.id}
-                    onClick={() => handleSiteSwitch(site.id)}
-                    className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img
-                        src={getWebsiteLogo(site.url)}
-                        alt=""
-                        className="h-5 w-5 rounded flex-shrink-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-foreground truncate">
-                          {site.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground truncate">
-                          {site.url.replace(/^https?:\/\//, '')}
-                        </div>
-                      </div>
-                    </div>
-                    {currentSiteId === site.id && (
-                      <Check className="h-4 w-4 text-[#16A34A] flex-shrink-0" />
-                    )}
-                  </button>
-                ))}
-                <div className="border-t border-border my-1 pt-1">
-                  <button
-                    onClick={handleAddNewSite}
-                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-[#16A34A] hover:bg-green-50 transition-colors"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add New Site
-                  </button>
-                </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.id} className="mb-6">
+              <div className="px-2 mb-2">
+                <span className="text-[10px] font-semibold text-[#6B7280] tracking-wider">
+                  {section.label}
+                </span>
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <nav className="mt-4 flex-1 overflow-y-auto px-3">
-          {NAV_ITEMS.filter(item => item.type !== "site-selector").map((item) => (
-            <div key={item.id}>
-              {item.expandable ? (
-                <>
-                  <button
-                    onClick={() => toggleSection(item.id)}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon && <item.icon className="h-4 w-4 text-muted-foreground" />}
-                      {item.label}
-                    </div>
-                    {expandedSections.includes(item.id) ? (
-                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </button>
-                  {expandedSections.includes(item.id) && item.children && (
-                    <div className="ml-4 space-y-0.5">
-                      {item.children.map((child) => (
-                        isInactive(child.id) ? (
-                          <button
-                            key={child.id}
-                            onClick={(e) => e.preventDefault()}
-                            className={cn(
-                              "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-not-allowed opacity-50",
-                              "text-muted-foreground"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              {child.icon && <child.icon className="h-4 w-4" />}
-                              {child.label}
-                            </div>
-                            {child.badge && (
-                              <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                                {child.badge}
-                              </span>
-                            )}
-                          </button>
-                        ) : (
-                          <Link
-                            key={child.id}
-                            href={child.href}
-                            className={cn(
-                              "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                              isActive(child.href)
-                                ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
-                                : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              {child.icon && <child.icon className="h-4 w-4" />}
-                              {child.label}
-                            </div>
-                            {child.badge && (
-                              <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                                {child.badge}
-                              </span>
-                            )}
-                          </Link>
-                        )
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                isInactive(item.id) ? (
-                  <button
-                    onClick={(e) => e.preventDefault()}
-                    className={cn(
-                      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-not-allowed opacity-50",
-                      "text-muted-foreground"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon && <item.icon className="h-4 w-4" />}
-                      {item.label}
-                    </div>
-                    {item.badge && (
-                      <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                ) : (
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
                   <Link
-                    href={item.href || "#"}
+                    key={item.id}
+                    href={item.href}
                     className={cn(
-                      "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                      isActive(item.href || "")
-                        ? "bg-[#F0FDF4] font-medium text-[#16A34A]"
-                        : "text-muted-foreground hover:bg-gray-50 hover:text-foreground"
+                      "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                      isActive(item.href)
+                        ? "bg-white text-[#1A1A1A] font-medium shadow-sm"
+                        : "text-[#6B7280] hover:text-[#1A1A1A] hover:bg-white/50"
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      {item.icon && <item.icon className="h-4 w-4" />}
-                      {item.label}
-                    </div>
-                    {item.badge && (
-                      <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                        {item.badge}
-                      </span>
-                    )}
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
                   </Link>
-                )
-              )}
+                ))}
+              </div>
             </div>
           ))}
         </nav>
 
-        <div className="border-t border-border p-3">
-          <Button className="w-full justify-center gap-2 rounded-xl border-2 border-[#F97316] bg-white py-5 text-[#F97316] hover:bg-orange-50">
-            <Sparkles className="h-4 w-4" />
-            Upgrade To Premium
-          </Button>
-        </div>
-
-        <div className="border-t border-border px-5 py-3">
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Pencil className="h-3.5 w-3.5" />
-              <span><strong className="font-semibold text-foreground">30</strong> Articles/mo</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <LinkIcon className="h-3.5 w-3.5" />
-              <span><strong className="font-semibold text-foreground">216</strong> Backlink Credits</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-border p-3">
-          <div className="flex items-center justify-between rounded-lg px-2 py-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E] text-sm font-medium text-white">
+        <div className="border-t border-[#E5E5E5] p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#10B981] to-[#059669] text-xs font-semibold text-white flex-shrink-0">
                 {userEmail.charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm text-foreground truncate max-w-[120px]">{userEmail}</span>
+              <span className="text-xs text-[#6B7280] truncate">{userEmail.split('@')[0]}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-1 text-[#6B7280] hover:text-[#DC2626] hover:bg-red-50 rounded transition-colors flex-shrink-0"
               title="Logout"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-3.5 w-3.5" />
             </button>
+          </div>
+          <div className="mt-2 px-2 py-1 rounded-md bg-[#DBEAFE] text-center">
+            <span className="text-[10px] font-medium text-[#1E40AF]">Superadmin</span>
           </div>
         </div>
       </aside>
 
-      <main className="ml-[260px] flex-1">
+      <main className="ml-[200px] flex-1">
         {children}
       </main>
     </div>
