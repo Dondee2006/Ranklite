@@ -1,6 +1,6 @@
 "use client";
 
-import { RankliteOnboarding } from "@/components/onboarding/ranklite-onboarding";
+import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
@@ -32,12 +32,12 @@ function OnboardingContent() {
     checkExistingCycle();
   }, [supabase, router]);
 
-  return <RankliteOnboarding />;
+  return <OnboardingWizard />;
 }
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#FAFFFE] via-[#F0FDF4] to-[#E8F5E9]"><div className="text-lg text-gray-600">Loading...</div></div>}>
+    <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-[#F8FAFC]"><div className="text-lg text-gray-600">Loading...</div></div>}>
       <OnboardingContent />
     </Suspense>
   );

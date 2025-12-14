@@ -65,6 +65,39 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     }, { onConflict: "site_id" });
 
+    const { data: starterPlan } = await supabase
+      .from("plans")
+      .select("id")
+      .eq("name", "Starter")
+      .single();
+
+    if (starterPlan) {
+      await supabase.from("user_plans").insert({
+        user_id: user.id,
+        plan_id: starterPlan.id,
+        status: "active",
+        start_date: new Date().toISOString(),
+      });
+    }
+
+    const nextRunDate = new Date();
+    nextRunDate.setDate(nextRunDate.getDate() + 1);
+    
+    await supabase.from("seo_cycles").insert({
+      user_id: user.id,
+      site_id: site.id,
+      name: "SEO Cycle",
+      status: "active",
+      posts_per_month: 10,
+      backlinks_per_post: 20,
+      max_backlinks_per_month: 200,
+      min_dr_for_backlinks: 30,
+      daily_automation_limit: 10,
+      qa_validation_enabled: true,
+      auto_publish: false,
+      next_run_at: nextRunDate.toISOString(),
+    });
+
     await seedThirtyDayPlan(supabase, site, body);
 
     await supabase.from("backlink_campaigns").insert({
