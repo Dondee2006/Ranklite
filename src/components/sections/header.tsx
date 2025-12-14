@@ -19,7 +19,7 @@ function RankliteLogo() {
         style={{ 
           right: '-4px',
           top: '-12px',
-          transform: 'rotate(-135deg)'
+          transform: 'rotate(45deg)'
         }}
       >
         <path d="M13 11V7H17" stroke="#10B981" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter"/>
