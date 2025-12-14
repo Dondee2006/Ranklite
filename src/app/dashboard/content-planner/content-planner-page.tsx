@@ -79,6 +79,8 @@ interface Article {
     cms_exports: object;
     published_at?: string;
     featured_image?: string;
+    backlinks_status?: string;
+    backlinks_count?: number;
 }
 
 interface AutopilotSettings {
@@ -99,24 +101,34 @@ function getArticleTypeLabel(type: string) {
 
 function getStatusBadgeStyle(status: string) {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
-        planned: { bg: "bg-gray-100", text: "text-gray-700", label: "Free" },
-        scheduled: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
-        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
-        published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
-        draft: { bg: "bg-gray-100", text: "text-gray-700", label: "Free" },
+        planned: { bg: "bg-blue-100", text: "text-blue-700", label: "Planned" },
+        generated: { bg: "bg-purple-100", text: "text-purple-700", label: "Generated" },
+        qa_validated: { bg: "bg-amber-100", text: "text-amber-700", label: "QA Validated" },
+        published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Published" },
+        backlinks_queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Backlinks Queued" },
     };
-    return styles[status] || styles.draft;
+    return styles[status] || styles.planned;
 }
 
 function getStatusIndicator(status: string) {
     const indicators: Record<string, { bg: string; text: string; label: string }> = {
-        planned: { bg: "bg-gray-100", text: "text-gray-700", label: "Active" },
-        scheduled: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Active" },
-        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Active" },
-        published: { bg: "bg-green-100", text: "text-green-700", label: "Active" },
-        draft: { bg: "bg-gray-100", text: "text-gray-700", label: "Active" },
+        planned: { bg: "bg-blue-100", text: "text-blue-700", label: "Planned" },
+        generated: { bg: "bg-purple-100", text: "text-purple-700", label: "Generated" },
+        qa_validated: { bg: "bg-amber-100", text: "text-amber-700", label: "QA Validated" },
+        published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Published" },
+        backlinks_queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Backlinks Queued" },
     };
-    return indicators[status] || indicators.draft;
+    return indicators[status] || indicators.planned;
+}
+
+function getBacklinksStatusBadge(status?: string) {
+    const styles: Record<string, { bg: string; text: string; label: string }> = {
+        pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pending" },
+        queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Queued" },
+        in_progress: { bg: "bg-yellow-100", text: "text-yellow-700", label: "In Progress" },
+        completed: { bg: "bg-green-100", text: "text-green-700", label: "Completed" },
+    };
+    return styles[status || 'pending'] || styles.pending;
 }
 
 function getInitials(title: string) {
@@ -147,10 +159,10 @@ function getArticleTypeIcon(type: string) {
 
 function getStatusColor(status: string) {
     const colors: Record<string, string> = {
-        planned: "bg-gray-100 text-gray-700",
-        scheduled: "bg-blue-100 text-blue-700",
-        generated: "bg-emerald-100 text-emerald-700",
-        published: "bg-green-100 text-green-700",
+        planned: "bg-blue-100 text-blue-700",
+        generated: "bg-purple-100 text-purple-700",
+        qa_validated: "bg-amber-100 text-amber-700",
+        published: "bg-emerald-100 text-emerald-700",
         draft: "bg-gray-100 text-gray-700",
     };
     return colors[status] || colors.draft;
@@ -540,22 +552,22 @@ export default function ContentPlannerPage() {
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Article
+                                            Title
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Keyword
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Type
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date
+                                            Publish Date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Backlinks Status
                                         </th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
+                                            CMS Export / Edit
                                         </th>
                                     </tr>
                                 </thead>
@@ -573,23 +585,14 @@ export default function ContentPlannerPage() {
                                     ) : (
                                         filteredArticles.map((article) => {
                                             const statusBadge = getStatusBadgeStyle(article.status);
-                                            const statusIndicator = getStatusIndicator(article.status);
-                                            const initials = getInitials(article.title);
+                                            const backlinksStatusBadge = getBacklinksStatusBadge(article.backlinks_status);
 
                                             return (
                                                 <tr key={article.id} className="hover:bg-gray-50 transition-colors">
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                                                <span className="text-sm font-semibold text-gray-600">{initials}</span>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                                                                    {article.title}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">{article.search_intent || "informational"}</p>
-                                                            </div>
-                                                        </div>
+                                                        <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                                            {article.title}
+                                                        </p>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className="text-sm text-teal-600 font-medium">
@@ -601,26 +604,42 @@ export default function ContentPlannerPage() {
                                                             {statusBadge.label}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusIndicator.bg, statusIndicator.text)}>
-                                                            {statusIndicator.label}
-                                                        </span>
-                                                    </td>
                                                     <td className="px-6 py-4 text-sm text-gray-500">
-                                                        {formatRelativeDate(article.scheduled_date)}
+                                                        {new Date(article.scheduled_date).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={cn("px-3 py-1 rounded-full text-xs font-medium", backlinksStatusBadge.bg, backlinksStatusBadge.text)}>
+                                                                {backlinksStatusBadge.label}
+                                                            </span>
+                                                            {article.backlinks_count ? (
+                                                                <span className="text-xs text-gray-500">({article.backlinks_count})</span>
+                                                            ) : null}
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <Button
-                                                            onClick={() => {
-                                                                setSelectedArticle(article);
-                                                                setShowArticleDetail(true);
-                                                            }}
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
-                                                        >
-                                                            View
-                                                        </Button>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            {article.cms_exports && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                                                >
+                                                                    <Download className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                onClick={() => {
+                                                                    setSelectedArticle(article);
+                                                                    setShowArticleDetail(true);
+                                                                }}
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                                                            >
+                                                                <Edit3 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
