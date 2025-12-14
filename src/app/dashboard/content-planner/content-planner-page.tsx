@@ -8,30 +8,22 @@ import {
     ChevronRight,
     Loader2,
     X,
-    Settings,
     Calendar,
     FileText,
     Zap,
     Edit3,
     Trash2,
-    Eye,
-    Download,
-    RefreshCw,
-    GripVertical,
-    Target,
     Clock,
-    BarChart3,
-    ExternalLink,
-    Link,
-    Image,
-    Copy,
+    RefreshCw,
     Check,
+    Filter,
+    Search,
+    ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
-import { WorkflowGuide } from "@/components/dashboard/workflow-guide";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -95,54 +87,52 @@ interface AutopilotSettings {
     cms_targets: string[];
 }
 
-function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfMonth(year: number, month: number) {
-    const day = new Date(year, month, 1).getDay();
-    return day === 0 ? 6 : day - 1;
-}
-
-function getWeekdayLabel(year: number, month: number, day: number) {
-    return new Date(year, month, day).toLocaleDateString("en-US", { weekday: "short" });
-}
-
 function getArticleTypeLabel(type: string) {
     const found = ARTICLE_TYPES.find(t => t.value === type);
     return found?.label || "Article";
 }
 
-function getArticleTone(status: string) {
-    const tones: Record<string, string> = {
-        published: "bg-gradient-to-b from-[#f1e9ff] to-white border-purple-200",
-        generated: "bg-gradient-to-b from-[#f1e9ff] to-white border-purple-200",
-        scheduled: "bg-gradient-to-b from-[#f1e9ff] to-white border-purple-200",
-        planned: "bg-slate-50 border-slate-200",
-        draft: "bg-slate-50 border-slate-200",
+function getStatusBadgeStyle(status: string) {
+    const styles: Record<string, { bg: string; text: string; label: string }> = {
+        planned: { bg: "bg-gray-100", text: "text-gray-700", label: "Free" },
+        scheduled: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
+        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
+        published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Paid" },
+        draft: { bg: "bg-gray-100", text: "text-gray-700", label: "Free" },
     };
-    return tones[status] || tones.planned;
+    return styles[status] || styles.draft;
 }
 
-function getStatusColor(status: string) {
-    const colors: Record<string, string> = {
-        planned: "bg-gray-100 text-gray-700",
-        scheduled: "bg-blue-100 text-blue-700",
-        generated: "bg-amber-100 text-amber-700",
-        published: "bg-green-100 text-green-700",
-        draft: "bg-slate-100 text-slate-600",
+function getStatusIndicator(status: string) {
+    const indicators: Record<string, { bg: string; text: string; label: string }> = {
+        planned: { bg: "bg-gray-100", text: "text-gray-700", label: "Active" },
+        scheduled: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Active" },
+        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Active" },
+        published: { bg: "bg-green-100", text: "text-green-700", label: "Active" },
+        draft: { bg: "bg-gray-100", text: "text-gray-700", label: "Active" },
     };
-    return colors[status] || colors.draft;
+    return indicators[status] || indicators.draft;
 }
 
-function getArticleTypeIcon(type: string) {
-    const found = ARTICLE_TYPES.find(t => t.value === type);
-    return found?.icon || "📄";
+function getInitials(title: string) {
+    const words = title.trim().split(" ");
+    if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return title.slice(0, 2).toUpperCase();
 }
 
-function getArticlePreview(article: Article) {
-    const source = article.meta_description || article.markdown_content || article.content || "";
-    return source.replace(/[#*]/g, "").slice(0, 140);
+function formatRelativeDate(dateStr: string) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "today";
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 30) return `${diffDays} days ago`;
+    if (diffDays < 60) return "about 1 month ago";
+    return `${Math.floor(diffDays / 30)} months ago`;
 }
 
 export default function ContentPlannerPage() {
@@ -153,7 +143,6 @@ export default function ContentPlannerPage() {
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [showArticleDetail, setShowArticleDetail] = useState(false);
     const [showAutopilotModal, setShowAutopilotModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -179,10 +168,10 @@ export default function ContentPlannerPage() {
         tone: "natural",
         cms_targets: [],
     });
-    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showCalendar, setShowCalendar] = useState(false);
     const autopilotRunLock = useRef(false);
 
-    // Welcome Modal State
     const searchParams = useSearchParams();
     const router = useRouter();
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -191,7 +180,6 @@ export default function ContentPlannerPage() {
     useEffect(() => {
         if (searchParams.get("welcome") === "true") {
             setShowWelcomeModal(true);
-            // Simulate loading delay for effect
             const timer = setTimeout(() => {
                 setWelcomeStep("success");
             }, 3000);
@@ -331,21 +319,6 @@ export default function ContentPlannerPage() {
         }
     }
 
-    async function updateArticle(articleId: string, updates: Partial<Article>) {
-        try {
-            const response = await fetch(`/api/articles/${articleId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updates),
-            });
-            if (response.ok) {
-                loadArticles();
-            }
-        } catch (error) {
-            console.error("Failed to update article:", error);
-        }
-    }
-
     async function deleteArticle(articleId: string) {
         try {
             const response = await fetch(`/api/articles/${articleId}`, {
@@ -376,40 +349,8 @@ export default function ContentPlannerPage() {
         }
     }
 
-    function copyToClipboard(text: string, id: string) {
-        navigator.clipboard.writeText(text);
-        setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
-    }
-
-    const plannerStartDay = today.getFullYear() === currentYear && today.getMonth() === currentMonth
-        ? today.getDate()
-        : 1;
-    const plannerStart = new Date(currentYear, currentMonth, plannerStartDay);
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const todayKey = new Date().toISOString().split("T")[0];
-
-    const totalPlannerDays = Math.max(0, daysInMonth - plannerStartDay + 1);
-    const plannerDays = Array.from({ length: totalPlannerDays }, (_, i) => {
-        const date = new Date(plannerStart);
-        date.setDate(plannerStart.getDate() + i);
-        return date;
-    });
-
-    const weeks: Date[][] = [];
-    for (let i = 0; i < plannerDays.length; i += 5) {
-        weeks.push(plannerDays.slice(i, i + 5));
-    }
-
-    const formatDateKey = (date: Date) => date.toISOString().split("T")[0];
-
-    const getArticlesForDate = (date: Date) => {
-        const dateStr = formatDateKey(date);
-        return articles.filter(a => a.scheduled_date === dateStr);
-    };
-
     const handleAddArticle = (date: Date) => {
-        const dateStr = formatDateKey(date);
+        const dateStr = date.toISOString().split("T")[0];
         setSelectedDate(dateStr);
         setNewArticle({
             title: "",
@@ -441,6 +382,11 @@ export default function ContentPlannerPage() {
         }
     };
 
+    const filteredArticles = articles.filter(article =>
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.keyword?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const stats = {
         total: articles.length,
         planned: articles.filter(a => a.status === "planned").length,
@@ -449,37 +395,26 @@ export default function ContentPlannerPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA]">
-            <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-8 py-5">
+        <div className="min-h-screen bg-[#F8FAFC]">
+            <header className="sticky top-0 z-30 border-b border-gray-200 bg-white px-8 py-5">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-                            <Calendar className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
-                                SEO Content Planner
-                            </h1>
-                            <p className="text-sm text-slate-500">Autopilot SEO Engine • Daily Content Generation</p>
-                        </div>
+                    <div>
+                        <h1 className="text-2xl font-semibold text-gray-900">Content Planner</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">Manage your SEO content calendar</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button
+                        <Button
                             onClick={() => setShowAutopilotModal(true)}
-                            className={cn(
-                                "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all",
-                                autopilotSettings.enabled
-                                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
-                                    : "border border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:bg-emerald-50"
-                            )}
+                            variant="outline"
+                            className="gap-2"
                         >
-                            <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "animate-pulse")} />
+                            <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-emerald-500")} />
                             Autopilot {autopilotSettings.enabled ? "ON" : "OFF"}
-                        </button>
+                        </Button>
                         <Button
                             onClick={generateMonthlyCalendar}
                             disabled={generating}
-                            className="gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2.5 text-white shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
+                            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
                         >
                             {generating ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -493,165 +428,215 @@ export default function ContentPlannerPage() {
             </header>
 
             <div className="p-8">
-                <div className="mb-6">
-                    <WorkflowGuide compact />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
-                                <FileText className="h-5 w-5 text-slate-600" />
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div className="p-6 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <div className="relative flex-1 max-w-md">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search articles..."
+                                    className="pl-9 h-10"
+                                />
                             </div>
-                            <div>
-                                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                                <p className="text-sm text-slate-500">Total Articles</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100">
-                                <Clock className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-slate-900">{stats.planned}</p>
-                                <p className="text-sm text-slate-500">Planned</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100">
-                                <RefreshCw className="h-5 w-5 text-amber-600" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-slate-900">{stats.generated}</p>
-                                <p className="text-sm text-slate-500">Generated</p>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    <Filter className="h-4 w-4" />
+                                    Filter
+                                </Button>
+                                <Button
+                                    onClick={() => setShowCalendar(!showCalendar)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    {showCalendar ? "Hide Calendar" : "Show Calendar"}
+                                </Button>
                             </div>
                         </div>
                     </div>
-                    <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100">
-                                <Check className="h-5 w-5 text-emerald-600" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-slate-900">{stats.published}</p>
-                                <p className="text-sm text-slate-500">Published</p>
-                            </div>
+
+                    {loading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
                         </div>
-                    </div>
-                </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Article
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Keyword
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Type
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredArticles.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-12 text-center">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <FileText className="h-12 w-12 text-gray-300 mb-3" />
+                                                    <p className="text-gray-500 font-medium">No articles found</p>
+                                                    <p className="text-sm text-gray-400 mt-1">Create your first content plan to get started</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredArticles.map((article) => {
+                                            const statusBadge = getStatusBadgeStyle(article.status);
+                                            const statusIndicator = getStatusIndicator(article.status);
+                                            const initials = getInitials(article.title);
 
-                <div className="flex items-center gap-3 mb-6">
-                    <button
-                        onClick={prevMonth}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
-                    >
-                        <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    <h2 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
-                        {MONTHS[currentMonth]} {currentYear}
-                    </h2>
-                    <button
-                        onClick={nextMonth}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
-                    >
-                        <ChevronRight className="h-5 w-5" />
-                    </button>
-                    {loading && <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />}
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm overflow-hidden">
-                    <div className="space-y-3 w-full">
-                        {weeks.map((week, weekIndex) => {
-                            return (
-                                <div key={weekIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                    {week.map((day, dayIndex) => {
-                                        const dayKey = formatDateKey(day);
-                                        const isToday = dayKey === todayKey;
-                                        const dayArticles = getArticlesForDate(day);
-                                        const primaryArticle = dayArticles[0];
-                                        const weekday = getWeekdayLabel(day.getFullYear(), day.getMonth(), day.getDate());
-
-                                        return (
-                                            <div
-                                                key={dayIndex}
-                                                className={cn(
-                                                    "min-h-[260px] rounded-2xl border p-3 shadow-sm transition-all overflow-hidden",
-                                                    "bg-white border-slate-200",
-                                                    isToday && "ring-2 ring-purple-200"
-                                                )}
-                                            >
-                                                <div className="flex h-full flex-col gap-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-xl font-bold text-slate-900">{day.getDate()}</span>
-                                                        <span className="text-xs font-semibold text-purple-500">{weekday}</span>
-                                                    </div>
-                                                    {primaryArticle ? (
-                                                        <div
-                                                            onClick={() => { setSelectedArticle(primaryArticle); setShowArticleDetail(true); }}
-                                                            className={cn(
-                                                                "mt-1 flex flex-1 flex-col rounded-xl border px-3 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 overflow-hidden",
-                                                                getArticleTone(primaryArticle.status)
-                                                            )}
-                                                        >
-                                                            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-purple-700">
-                                                                <span className="h-2 w-2 rounded-full bg-purple-500" />
-                                                                <span>{getArticleTypeLabel(primaryArticle.article_type)}</span>
-                                                                {primaryArticle.search_intent && (
-                                                                    <span className="text-slate-500">· {primaryArticle.search_intent.replace("-", " ")}</span>
-                                                                )}
+                                            return (
+                                                <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                                                <span className="text-sm font-semibold text-gray-600">{initials}</span>
                                                             </div>
-                                                            {primaryArticle.keyword && (
-                                                                <div className="mt-2 inline-flex max-w-full items-center">
-                                                                    <span className="truncate rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">
-                                                                        {primaryArticle.keyword}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                            <p className="mt-3 line-clamp-3 text-base font-semibold leading-tight text-slate-900">
-                                                                {primaryArticle.title}
-                                                            </p>
-                                                            <div className="mt-3 space-y-1 text-xs text-slate-700">
-                                                                <p>Volume: {primaryArticle.volume ?? "–"}</p>
-                                                                <p>Difficulty: {primaryArticle.difficulty ?? "–"}</p>
-                                                            </div>
-                                                            <div className="mt-auto pt-3">
-                                                                <Button
-                                                                    size="sm"
-                                                                    className="w-full justify-center rounded-lg bg-gradient-to-b from-slate-900 to-slate-800 text-sm font-semibold text-white shadow"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setSelectedArticle(primaryArticle);
-                                                                        setShowArticleDetail(true);
-                                                                    }}
-                                                                >
-                                                                    Visit Article
-                                                                </Button>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                                                    {article.title}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">{article.search_intent || "informational"}</p>
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleAddArticle(day)}
-                                                            className="mt-1 flex min-h-[140px] flex-1 w-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-medium text-slate-400 hover:border-purple-200 hover:text-purple-500 hover:bg-purple-50/40"
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-sm text-teal-600 font-medium">
+                                                            {article.keyword || "—"}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusBadge.bg, statusBadge.text)}>
+                                                            {statusBadge.label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusIndicator.bg, statusIndicator.text)}>
+                                                            {statusIndicator.label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                                        {formatRelativeDate(article.scheduled_date)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <Button
+                                                            onClick={() => {
+                                                                setSelectedArticle(article);
+                                                                setShowArticleDetail(true);
+                                                            }}
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                                                         >
-                                                            Add article
-                                                        </button>
-                                                    )}
-                                                    {dayArticles.length > 1 && (
-                                                        <p className="text-xs font-semibold text-slate-500">+{dayArticles.length - 1} more</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            );
-                        })}
+                                                            View
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                            <p>Showing {filteredArticles.length} of {articles.length} articles</p>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" disabled>Previous</Button>
+                                <Button variant="outline" size="sm" disabled>Next</Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                {showCalendar && (
+                    <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <button
+                                onClick={prevMonth}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <h2 className="text-lg font-semibold text-gray-900">
+                                {MONTHS[currentMonth]} {currentYear}
+                            </h2>
+                            <button
+                                onClick={nextMonth}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-7 gap-2">
+                            {DAYS.map(day => (
+                                <div key={day} className="text-xs font-medium text-gray-500 text-center py-2">
+                                    {day}
+                                </div>
+                            ))}
+                            {Array.from({ length: 35 }, (_, i) => {
+                                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                                const dayOfMonth = i - (firstDay === 0 ? 6 : firstDay - 1) + 1;
+                                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                                const isValidDay = dayOfMonth > 0 && dayOfMonth <= daysInMonth;
+                                const date = isValidDay ? new Date(currentYear, currentMonth, dayOfMonth) : null;
+                                const dateStr = date?.toISOString().split("T")[0];
+                                const dayArticles = isValidDay ? articles.filter(a => a.scheduled_date === dateStr) : [];
+
+                                return (
+                                    <div
+                                        key={i}
+                                        className={cn(
+                                            "min-h-[80px] rounded-lg border p-2",
+                                            isValidDay ? "bg-white border-gray-200 hover:border-emerald-300 cursor-pointer" : "bg-gray-50 border-transparent"
+                                        )}
+                                        onClick={() => isValidDay && date && handleAddArticle(date)}
+                                    >
+                                        {isValidDay && (
+                                            <>
+                                                <div className="text-sm font-medium text-gray-900 mb-1">{dayOfMonth}</div>
+                                                {dayArticles.length > 0 && (
+                                                    <div className="space-y-1">
+                                                        {dayArticles.slice(0, 2).map(article => (
+                                                            <div key={article.id} className="text-xs text-gray-600 truncate bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                                {article.title}
+                                                            </div>
+                                                        ))}
+                                                        {dayArticles.length > 2 && (
+                                                            <div className="text-xs text-gray-500">+{dayArticles.length - 2} more</div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {showAddModal && (
