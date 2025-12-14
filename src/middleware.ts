@@ -6,6 +6,22 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
+  const isPublicPage = 
+    request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname.startsWith("/tools") ||
+    request.nextUrl.pathname.startsWith("/docs") ||
+    request.nextUrl.pathname.startsWith("/about") ||
+    request.nextUrl.pathname.startsWith("/affiliate") ||
+    request.nextUrl.pathname.startsWith("/terms") ||
+    request.nextUrl.pathname.startsWith("/privacy") ||
+    request.nextUrl.pathname.startsWith("/cookies") ||
+    request.nextUrl.pathname.startsWith("/blog") ||
+    request.nextUrl.pathname.startsWith("/integrations");
+
+  if (isPublicPage) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -44,12 +60,6 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname === "/signup";
 
   if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && request.nextUrl.pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
