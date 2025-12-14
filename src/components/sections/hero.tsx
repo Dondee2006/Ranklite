@@ -137,7 +137,7 @@ export default function HeroSection() {
               </h1>
 
               <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-relaxed text-muted-foreground sm:text-[19px] lg:mt-8">
-                Ranklite generates backlinks by creating SEO tools and AI-discoverable content that earn links naturally. No waiting. No trading. No dependency on other users.
+                Ranklite creates a 30-day AI content plan, auto-publishes blog posts, builds high-quality backlinks to each post, and validates everything — so your site ranks without manual SEO work.
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
