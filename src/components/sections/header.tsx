@@ -2,17 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Send, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 function RankliteLogo() {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-lg shadow-green-500/20">
-        <Send className="h-5 w-5 text-white" />
-      </div>
-      <span className="text-[22px] font-bold tracking-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
-        Ranklite
+    <div className="flex items-center gap-2">
+      <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
+        ranklite
       </span>
+      <div className="flex flex-col gap-0">
+        <div className="h-[3px] w-[18px] bg-[#10B981]" />
+        <div className="h-[3px] w-[18px] translate-x-[7px] -translate-y-[1px] rotate-90 bg-[#10B981]" />
+      </div>
     </div>
   );
 }
