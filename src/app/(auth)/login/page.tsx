@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -50,11 +50,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="flex flex-col items-center mb-8">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+            <Send className="h-5 w-5 text-white" />
+          </div>
           <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-gray-900">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">R</span>
-            </div>
             Ranklite
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">Welcome back</h1>
