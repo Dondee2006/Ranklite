@@ -1,48 +1,43 @@
 "use client";
 
-import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
+import { RankliteOnboarding } from "@/components/onboarding/ranklite-onboarding";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
 function OnboardingContent() {
   const router = useRouter();
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const isAddingNewSite = searchParams.get("action") === "add";
 
   useEffect(() => {
-    async function checkSite() {
-      if (isAddingNewSite) {
-        return;
-      }
-
+    async function checkExistingCycle() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       try {
-        const { data: sites } = await supabase
-          .from("sites")
+        const { data: cycles } = await supabase
+          .from("seo_cycles")
           .select("id")
           .eq("user_id", user.id)
+          .eq("status", "active")
           .limit(1);
 
-        if (sites && sites.length > 0) {
-          router.push("/dashboard");
+        if (cycles && cycles.length > 0) {
+          router.push("/dashboard/overview");
         }
       } catch (error) {
-        console.error("Failed to check site:", error);
+        console.error("Failed to check SEO cycle:", error);
       }
     }
-    checkSite();
-  }, [supabase, router, isAddingNewSite]);
+    checkExistingCycle();
+  }, [supabase, router]);
 
-  return <OnboardingWizard isAddingNewSite={isAddingNewSite} />;
+  return <RankliteOnboarding />;
 }
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#FAFFFE] via-[#F0FDF4] to-[#E8F5E9]"><div className="text-lg text-gray-600">Loading...</div></div>}>
       <OnboardingContent />
     </Suspense>
   );
