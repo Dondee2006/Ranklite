@@ -17,6 +17,7 @@ import {
   ClipboardList,
   LogOut,
   CreditCard,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -34,6 +35,7 @@ const NAV_SECTIONS = [
     label: "SEO ENGINE",
     items: [
       { id: "seo-cycle", label: "SEO Cycle", href: "/dashboard/seo-cycle", icon: RefreshCw },
+      { id: "content-planner", label: "Content Planner", href: "/dashboard/content-planner", icon: Calendar },
       { id: "content", label: "Content", href: "/dashboard/content", icon: FileText },
       { id: "backlinks", label: "Backlinks", href: "/dashboard/backlinks", icon: Link2 },
       { id: "qa-validation", label: "QA & Validation", href: "/dashboard/qa-validation", icon: ShieldCheck },
