@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import ContentPlannerPage from "./content-planner-page";
 import { Loader2 } from "lucide-react";
+import { WorkflowGuide } from "@/components/dashboard/workflow-guide";
 
 export default function Page() {
   return (

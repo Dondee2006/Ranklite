@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
+import { WorkflowGuide } from "@/components/dashboard/workflow-guide";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -448,7 +449,7 @@ export default function ContentPlannerPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-[#FAFAFA]">
             <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-8 py-5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -492,6 +493,10 @@ export default function ContentPlannerPage() {
             </header>
 
             <div className="p-8">
+                <div className="mb-6">
+                    <WorkflowGuide compact />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
                     <div className="rounded-2xl bg-white p-5 shadow-sm border border-slate-100">
                         <div className="flex items-center gap-3">
