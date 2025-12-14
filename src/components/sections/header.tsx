@@ -10,10 +10,9 @@ function RankliteLogo() {
       <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
         ranklite
       </span>
-      <div className="flex flex-col gap-0">
-        <div className="h-[3px] w-[18px] bg-[#10B981]" />
-        <div className="h-[3px] w-[18px] translate-x-[7px] -translate-y-[1px] rotate-90 bg-[#10B981]" />
-      </div>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+        <path d="M7 17L17 7M17 7H9M17 7V15" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
     </div>
   );
 }
