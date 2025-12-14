@@ -1,36 +1,7 @@
 import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
-import { Webhook, Code, Settings, Key, ChevronRight, CheckCircle, Copy } from "lucide-react";
+import { ChevronRight, Webhook, Copy, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
-
-const steps = [
-  {
-    number: 1,
-    title: "Create a Webhook Endpoint",
-    description: "Set up an HTTPS endpoint on your server that can receive POST requests. Your endpoint must respond with a 200 status code within 5 seconds.",
-    code: `// Express.js example
-app.post('/webhooks/ranklite', async (req, res) => {
-  const event = req.body;
-  console.log('Received webhook:', event.type);
-  res.status(200).json({ received: true });
-});`,
-  },
-  {
-    number: 2,
-    title: "Add Webhook in Dashboard",
-    description: "Navigate to Settings > Webhooks in your Ranklite dashboard. Enter your endpoint URL and select which events you want to receive.",
-  },
-  {
-    number: 3,
-    title: "Verify the Webhook",
-    description: "Click 'Test Webhook' to send a test event. Your endpoint should receive a test payload and respond with a 200 status code.",
-  },
-  {
-    number: 4,
-    title: "Handle Events",
-    description: "Process incoming webhook events based on their type. Each event contains relevant data about the action that occurred.",
-  },
-];
 
 export default function WebhookSetupPage() {
   return (
@@ -49,172 +20,253 @@ export default function WebhookSetupPage() {
             Webhook Setup
           </h1>
           <p className="max-w-3xl text-[18px] leading-relaxed text-muted-foreground">
-            Configure webhooks to receive real-time notifications when articles are generated, published, or updated.
+            Configure webhooks to receive real-time notifications when content is created, published, or updated.
           </p>
+        </div>
+
+        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">What are Webhooks?</h2>
+          <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
+            Webhooks allow you to receive HTTP POST notifications whenever specific events occur in your Ranklite account. 
+            This enables real-time integrations with your own systems, automation workflows, and custom applications.
+          </p>
+          <div className="rounded-lg bg-[#F0FDF4] p-6">
+            <h3 className="mb-3 text-[18px] font-semibold text-foreground">Common Use Cases</h3>
+            <ul className="ml-6 space-y-2 text-[15px] text-muted-foreground">
+              <li>Trigger custom workflows when new content is published</li>
+              <li>Update external databases with article metadata</li>
+              <li>Send notifications to Slack, Discord, or other platforms</li>
+              <li>Sync content status across multiple systems</li>
+              <li>Track content performance in custom analytics tools</li>
+            </ul>
+          </div>
         </div>
 
         <div className="mb-16">
-          <h2 className="mb-8 font-display text-[32px] font-semibold text-foreground">Setup Steps</h2>
-          <div className="space-y-12">
-            {steps.map((step) => (
-              <div key={step.number} className="flex gap-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] text-[18px] font-bold text-white shadow-md shadow-orange-500/20">
-                  {step.number}
-                </div>
-                <div className="flex-1">
-                  <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">{step.title}</h3>
-                  <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">{step.description}</p>
-                  {step.code && (
-                    <div className="relative">
-                      <pre className="overflow-x-auto rounded-lg bg-slate-900 p-4 text-[13px] text-slate-100">
-                        <code>{step.code}</code>
-                      </pre>
-                      <button className="absolute right-3 top-3 rounded-md bg-slate-800 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white">
-                        <Copy className="h-4 w-4" />
-                      </button>
+          <h2 className="mb-8 font-display text-[32px] font-semibold text-foreground">Creating a Webhook</h2>
+          <div className="space-y-6">
+            <div className="flex gap-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] text-[18px] font-bold text-white shadow-md shadow-green-500/20">
+                1
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Navigate to Webhooks Settings</h3>
+                <p className="text-[16px] leading-relaxed text-muted-foreground">
+                  Go to your <Link href="/dashboard/settings" className="text-[#22C55E] hover:underline">Dashboard → Settings → Webhooks</Link> or access directly through the Integrations menu.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] text-[18px] font-bold text-white shadow-md shadow-green-500/20">
+                2
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Click "Add Webhook"</h3>
+                <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
+                  Click the "Add New Webhook" button to open the configuration form.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] text-[18px] font-bold text-white shadow-md shadow-green-500/20">
+                3
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Configure Webhook Details</h3>
+                <div className="rounded-lg border border-border bg-slate-50 p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="mb-2 text-[14px] font-semibold text-foreground">Endpoint URL</p>
+                      <p className="text-[14px] text-muted-foreground">Your server endpoint that will receive webhook payloads (must use HTTPS)</p>
+                      <code className="mt-2 block rounded bg-slate-100 px-3 py-2 text-[13px] text-slate-700">
+                        https://your-domain.com/api/webhooks/ranklite
+                      </code>
                     </div>
-                  )}
+                    <div>
+                      <p className="mb-2 text-[14px] font-semibold text-foreground">Events to Subscribe</p>
+                      <p className="text-[14px] text-muted-foreground">Select which events should trigger this webhook</p>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-[14px] font-semibold text-foreground">Description (Optional)</p>
+                      <p className="text-[14px] text-muted-foreground">Add a description to help identify this webhook</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Webhook Configuration</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="mb-3 text-[18px] font-semibold text-foreground">Endpoint Requirements</h3>
-              <ul className="space-y-2 text-[15px] text-muted-foreground">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 shrink-0 text-[#F59E0B]" />
-                  <span>Must be a valid HTTPS URL (HTTP not supported for security)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 shrink-0 text-[#F59E0B]" />
-                  <span>Must respond with HTTP 200-299 status code within 5 seconds</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 shrink-0 text-[#F59E0B]" />
-                  <span>Should process events asynchronously to avoid timeouts</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 shrink-0 text-[#F59E0B]" />
-                  <span>Must be publicly accessible (no localhost or private IPs)</span>
-                </li>
-              </ul>
+            <div className="flex gap-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] text-[18px] font-bold text-white shadow-md shadow-green-500/20">
+                4
+              </div>
+              <div className="flex-1">
+                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Save and Get Signing Secret</h3>
+                <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
+                  After saving, you'll receive a signing secret. Store this securely - you'll need it to verify webhook authenticity.
+                </p>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />
+                    <div className="text-[14px] text-amber-800">
+                      <strong>Important:</strong> The signing secret is shown only once. Copy it immediately and store it in a secure location like environment variables.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Event Selection</h2>
-          <p className="mb-6 text-[15px] text-muted-foreground">
-            Choose which events you want to receive. You can subscribe to all events or select specific ones:
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Webhook Payload Structure</h2>
+          <p className="mb-4 text-[16px] text-muted-foreground">
+            All webhooks send a JSON payload with this structure:
           </p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {[
-              { name: "article.generated", description: "Article content has been generated" },
-              { name: "article.published", description: "Article has been published to CMS" },
-              { name: "article.updated", description: "Article content has been updated" },
-              { name: "article.deleted", description: "Article has been deleted" },
-              { name: "integration.connected", description: "New integration connected" },
-              { name: "integration.error", description: "Integration error occurred" },
-            ].map((event) => (
-              <div key={event.name} className="rounded-lg border border-border p-4">
-                <code className="mb-2 block text-[13px] font-mono text-[#F59E0B]">{event.name}</code>
-                <p className="text-[14px] text-muted-foreground">{event.description}</p>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
+{`{
+  "id": "evt_1234567890",
+  "type": "article.published",
+  "created": 1734134400,
+  "data": {
+    "article": {
+      "id": "art_abc123",
+      "title": "Complete Guide to SEO in 2025",
+      "url": "https://example.com/seo-guide-2025",
+      "status": "published",
+      "published_at": "2025-12-14T10:00:00Z",
+      "keywords": ["seo", "search engine optimization"],
+      "word_count": 2500
+    }
+  }
+}`}
+            </pre>
           </div>
         </div>
 
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Complete Example</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="mb-3 text-[16px] font-semibold text-foreground">Express.js Webhook Handler</h3>
-              <div className="relative">
-                <pre className="overflow-x-auto rounded-lg bg-slate-900 p-4 text-[13px] text-slate-100">
-                  <code>{`const express = require('express');
-const crypto = require('crypto');
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Testing Your Webhook</h2>
+          <p className="mb-6 text-[16px] text-muted-foreground">
+            Use the test functionality to verify your endpoint is working correctly:
+          </p>
+          <ol className="space-y-4">
+            <li className="flex gap-4">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0FDF4] text-[14px] font-semibold text-[#22C55E]">1</span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Click "Test Webhook"</p>
+                <p className="text-[14px] text-muted-foreground">This sends a sample payload to your endpoint</p>
+              </div>
+            </li>
+            <li className="flex gap-4">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0FDF4] text-[14px] font-semibold text-[#22C55E]">2</span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Verify Receipt</p>
+                <p className="text-[14px] text-muted-foreground">Check your server logs to confirm the payload was received</p>
+              </div>
+            </li>
+            <li className="flex gap-4">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0FDF4] text-[14px] font-semibold text-[#22C55E]">3</span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Respond with 200</p>
+                <p className="text-[14px] text-muted-foreground">Your endpoint must return a 200 status code within 5 seconds</p>
+              </div>
+            </li>
+          </ol>
+        </div>
 
+        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Example Implementation</h2>
+          <p className="mb-4 text-[16px] text-muted-foreground">
+            Here's a basic Node.js/Express example:
+          </p>
+          <div className="overflow-x-auto">
+            <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
+{`import express from 'express';
+import crypto from 'crypto';
+
+const app = express();
 app.use(express.json());
 
-app.post('/webhooks/ranklite', async (req, res) => {
-  // Verify webhook signature (recommended)
-  const signature = req.headers['x-ranklite-signature'];
-  const webhookSecret = process.env.RANKLITE_WEBHOOK_SECRET;
-  
-  const hash = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(JSON.stringify(req.body))
-    .digest('hex');
-  
-  if (signature !== hash) {
-    return res.status(401).json({ error: 'Invalid signature' });
-  }
-  
-  // Process event
-  const event = req.body;
-  
-  switch (event.type) {
-    case 'article.generated':
-      await handleArticleGenerated(event.data);
-      break;
-    case 'article.published':
-      await handleArticlePublished(event.data);
-      break;
-    default:
-      console.log('Unhandled event type:', event.type);
-  }
-  
-  // Respond quickly
-  res.status(200).json({ received: true });
-});
-
-async function handleArticleGenerated(data) {
-  console.log('New article:', data.article.title);
-  // Your custom logic here
+// Verify webhook signature
+function verifySignature(payload, signature, secret) {
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = hmac.update(payload).digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(digest)
+  );
 }
 
-async function handleArticlePublished(data) {
-  console.log('Published:', data.article.url);
-  // Your custom logic here
-}`}</code>
-                </pre>
-                <button className="absolute right-3 top-3 rounded-md bg-slate-800 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white">
-                  <Copy className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+app.post('/api/webhooks/ranklite', (req, res) => {
+  const signature = req.headers['x-ranklite-signature'];
+  const payload = JSON.stringify(req.body);
+  
+  // Verify the webhook is from Ranklite
+  if (!verifySignature(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  const { type, data } = req.body;
+  
+  // Handle different event types
+  switch (type) {
+    case 'article.published':
+      console.log('Article published:', data.article.title);
+      // Add your logic here
+      break;
+    case 'article.updated':
+      console.log('Article updated:', data.article.title);
+      break;
+  }
+  
+  // Always respond with 200
+  res.status(200).send('Webhook received');
+});
+
+app.listen(3000);`}
+            </pre>
           </div>
         </div>
 
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Testing Webhooks</h2>
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Best Practices</h2>
           <div className="space-y-4">
-            <p className="text-[15px] text-muted-foreground">
-              Use the webhook testing tools in your dashboard to verify your endpoint is working correctly:
-            </p>
-            <ol className="list-decimal space-y-3 pl-6 text-[15px] text-muted-foreground">
-              <li>Click "Test Webhook" in the dashboard</li>
-              <li>Check your server logs to see if the test event was received</li>
-              <li>Verify the response status code is 200</li>
-              <li>Review the event payload structure</li>
-            </ol>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4">
-              <p className="text-[14px] text-blue-900">
-                <strong>Pro Tip:</strong> Use tools like{" "}
-                <a href="https://webhook.site" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  webhook.site
-                </a>{" "}
-                or{" "}
-                <a href="https://ngrok.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  ngrok
-                </a>{" "}
-                to test webhooks during development.
-              </p>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Respond Quickly</p>
+                <p className="text-[14px] text-muted-foreground">Process webhooks asynchronously and respond with 200 immediately</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Verify Signatures</p>
+                <p className="text-[14px] text-muted-foreground">Always validate the webhook signature to ensure authenticity</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Handle Retries</p>
+                <p className="text-[14px] text-muted-foreground">Make your endpoint idempotent as webhooks may be sent multiple times</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Use HTTPS</p>
+                <p className="text-[14px] text-muted-foreground">Webhook endpoints must use HTTPS for security</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">Monitor Failures</p>
+                <p className="text-[14px] text-muted-foreground">Set up alerts for webhook delivery failures</p>
+              </div>
             </div>
           </div>
         </div>
@@ -222,25 +274,17 @@ async function handleArticlePublished(data) {
         <div className="grid gap-6 md:grid-cols-2">
           <Link
             href="/docs/webhooks/events"
-            className="group rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#F59E0B] hover:shadow-md"
+            className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#22C55E] hover:shadow-md"
           >
-            <h3 className="mb-2 text-[18px] font-semibold text-foreground group-hover:text-[#F59E0B]">
-              Event Types →
-            </h3>
-            <p className="text-[14px] text-muted-foreground">
-              Learn about all available webhook events and their payloads
-            </p>
+            <h3 className="mb-2 font-display text-[20px] font-semibold text-foreground">Event Types →</h3>
+            <p className="text-[14px] text-muted-foreground">Learn about all available webhook events</p>
           </Link>
           <Link
             href="/docs/webhooks/security"
-            className="group rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#F59E0B] hover:shadow-md"
+            className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#22C55E] hover:shadow-md"
           >
-            <h3 className="mb-2 text-[18px] font-semibold text-foreground group-hover:text-[#F59E0B]">
-              Security & Verification →
-            </h3>
-            <p className="text-[14px] text-muted-foreground">
-              Best practices for securing your webhook endpoints
-            </p>
+            <h3 className="mb-2 font-display text-[20px] font-semibold text-foreground">Security & Verification →</h3>
+            <p className="text-[14px] text-muted-foreground">Secure your webhook endpoints properly</p>
           </Link>
         </div>
       </main>

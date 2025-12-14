@@ -1,83 +1,95 @@
 import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
-import { Wrench, AlertCircle, CheckCircle2, XCircle, Clock, ChevronRight } from "lucide-react";
+import { ChevronRight, AlertCircle, CheckCircle, XCircle, Clock, Zap } from "lucide-react";
 import Link from "next/link";
 
 const issues = [
   {
     title: "Webhooks Not Being Received",
     icon: XCircle,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
+    color: "text-red-600 bg-red-50",
+    causes: [
+      "Endpoint URL is incorrect or unreachable",
+      "Firewall blocking incoming requests",
+      "Endpoint not using HTTPS",
+      "Server is down or timing out"
+    ],
     solutions: [
-      {
-        problem: "Endpoint is not publicly accessible",
-        solution: "Ensure your webhook endpoint is accessible from the internet. Test it using a tool like curl or Postman from outside your network. Localhost URLs won't work."
-      },
-      {
-        problem: "Firewall blocking requests",
-        solution: "Check your firewall settings and whitelist Ranklite's webhook IPs: 54.243.252.0/22, 54.243.128.0/22"
-      },
-      {
-        problem: "SSL certificate issues",
-        solution: "Ensure your HTTPS endpoint has a valid SSL certificate. Self-signed certificates are not supported."
-      }
+      "Verify your endpoint URL is correct and publicly accessible",
+      "Check firewall rules allow incoming HTTPS traffic",
+      "Ensure your endpoint uses a valid SSL certificate",
+      "Check server logs for errors or timeouts",
+      "Test endpoint with curl: curl -X POST https://your-endpoint.com"
     ]
   },
   {
     title: "Signature Verification Failing",
     icon: AlertCircle,
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
+    color: "text-amber-600 bg-amber-50",
+    causes: [
+      "Using wrong webhook secret",
+      "Modifying request body before verification",
+      "Incorrect signature computation",
+      "Secret not properly stored in environment"
+    ],
     solutions: [
-      {
-        problem: "Using wrong webhook secret",
-        solution: "Verify you're using the correct webhook secret from your dashboard. Each webhook has its own unique secret."
-      },
-      {
-        problem: "Modified request body",
-        solution: "Ensure you're calculating the signature using the raw request body before any parsing or modification. Use raw body middleware in Express."
-      },
-      {
-        problem: "Character encoding issues",
-        solution: "Make sure the request body is UTF-8 encoded when calculating the signature hash."
-      }
+      "Copy secret from webhook settings and update environment variables",
+      "Use raw request body for signature verification",
+      "Verify you're using HMAC-SHA256 with 'sha256=' prefix",
+      "Check for timing-safe comparison implementation",
+      "Test with provided example payload and secret"
     ]
   },
   {
     title: "Webhook Timeouts",
     icon: Clock,
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-50",
+    color: "text-orange-600 bg-orange-50",
+    causes: [
+      "Endpoint taking too long to respond",
+      "Synchronous processing of heavy operations",
+      "Database queries blocking response",
+      "External API calls delaying response"
+    ],
     solutions: [
-      {
-        problem: "Processing takes too long",
-        solution: "Respond with 200 immediately and process the webhook asynchronously using a queue or background job."
-      },
-      {
-        problem: "Database queries blocking response",
-        solution: "Move all database operations and external API calls to an async background worker."
-      },
-      {
-        problem: "Network latency",
-        solution: "Ensure your server has good network connectivity and is geographically close to your target services."
-      }
+      "Respond with 200 immediately and process asynchronously",
+      "Queue webhook data for background processing",
+      "Optimize database queries and use indexes",
+      "Move external API calls to background jobs",
+      "Aim for response under 3 seconds (timeout at 5 seconds)"
     ]
   },
   {
-    title: "Duplicate Events",
-    icon: CheckCircle2,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    title: "Receiving Duplicate Webhooks",
+    icon: Zap,
+    color: "text-blue-600 bg-blue-50",
+    causes: [
+      "Endpoint not responding quickly enough",
+      "Network issues causing retries",
+      "Server returning non-200 status codes"
+    ],
     solutions: [
-      {
-        problem: "No idempotency handling",
-        solution: "Store processed event IDs in a database and check before processing. Use the event.id field as a unique identifier."
-      },
-      {
-        problem: "Retry logic triggering duplicates",
-        solution: "This is expected behavior. Always implement idempotency checks to handle duplicate deliveries gracefully."
-      }
+      "Implement idempotency using event ID",
+      "Store processed event IDs in database or cache",
+      "Always respond with 200 even if event was already processed",
+      "Check for duplicate IDs before processing",
+      "Use Redis or database to track processed events"
+    ]
+  },
+  {
+    title: "Missing Expected Events",
+    icon: AlertCircle,
+    color: "text-purple-600 bg-purple-50",
+    causes: [
+      "Webhook not subscribed to specific event types",
+      "Events filtered in webhook settings",
+      "Webhook disabled or deleted"
+    ],
+    solutions: [
+      "Check webhook event subscriptions in settings",
+      "Verify webhook is active and enabled",
+      "Review webhook logs in dashboard",
+      "Test with 'Send Test Webhook' button",
+      "Check webhook event history for patterns"
     ]
   }
 ];
@@ -99,171 +111,165 @@ export default function WebhookTroubleshootingPage() {
             Webhook Troubleshooting
           </h1>
           <p className="max-w-3xl text-[18px] leading-relaxed text-muted-foreground">
-            Solutions to common webhook issues and debugging tips.
+            Common webhook issues and how to resolve them quickly.
           </p>
         </div>
 
-        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Quick Diagnostics</h2>
-          <div className="space-y-4">
-            <div className="rounded-lg border border-border p-4">
-              <h3 className="mb-2 flex items-center gap-2 text-[16px] font-semibold text-foreground">
-                <CheckCircle2 className="h-5 w-5 text-[#22C55E]" />
-                Check Webhook Logs
-              </h3>
-              <p className="text-[14px] text-muted-foreground">
-                Go to Settings → Webhooks in your dashboard. Click on your webhook to see delivery logs, including response codes and error messages.
-              </p>
-            </div>
-            
-            <div className="rounded-lg border border-border p-4">
-              <h3 className="mb-2 flex items-center gap-2 text-[16px] font-semibold text-foreground">
-                <CheckCircle2 className="h-5 w-5 text-[#22C55E]" />
-                Test Your Endpoint
-              </h3>
-              <p className="text-[14px] text-muted-foreground">
-                Use the "Send Test Webhook" button in your dashboard to verify your endpoint is working correctly.
-              </p>
-            </div>
-            
-            <div className="rounded-lg border border-border p-4">
-              <h3 className="mb-2 flex items-center gap-2 text-[16px] font-semibold text-foreground">
-                <CheckCircle2 className="h-5 w-5 text-[#22C55E]" />
-                Check Server Logs
-              </h3>
-              <p className="text-[14px] text-muted-foreground">
-                Review your server logs for any errors or exceptions when receiving webhook requests.
-              </p>
-            </div>
+        <div className="mb-16 rounded-2xl border border-blue-200 bg-blue-50 p-8">
+          <h3 className="mb-4 text-[20px] font-semibold text-blue-900">Debugging Tools</h3>
+          <div className="space-y-3 text-[15px] text-blue-800">
+            <p><strong>Webhook Logs:</strong> Dashboard → Settings → Webhooks → View Logs</p>
+            <p><strong>Test Webhook:</strong> Send test payload to verify endpoint is working</p>
+            <p><strong>Request Logs:</strong> Check recent webhook attempts, responses, and errors</p>
+            <p><strong>Retry History:</strong> View failed deliveries and retry attempts</p>
           </div>
         </div>
 
-        <div className="space-y-12">
-          {issues.map((issue) => (
-            <div key={issue.title} className="rounded-2xl border border-border bg-white p-8 shadow-sm">
-              <div className="mb-6 flex items-center gap-3">
-                <div className={`rounded-lg ${issue.bgColor} p-3`}>
-                  <issue.icon className={`h-6 w-6 ${issue.color}`} />
-                </div>
-                <h2 className="font-display text-[24px] font-semibold text-foreground">{issue.title}</h2>
-              </div>
-              
-              <div className="space-y-6">
-                {issue.solutions.map((solution, index) => (
-                  <div key={index} className="rounded-lg border border-border p-5">
-                    <div className="mb-3 flex items-start gap-2">
-                      <AlertCircle className="h-5 w-5 shrink-0 text-muted-foreground" />
-                      <div>
-                        <h3 className="mb-1 text-[15px] font-semibold text-foreground">{solution.problem}</h3>
-                        <p className="text-[14px] text-muted-foreground">{solution.solution}</p>
-                      </div>
-                    </div>
+        <div className="mb-16">
+          <h2 className="mb-8 font-display text-[32px] font-semibold text-foreground">Common Issues</h2>
+          <div className="space-y-8">
+            {issues.map((issue, index) => (
+              <div key={index} className="rounded-2xl border border-border bg-white p-8 shadow-sm">
+                <div className="mb-6 flex items-start gap-4">
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${issue.color}`}>
+                    <issue.icon className="h-6 w-6" />
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div>
+                    <h3 className="mb-2 font-display text-[22px] font-semibold text-foreground">{issue.title}</h3>
+                  </div>
+                </div>
 
-        <div className="mt-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Testing Tools</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-lg border border-border p-5">
-              <h3 className="mb-2 text-[16px] font-semibold text-foreground">webhook.site</h3>
-              <p className="mb-3 text-[14px] text-muted-foreground">
-                Get a unique URL to test webhook payloads without writing any code.
-              </p>
-              <a
-                href="https://webhook.site"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[14px] text-[#F59E0B] hover:underline"
-              >
-                Visit webhook.site →
-              </a>
-            </div>
-            
-            <div className="rounded-lg border border-border p-5">
-              <h3 className="mb-2 text-[16px] font-semibold text-foreground">ngrok</h3>
-              <p className="mb-3 text-[14px] text-muted-foreground">
-                Create a public URL for your local development server to test webhooks.
-              </p>
-              <a
-                href="https://ngrok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[14px] text-[#F59E0B] hover:underline"
-              >
-                Visit ngrok.com →
-              </a>
-            </div>
-            
-            <div className="rounded-lg border border-border p-5">
-              <h3 className="mb-2 text-[16px] font-semibold text-foreground">RequestBin</h3>
-              <p className="mb-3 text-[14px] text-muted-foreground">
-                Inspect HTTP requests in real-time with detailed headers and body.
-              </p>
-              <a
-                href="https://requestbin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[14px] text-[#F59E0B] hover:underline"
-              >
-                Visit requestbin.com →
-              </a>
-            </div>
-            
-            <div className="rounded-lg border border-border p-5">
-              <h3 className="mb-2 text-[16px] font-semibold text-foreground">Postman</h3>
-              <p className="mb-3 text-[14px] text-muted-foreground">
-                Simulate webhook requests to test your endpoint's response handling.
-              </p>
-              <a
-                href="https://postman.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[14px] text-[#F59E0B] hover:underline"
-              >
-                Visit postman.com →
-              </a>
-            </div>
-          </div>
-        </div>
+                <div className="mb-6">
+                  <h4 className="mb-3 text-[16px] font-semibold text-foreground">Common Causes:</h4>
+                  <ul className="ml-6 space-y-2">
+                    {issue.causes.map((cause, i) => (
+                      <li key={i} className="text-[14px] text-muted-foreground">• {cause}</li>
+                    ))}
+                  </ul>
+                </div>
 
-        <div className="mt-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Debug Checklist</h2>
-          <div className="space-y-3">
-            {[
-              "Endpoint is publicly accessible via HTTPS",
-              "SSL certificate is valid and not self-signed",
-              "Webhook secret matches the one in dashboard",
-              "Signature verification is implemented correctly",
-              "Using raw request body for signature calculation",
-              "Responding with 200 status code within 5 seconds",
-              "Idempotency checks are in place",
-              "Server logs show incoming requests",
-              "No firewall or network restrictions",
-              "Error handling and logging are implemented"
-            ].map((item, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="mt-1 h-4 w-4 rounded border border-border"></div>
-                <span className="text-[14px] text-muted-foreground">{item}</span>
+                <div>
+                  <h4 className="mb-3 text-[16px] font-semibold text-foreground">Solutions:</h4>
+                  <div className="space-y-3">
+                    {issue.solutions.map((solution, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 shrink-0 text-[#22C55E]" />
+                        <p className="text-[14px] text-muted-foreground">{solution}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mt-16 rounded-2xl border border-blue-200 bg-blue-50 p-8">
+        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Testing Webhooks Locally</h2>
+          <p className="mb-6 text-[16px] text-muted-foreground">
+            To test webhooks on your local development environment, use a tunneling service:
+          </p>
+          
+          <div className="mb-6">
+            <h3 className="mb-3 text-[18px] font-semibold text-foreground">Using ngrok</h3>
+            <div className="overflow-x-auto">
+              <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
+{`# Install ngrok
+npm install -g ngrok
+
+# Start your local server (e.g., port 3000)
+npm run dev
+
+# In another terminal, create tunnel
+ngrok http 3000
+
+# Use the HTTPS URL from ngrok as your webhook endpoint
+# Example: https://abc123.ngrok.io/api/webhooks/ranklite`}
+              </pre>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="mb-3 text-[18px] font-semibold text-foreground">Using Hookdeck (Alternative)</h3>
+            <p className="mb-3 text-[15px] text-muted-foreground">
+              Hookdeck provides additional debugging features for webhook development:
+            </p>
+            <ul className="ml-6 space-y-2 text-[14px] text-muted-foreground">
+              <li>• Inspect webhook payloads in detail</li>
+              <li>• Replay webhooks for testing</li>
+              <li>• Filter and search webhook history</li>
+              <li>• Monitor webhook performance</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Debugging Checklist</h2>
+          <div className="space-y-3">
+            {[
+              "Verify endpoint URL is correct and publicly accessible",
+              "Check webhook is enabled and subscribed to correct events",
+              "Confirm HTTPS is used with valid SSL certificate",
+              "Test signature verification with example payload",
+              "Check server logs for errors or exceptions",
+              "Verify endpoint responds within 5 seconds",
+              "Test with 'Send Test Webhook' in dashboard",
+              "Review webhook delivery logs for error messages",
+              "Confirm firewall allows incoming HTTPS traffic",
+              "Validate webhook secret matches environment variable"
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg border border-border p-4">
+                <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-[#22C55E] focus:ring-[#22C55E]" />
+                <label className="text-[15px] text-muted-foreground">{item}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Sample Curl Test</h2>
+          <p className="mb-4 text-[16px] text-muted-foreground">
+            Test your endpoint manually with curl:
+          </p>
+          <div className="overflow-x-auto">
+            <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
+{`curl -X POST https://your-domain.com/api/webhooks/ranklite \\
+  -H "Content-Type: application/json" \\
+  -H "X-Ranklite-Signature: sha256=test_signature" \\
+  -d '{
+    "id": "evt_test_123",
+    "type": "article.published",
+    "created": 1734134400,
+    "data": {
+      "article": {
+        "id": "art_test",
+        "title": "Test Article",
+        "status": "published"
+      }
+    }
+  }'`}
+            </pre>
+          </div>
+        </div>
+
+        <div className="mb-16 rounded-2xl border border-amber-200 bg-amber-50 p-8">
           <div className="flex items-start gap-4">
-            <AlertCircle className="h-6 w-6 shrink-0 text-blue-600" />
+            <AlertCircle className="h-6 w-6 shrink-0 text-amber-600" />
             <div>
-              <h3 className="mb-2 text-[18px] font-semibold text-blue-900">Still Having Issues?</h3>
-              <p className="mb-4 text-[15px] leading-relaxed text-blue-800">
-                If you've tried these solutions and are still experiencing problems, our support team can help debug your webhook implementation.
+              <h3 className="mb-2 text-[18px] font-semibold text-amber-900">Still Having Issues?</h3>
+              <p className="mb-4 text-[15px] leading-relaxed text-amber-800">
+                If you've tried these solutions and still experiencing problems, contact our support team with:
               </p>
+              <ul className="ml-6 space-y-2 text-[14px] text-amber-800">
+                <li>• Your webhook endpoint URL</li>
+                <li>• Webhook ID from settings</li>
+                <li>• Recent error messages from logs</li>
+                <li>• Screenshots of webhook configuration</li>
+                <li>• Server logs showing the issue</li>
+              </ul>
               <a
                 href="mailto:support@ranklite.com"
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-[14px] font-semibold text-white transition-all hover:bg-blue-700"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber-600 px-6 py-3 text-[14px] font-semibold text-white transition-all hover:bg-amber-700"
               >
                 Contact Support
               </a>
@@ -271,28 +277,20 @@ export default function WebhookTroubleshootingPage() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
-          <Link
-            href="/docs/webhooks/setup"
-            className="group rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#F59E0B] hover:shadow-md"
-          >
-            <h3 className="mb-2 text-[18px] font-semibold text-foreground group-hover:text-[#F59E0B]">
-              Webhook Setup →
-            </h3>
-            <p className="text-[14px] text-muted-foreground">
-              Review the setup guide
-            </p>
-          </Link>
+        <div className="grid gap-6 md:grid-cols-2">
           <Link
             href="/docs/webhooks/security"
-            className="group rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#F59E0B] hover:shadow-md"
+            className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#22C55E] hover:shadow-md"
           >
-            <h3 className="mb-2 text-[18px] font-semibold text-foreground group-hover:text-[#F59E0B]">
-              Security & Verification →
-            </h3>
-            <p className="text-[14px] text-muted-foreground">
-              Check security best practices
-            </p>
+            <h3 className="mb-2 font-display text-[20px] font-semibold text-foreground">← Security & Verification</h3>
+            <p className="text-[14px] text-muted-foreground">Learn how to secure webhook endpoints</p>
+          </Link>
+          <Link
+            href="/docs/webhooks/setup"
+            className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:border-[#22C55E] hover:shadow-md"
+          >
+            <h3 className="mb-2 font-display text-[20px] font-semibold text-foreground">Webhook Setup →</h3>
+            <p className="text-[14px] text-muted-foreground">Start from the beginning</p>
           </Link>
         </div>
       </main>
