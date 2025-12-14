@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { BacklinkTask, Platform, SubmissionData, TaskStatus } from "./types";
 import { runPolicyCheck, shouldRequireManualReview } from "./policy-engine";
+import { checkBacklinkGenerationLimit, incrementBacklinkUsage } from "@/lib/usage-limits";
 
 const MAX_DAILY_SUBMISSIONS = 10;
 const MIN_DELAY_BETWEEN_SUBMISSIONS_MS = 5 * 60 * 1000;
@@ -19,6 +20,12 @@ export async function createTasksForUser(
     .order("domain_rating", { ascending: false });
 
   if (!platforms?.length) {
+    return { created: 0, skipped: 0, blocked: 0 };
+  }
+
+  const limitCheck = await checkBacklinkGenerationLimit(userId, platforms.length);
+  if (!limitCheck.allowed) {
+    console.error(`Backlink limit exceeded for user ${userId}: ${limitCheck.message}`);
     return { created: 0, skipped: 0, blocked: 0 };
   }
 

@@ -22,13 +22,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: plan } = await supabase
+    const { data: newPlan } = await supabase
       .from("plans")
       .select("*")
       .eq("id", planId)
       .single();
 
-    if (!plan) {
+    if (!newPlan) {
       return NextResponse.json(
         { error: "Plan not found" },
         { status: 404 }
@@ -37,20 +37,34 @@ export async function POST(request: NextRequest) {
 
     const { data: existingUserPlan } = await supabase
       .from("user_plans")
-      .select("*")
+      .select("*, plans(*)")
       .eq("user_id", user.id)
       .single();
 
+    const now = new Date();
+    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const isUpgrade = existingUserPlan && 
+      existingUserPlan.plans && 
+      newPlan.price > existingUserPlan.plans.price;
+
     if (existingUserPlan) {
+      const updates: Record<string, unknown> = {
+        plan_id: planId,
+        status: "active",
+        updated_at: now.toISOString(),
+      };
+
+      if (isUpgrade) {
+        updates.current_period_start = now.toISOString();
+        updates.current_period_end = periodEnd.toISOString();
+      } else {
+        updates.current_period_end = periodEnd.toISOString();
+      }
+
       const { error: updateError } = await supabase
         .from("user_plans")
-        .update({
-          plan_id: planId,
-          status: "active",
-          start_date: new Date().toISOString(),
-          end_date: null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updates)
         .eq("id", existingUserPlan.id);
 
       if (updateError) {
@@ -67,7 +81,8 @@ export async function POST(request: NextRequest) {
           user_id: user.id,
           plan_id: planId,
           status: "active",
-          start_date: new Date().toISOString(),
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
         });
 
       if (insertError) {
@@ -81,7 +96,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Plan updated successfully",
+      message: `Plan ${isUpgrade ? 'upgraded' : 'changed'} successfully. ${isUpgrade ? 'Changes are effective immediately.' : 'Changes will take effect at the next billing cycle.'}`,
+      immediate: isUpgrade,
     });
   } catch (error) {
     console.error("Failed to change plan:", error);

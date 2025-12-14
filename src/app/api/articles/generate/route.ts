@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { checkPostGenerationLimit, incrementPostUsage } from "@/lib/usage-limits";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -7,6 +8,19 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limitCheck = await checkPostGenerationLimit(user.id);
+  if (!limitCheck.allowed) {
+    return NextResponse.json(
+      { 
+        error: limitCheck.message,
+        usage: limitCheck.usage,
+        limits: limitCheck.limits,
+        percentUsed: limitCheck.percentUsed
+      },
+      { status: 403 }
+    );
   }
 
   const body = await request.json();
@@ -103,6 +117,8 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await incrementPostUsage(user.id);
 
   return NextResponse.json({
     article: updatedArticle,

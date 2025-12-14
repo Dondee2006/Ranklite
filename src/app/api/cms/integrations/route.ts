@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { checkIntegrationLimit } from '@/lib/usage-limits';
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,6 +43,18 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const limitCheck = await checkIntegrationLimit(user.id);
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: limitCheck.message,
+          current: limitCheck.current,
+          limit: limitCheck.limit
+        },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

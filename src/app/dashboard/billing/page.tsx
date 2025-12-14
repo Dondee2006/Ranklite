@@ -17,7 +17,7 @@ type Plan = {
   posts_per_month: number;
   backlinks_per_post: number;
   qa_validation: boolean;
-  integrations: string[];
+  integrations_limit: number;
 };
 
 type UserPlan = {
@@ -270,13 +270,13 @@ export default function BillingPage() {
                         <Tooltip>
                           <TooltipTrigger>
                             <div className="flex items-center gap-1 text-sm text-[#6B7280]">
-                              <span>{plan.integrations.length} platforms</span>
+                              <span>{plan.integrations_limit === -1 ? 'Unlimited' : `${plan.integrations_limit} platforms`}</span>
                               <Info className="h-3.5 w-3.5" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <div className="text-xs">
-                              {plan.integrations.join(", ")}
+                              {plan.integrations_limit === -1 ? 'Unlimited' : `${plan.integrations_limit} platforms`}
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -356,7 +356,7 @@ export default function BillingPage() {
                                   <div>• {plan.posts_per_month} posts per month</div>
                                   <div>• {plan.backlinks_per_post} backlinks per post</div>
                                   <div>• QA validation included</div>
-                                  <div>• Integrations: {plan.integrations.join(", ")}</div>
+                                  <div>• {plan.integrations_limit === -1 ? 'Unlimited' : plan.integrations_limit} integrations</div>
                                 </div>
                               </div>
                             </TooltipContent>

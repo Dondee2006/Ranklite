@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getUserPlanAndUsage } from "@/lib/usage-limits";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,27 +14,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { data: userPlan } = await supabase
-      .from("user_plans")
-      .select(`
-        *,
-        plans (*)
-      `)
-      .eq("user_id", user.id)
-      .single();
+    const { plan, usage, status, periodEnd } = await getUserPlanAndUsage(user.id);
 
-    if (!userPlan) {
+    if (!plan) {
       return NextResponse.json({
         plan: null,
+        usage: null,
         status: null,
       });
     }
 
     return NextResponse.json({
-      plan: userPlan.plans,
-      status: userPlan.status,
-      start_date: userPlan.start_date,
-      end_date: userPlan.end_date,
+      plan,
+      usage,
+      status,
+      periodEnd,
     });
   } catch (error) {
     console.error("Failed to get current plan:", error);
