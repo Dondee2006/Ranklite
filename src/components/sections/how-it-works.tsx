@@ -69,15 +69,17 @@ export default function HowItWorks() {
                 {step.number}
               </div>
 
-              <h4 className="mb-3 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
-                {step.title}
-              </h4>
-              <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
-              <p className="text-[14px] font-medium leading-relaxed text-[#22C55E]">
-                {step.subtext}
-              </p>
+              <div className="pr-16">
+                <h4 className="mb-3 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
+                  {step.title}
+                </h4>
+                <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
+                  {step.description}
+                </p>
+                <p className="text-[14px] font-medium leading-relaxed text-[#22C55E]">
+                  {step.subtext}
+                </p>
+              </div>
             </div>
           ))}
         </div>
