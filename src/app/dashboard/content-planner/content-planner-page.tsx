@@ -438,18 +438,6 @@ export default function ContentPlannerPage() {
                             <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-emerald-500")} />
                             Autopilot {autopilotSettings.enabled ? "ON" : "OFF"}
                         </Button>
-                        <Button
-                            onClick={generateMonthlyCalendar}
-                            disabled={generating}
-                            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-                        >
-                            {generating ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Sparkles className="h-4 w-4" />
-                            )}
-                            Generate 30-Day Plan
-                        </Button>
                     </div>
                 </div>
             </header>
