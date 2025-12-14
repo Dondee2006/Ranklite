@@ -26,17 +26,6 @@ export default function Home() {
         <ProblemsSolution />
         <HowItWorks />
         <section className="container mx-auto max-w-[1320px] px-5 md:px-8">
-          <div className="mb-12 text-center lg:mb-20">
-            <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#F0FDF4] px-4 py-1.5 text-[13px] font-semibold text-[#16A34A]">
-              Features
-            </span>
-            <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[40px] lg:text-[52px]">
-              Accelerate your{" "}
-              <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
-                SEO growth
-              </span>
-            </h2>
-          </div>
           <FeaturesSeoAnalysis />
           <FeaturesNaturalRanking />
           <FeaturesArticleStyle />
