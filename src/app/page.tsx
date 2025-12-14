@@ -11,6 +11,7 @@ import BoostVisibility from "@/components/sections/boost-visibility";
 import AdditionalFeatures from "@/components/sections/additional-features";
 import WritingExamples from "@/components/sections/writing-examples";
 import AIInSEO from "@/components/sections/ai-in-seo";
+import WhyRanklite from "@/components/sections/why-ranklite";
 import Pricing from "@/components/sections/pricing";
 import FAQSection from "@/components/sections/faq";
 import CtaSection from "@/components/sections/cta-section";
@@ -46,6 +47,7 @@ export default function Home() {
         <AdditionalFeatures />
         <WritingExamples />
         <AIInSEO />
+        <WhyRanklite />
         <Pricing />
         <FAQSection />
         <CtaSection />
