@@ -27,6 +27,7 @@ export default function BillingPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -35,6 +36,7 @@ export default function BillingPage() {
   }, []);
 
   async function loadData() {
+    setError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -44,21 +46,28 @@ export default function BillingPage() {
         return;
       }
 
-      const { data: plansData } = await supabase
+      const { data: plansData, error: plansError } = await supabase
         .from("plans")
         .select("*")
         .order("price", { ascending: true });
 
-      const { data: userPlanData } = await supabase
+      if (plansError) throw plansError;
+
+      const { data: userPlanData, error: userPlanError } = await supabase
         .from("user_plans")
         .select("*, plans(*)")
         .eq("user_id", user.id)
         .single();
 
-      setPlans(Array.isArray(plansData) ? plansData : []);
+      if (userPlanError && userPlanError.code !== "PGRST116") {
+        console.error("User plan error:", userPlanError);
+      }
+
+      setPlans(plansData || []);
       setUserPlan(userPlanData || null);
-    } catch (error) {
-      console.error("Error loading billing data:", error);
+    } catch (err: any) {
+      console.error("Error loading billing data:", err);
+      setError(err.message || "Failed to load billing data");
       setPlans([]);
       setUserPlan(null);
     } finally {
@@ -111,6 +120,38 @@ export default function BillingPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-600 mb-4">No plans available</p>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
     );
   }
