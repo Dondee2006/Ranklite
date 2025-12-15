@@ -67,7 +67,8 @@ export default function BillingPage() {
       }
     }
     loadData();
-  }, [supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredPlans = (plans || []).filter((plan) => {
     if (filter === "all") return true;
@@ -79,7 +80,7 @@ export default function BillingPage() {
     return true;
   });
 
-  const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil((filteredPlans?.length || 0) / itemsPerPage));
   const paginatedPlans = filteredPlans.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
