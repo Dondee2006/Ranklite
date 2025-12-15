@@ -302,6 +302,13 @@ export function SEOCycleVisual() {
           </div>
         </div>
       </div>
+
+      <div className="px-8 pb-6">
+        <div className="flex items-center gap-2 text-sm text-[#6B7280] bg-[#F9FAFB] px-4 py-3 rounded-lg border border-[#E5E5E5]">
+          <Info className="w-4 h-4 flex-shrink-0" />
+          <span>The SEO Cycle coordinates content creation and backlink generation with built-in safety checks</span>
+        </div>
+      </div>
     </div>
   );
 }
