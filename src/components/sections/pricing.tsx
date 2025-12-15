@@ -8,17 +8,17 @@ export default function Pricing() {
       tagline: "Safe Growth",
       price: "$49",
       period: "/month",
-      color: "from-green-500 to-emerald-500",
+      color: "from-green-500 to-emerald-600",
       icon: "🟢",
       description: "Best for new sites or small businesses starting SEO.",
       features: [
-        { label: "Sites", value: "1 website" },
-        { label: "Article Growth", value: "1 backlink per article, phased, SEO-safe" },
-        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
-        { label: "What's included", value: "AI-written posts, auto-publishing, per-article backlink building, built-in SEO protection" },
+        "1 website",
+        "1 backlink per article (SEO-safe)",
+        "AI-written posts & auto-publishing",
+        "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS",
+        "Built-in SEO protection",
       ],
       status: "Inactive",
-      whyWorks: "Ranklite paces growth conservatively so your site builds trust without triggering penalties.",
       cta: "Start safe growth",
       ctaLink: "/login",
     },
@@ -27,17 +27,17 @@ export default function Pricing() {
       tagline: "Balanced Growth",
       price: "$99",
       period: "/month",
-      color: "from-blue-500 to-blue-600",
+      color: "from-green-500 to-emerald-600",
       icon: "🔵",
       isPopular: true,
       description: "Designed for consistent rankings and steady traffic.",
       features: [
-        { label: "Sites", value: "Up to 3 websites" },
-        { label: "Article Growth", value: "2–3 backlinks per article, attached to each post, progressive authority" },
-        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
-        { label: "What's included", value: "30-day AI content plan, daily publishing, per-article backlink generator, QA validation & indexing checks" },
+        "Up to 3 websites",
+        "2–3 backlinks per article (progressive authority)",
+        "30-day AI content plan & daily publishing",
+        "QA validation & indexing checks",
+        "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS",
       ],
-      whyWorks: "This plan mirrors how strong sites grow — consistent content, progressive authority, zero micromanagement.",
       cta: "Start growing",
       ctaLink: "/login",
     },
@@ -46,16 +46,16 @@ export default function Pricing() {
       tagline: "Authority Growth",
       price: "$199",
       period: "/month",
-      color: "from-red-500 to-rose-600",
+      color: "from-green-500 to-emerald-600",
       icon: "🔴",
       description: "Built for established brands that want to move faster.",
       features: [
-        { label: "Sites", value: "Up to 10 websites" },
-        { label: "Article Growth", value: "Up to 5 backlinks per article, scales after QA validation, optimized for aged domains" },
-        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
-        { label: "What's included", value: "Accelerated publishing, high-capacity per-article backlink generation, priority QA validation, advanced authority controls" },
+        "Up to 10 websites",
+        "Up to 5 backlinks per article (scales after QA)",
+        "Accelerated publishing & high-capacity backlink generation",
+        "Priority QA validation & advanced authority controls",
+        "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS",
       ],
-      whyWorks: "Ranklite increases momentum only when your site is ready, protecting rankings while scaling.",
       cta: "Scale authority",
       ctaLink: "/login",
     },
@@ -117,17 +117,17 @@ export default function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative overflow-hidden rounded-3xl border bg-white p-8 shadow-lg transition-all hover:shadow-xl ${
-                plan.isPopular ? "border-blue-500 shadow-blue-500/10 ring-2 ring-blue-500/20" : "border-border"
+              className={`relative overflow-hidden rounded-3xl border bg-white p-6 shadow-lg transition-all hover:shadow-xl ${
+                plan.isPopular ? "border-green-500 shadow-green-500/10 ring-2 ring-green-500/20" : "border-border"
               }`}
             >
               {plan.isPopular && (
-                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 text-[11px] font-semibold text-white">
+                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-[11px] font-semibold text-white">
                   ⭐ Most Popular
                 </div>
               )}
               
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{plan.icon}</span>
                 <div>
                   <h3 className="font-display text-[20px] font-bold text-foreground">{plan.name}</h3>
@@ -135,18 +135,18 @@ export default function Pricing() {
                 </div>
               </div>
 
-              <div className="mb-4 flex items-baseline gap-1">
+              <div className="mb-3 flex items-baseline gap-1">
                 <span className="font-display text-[40px] font-bold text-foreground">{plan.price}</span>
                 <span className="text-[16px] text-muted-foreground">{plan.period}</span>
               </div>
 
-              <p className="mb-6 text-[14px] text-muted-foreground">{plan.description}</p>
+              <p className="mb-4 text-[14px] text-muted-foreground">{plan.description}</p>
 
-              <ul className="space-y-4 mb-6">
+              <ul className="space-y-2 mb-5">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="text-[14px]">
-                    <div className="font-semibold text-foreground mb-1">{feature.label}:</div>
-                    <div className="text-muted-foreground">{feature.value}</div>
+                  <li key={i} className="flex items-start gap-2 text-[13px]">
+                    <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -156,11 +156,6 @@ export default function Pricing() {
                   Status: {plan.status}
                 </div>
               )}
-
-              <div className="mb-6 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-                <p className="text-[13px] font-semibold text-foreground mb-2">Why it works</p>
-                <p className="text-[13px] text-muted-foreground leading-relaxed">{plan.whyWorks}</p>
-              </div>
 
               <Link
                 href={plan.ctaLink}
