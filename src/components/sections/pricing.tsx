@@ -57,7 +57,7 @@ export default function Pricing() {
       <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
         {/* Header */}
         <div className="mx-auto mb-14 max-w-[800px] text-center lg:mb-20">
-          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#10B981] sm:text-[48px] lg:text-[56px]">
+          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#22C55E] sm:text-[48px] lg:text-[56px]">
             Choose Your Plan
           </h2>
           <p className="mx-auto mt-5 max-w-[620px] text-[18px] leading-relaxed text-[#4A5568] lg:text-[20px]">
@@ -81,7 +81,7 @@ export default function Pricing() {
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-display text-[56px] font-bold text-[#10B981]">${plan.price}</span>
+                  <span className="font-display text-[56px] font-bold text-[#22C55E]">${plan.price}</span>
                   <span className="text-[18px] text-[#718096]">{plan.period}</span>
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function Pricing() {
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
                     {feature.included ? (
-                      <Check className="h-5 w-5 text-[#10B981] flex-shrink-0 mt-0.5" />
+                      <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
                     ) : (
                       <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
                     )}
@@ -103,7 +103,7 @@ export default function Pricing() {
               {/* CTA Button */}
               <Link
                 href={plan.ctaLink}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#10B981] py-4 text-[16px] font-semibold text-white shadow-lg transition-all hover:bg-[#059669] hover:shadow-xl"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-4 text-[16px] font-semibold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
               >
                 {plan.cta}
               </Link>
@@ -127,7 +127,7 @@ export default function Pricing() {
                   <li className="text-[15px] text-[#718096]">• Manual work</li>
                 </ul>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 p-6">
+              <div className="rounded-2xl bg-[#22C55E]/10 p-6">
                 <h4 className="mb-4 text-[18px] font-bold text-[#1A202C]">Ranklite does the work for you.</h4>
                 <div className="space-y-2 text-[15px] text-[#4A5568] leading-relaxed">
                   <p>We automatically control publishing, link building, and SEO pacing behind the scenes — so Google sees natural growth, not automation.</p>

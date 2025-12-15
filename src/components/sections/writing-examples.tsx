@@ -39,8 +39,8 @@ const articles = [
     title: 'Ranklite Backlink Generator vs Traditional Backlink Exchanges: Which Boosts Your SEO Faster?',
     source: 'MotionLab',
     type: 'Tools Listicle',
-    icon: <Video className="w-5 h-5 text-emerald-600" />,
-    color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    icon: <Video className="w-5 h-5 text-[#22C55E]" />,
+    color: 'bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20',
     content: {
       headline: 'Backlinks are essential for improving your website\'s authority and search engine ranking, but not all backlink strategies are created equal. Ranklite\'s Backlink Generator offers a modern, automated approach that contrasts sharply with traditional backlink exchanges.',
       paragraph1: "Ranklite's Backlink Generator creates high-quality backlinks automatically. Instead of manually trading links or submitting your site to random directories, Ranklite identifies relevant, authoritative sites and generates links that add real SEO value. This automation saves hours of tedious work while ensuring your backlinks are credible and effective. Traditional backlink exchanges often involve reaching out to other website owners, offering reciprocal links, or joining link exchange networks. While this may seem like a cost-free approach, it can be time-consuming and risky. Low-quality or irrelevant backlinks can harm your SEO rather than improve it, and managing exchanges manually becomes difficult as your website grows. Ranklite's approach prioritizes quality over quantity. Every backlink is chosen based on relevance and authority, helping your content rank higher without the guesswork. The system also integrates seamlessly with your content workflow, meaning new articles can automatically receive backlinks as part of the publishing process.",
@@ -61,11 +61,11 @@ export default function WritingExamples() {
         {/* Header Section */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-16">
           <div className="lg:col-span-5 flex flex-col justify-center">
-            <span className="text-xs font-semibold text-green-500 uppercase tracking-[1.44px] mb-4">
+            <span className="text-xs font-semibold text-[#22C55E] uppercase tracking-[1.44px] mb-4">
               WRITING EXAMPLES
             </span>
             <h2 className="text-4xl lg:text-[56px] font-bold text-black leading-[1.1] tracking-[-1.44px] mb-6 font-display">
-              Smart content that <span className="text-green-500">readers actually enjoy.</span>
+              Smart content that <span className="text-[#22C55E]">readers actually enjoy.</span>
             </h2>
 
             <div className="hidden lg:flex items-center gap-2 mb-8 text-sm font-medium text-gray-500 italic transform -rotate-2 translate-x-4">
@@ -89,8 +89,8 @@ export default function WritingExamples() {
                   onClick={() => setActiveArticleId(article.id)}
                   className={`group text-left p-5 rounded-xl border transition-all duration-300 ease-in-out relative
                     ${activeArticleId === article.id
-                      ? 'bg-white border-green-500 shadow-lg scale-[1.02] z-10'
-                      : 'bg-white border-gray-100 hover:border-green-200 hover:shadow-md'
+                      ? 'bg-white border-[#22C55E] shadow-lg scale-[1.02] z-10'
+                      : 'bg-white border-gray-100 hover:border-[#22C55E]/30 hover:shadow-md'
                     }
                   `}
                 >
@@ -116,8 +116,8 @@ export default function WritingExamples() {
                   </div>
 
                   {activeArticleId === article.id && (
-                    <div className="absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:block text-green-500">
-                      <div className="bg-white rounded-full p-1 shadow-sm border border-green-100">
+                    <div className="absolute -right-3 top-1/2 -translate-y-1/2 hidden lg:block text-[#22C55E]">
+                      <div className="bg-white rounded-full p-1 shadow-sm border border-[#22C55E]/20">
                         <ChevronRight size={20} />
                       </div>
                     </div>
@@ -133,7 +133,7 @@ export default function WritingExamples() {
               </p>
               <Link
                 href="/blog"
-                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
+                className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
               >
                 Explore the Blog
                 <ArrowRight size={16} />
@@ -160,7 +160,7 @@ export default function WritingExamples() {
 
                 {/* Overlay Text on Image */}
                 <div className="absolute bottom-6 left-6 right-6 text-white">
-                  <div className="inline-block px-3 py-1 bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-md mb-3 shadow-sm">
+                  <div className="inline-block px-3 py-1 bg-[#22C55E] text-white text-[10px] font-bold uppercase tracking-widest rounded-md mb-3 shadow-sm">
                     Productivity Tips
                   </div>
                 </div>
@@ -198,7 +198,7 @@ export default function WritingExamples() {
                     <span className="text-sm text-gray-500 font-medium">+10k views</span>
                   </div>
 
-                  <span className="text-sm font-semibold text-green-500 flex items-center gap-1 cursor-pointer hover:underline">
+                  <span className="text-sm font-semibold text-[#22C55E] flex items-center gap-1 cursor-pointer hover:underline">
                     Continue Reading <ArrowRight size={14} />
                   </span>
                 </div>
@@ -214,7 +214,7 @@ export default function WritingExamples() {
           </p>
           <Link
             href="/blog"
-            className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
           >
             Explore the Blog
             <ArrowRight size={18} />

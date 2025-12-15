@@ -23,8 +23,8 @@ export default function ExampleArticleContent() {
       title: "Top 9 AI Video Generators: Transform Your Vision into Reality",
       company: "revid.ai",
       type: "Tools Listicle",
-      typeColor: "text-emerald-600 bg-emerald-50",
-      icon: <div className="w-5 h-5 bg-emerald-500 rounded-lg" />,
+      typeColor: "text-[#22C55E] bg-[#22C55E]/10",
+      icon: <div className="w-5 h-5 bg-[#22C55E] rounded-lg" />,
       isActive: false,
     },
   ];
