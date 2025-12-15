@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Check, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 type Plan = {
   id: string;
@@ -29,8 +28,6 @@ export default function BillingPage() {
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
-
   useEffect(() => {
     loadData();
   }, []);
@@ -38,33 +35,16 @@ export default function BillingPage() {
   async function loadData() {
     setError(null);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setPlans([]);
-        setUserPlan(null);
-        setLoading(false);
-        return;
-      }
+      const [plansRes, userPlanRes] = await Promise.all([
+        fetch("/api/billing/plans"),
+        fetch("/api/billing/user-plan"),
+      ]);
 
-      const { data: plansData, error: plansError } = await supabase
-        .from("plans")
-        .select("*")
-        .order("price", { ascending: true });
+      const plansData = await plansRes.json();
+      const userPlanData = await userPlanRes.json();
 
-      if (plansError) throw plansError;
-
-      const { data: userPlanData, error: userPlanError } = await supabase
-        .from("user_plans")
-        .select("*, plans(*)")
-        .eq("user_id", user.id)
-        .single();
-
-      if (userPlanError && userPlanError.code !== "PGRST116") {
-        console.error("User plan error:", userPlanError);
-      }
-
-      setPlans(plansData || []);
-      setUserPlan(userPlanData || null);
+      setPlans(Array.isArray(plansData.plans) ? plansData.plans : []);
+      setUserPlan(userPlanData.userPlan || null);
     } catch (err: any) {
       console.error("Error loading billing data:", err);
       setError(err.message || "Failed to load billing data");
@@ -78,34 +58,13 @@ export default function BillingPage() {
   async function handleChangePlan(planId: string) {
     setChangingPlan(planId);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const res = await fetch("/api/billing/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId }),
+      });
 
-      const now = new Date().toISOString();
-      const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-      if (userPlan) {
-        await supabase
-          .from("user_plans")
-          .update({
-            plan_id: planId,
-            status: "active",
-            current_period_start: now,
-            current_period_end: periodEnd,
-            updated_at: now,
-          })
-          .eq("id", userPlan.id);
-      } else {
-        await supabase
-          .from("user_plans")
-          .insert({
-            user_id: user.id,
-            plan_id: planId,
-            status: "active",
-            current_period_start: now,
-            current_period_end: periodEnd,
-          });
-      }
+      if (!res.ok) throw new Error("Failed to change plan");
 
       await loadData();
     } catch (error) {
