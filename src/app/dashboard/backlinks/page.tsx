@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Loader2, RotateCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Backlink {
   id: string;
   source_name: string;
   linking_url: string;
-  target_post: string;
   anchor_text: string;
   domain_rating: number;
-  status: "Live" | "Pending" | "Failed";
-  added_date: string;
+  status: string;
+  date_added: string;
+  source_domain?: string;
 }
 
 const STATUS_COLORS = {
@@ -42,10 +42,12 @@ export default function BacklinksPage() {
     setLoading(true);
     try {
       const response = await fetch("/api/backlinks");
+      if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setBacklinks(data.backlinks || []);
     } catch (error) {
       console.error("Failed to load backlinks:", error);
+      setBacklinks([]);
     } finally {
       setLoading(false);
     }
@@ -104,9 +106,6 @@ export default function BacklinksPage() {
                       Linking URL
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Target Post
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Anchor Text
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
@@ -126,7 +125,7 @@ export default function BacklinksPage() {
                 <tbody className="divide-y divide-[#E5E5E5]">
                   {filteredBacklinks.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-sm text-[#6B7280]">
+                      <td colSpan={7} className="px-6 py-12 text-center text-sm text-[#6B7280]">
                         No backlinks found
                       </td>
                     </tr>
@@ -134,7 +133,7 @@ export default function BacklinksPage() {
                     filteredBacklinks.map((backlink) => (
                       <tr key={backlink.id} className="hover:bg-[#F9FAFB] transition-colors">
                         <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-[#1A1A1A]">{backlink.source_name}</div>
+                          <div className="text-sm font-medium text-[#1A1A1A]">{backlink.source_name || backlink.source_domain || "Unknown"}</div>
                         </td>
                         <td className="px-6 py-4">
                           <a
@@ -143,33 +142,34 @@ export default function BacklinksPage() {
                             rel="noopener noreferrer"
                             className="text-sm text-[#2563EB] hover:text-[#1E40AF] underline"
                           >
-                            {backlink.linking_url.slice(0, 40)}...
+                            {backlink.linking_url?.slice(0, 40)}...
                           </a>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-[#6B7280]">{backlink.target_post}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-[#6B7280]">{backlink.anchor_text}</div>
+                          <div className="text-sm text-[#6B7280]">{backlink.anchor_text || "-"}</div>
                         </td>
                         <td className="px-6 py-4">
                           <span className={cn(
                             "inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-bold w-10",
-                            getDRColor(backlink.domain_rating)
+                            getDRColor(backlink.domain_rating || 0)
                           )}>
-                            {backlink.domain_rating}
+                            {backlink.domain_rating || 0}
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           <span className={cn(
                             "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
-                            STATUS_COLORS[backlink.status]
+                            backlink.status === "Live" ? "bg-[#D1FAE5] text-[#065F46]" :
+                            backlink.status === "Pending" ? "bg-[#FEF3C7] text-[#92400E]" :
+                            "bg-[#FEE2E2] text-[#991B1B]"
                           )}>
                             {backlink.status}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-[#6B7280]">{backlink.added_date}</div>
+                          <div className="text-sm text-[#6B7280]">
+                            {backlink.date_added ? new Date(backlink.date_added).toLocaleDateString() : "-"}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
@@ -179,11 +179,6 @@ export default function BacklinksPage() {
                             >
                               View
                             </Link>
-                            {backlink.status === "Failed" && (
-                              <button className="text-sm font-medium text-[#DC2626] hover:text-[#991B1B]">
-                                Retry
-                              </button>
-                            )}
                           </div>
                         </td>
                       </tr>
