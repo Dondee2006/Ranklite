@@ -81,7 +81,7 @@ const INTEGRATIONS: Integration[] = [
   { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "📊" },
 ];
 
-const SUPPORTED_PLATFORMS = ["wordpress", "webflow"];
+const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix"];
 
 type Feedback = { type: "success" | "error"; text: string } | null;
 
