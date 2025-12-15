@@ -1,57 +1,87 @@
 import Link from "next/link";
-import { Check, X, ArrowRight, Zap } from "lucide-react";
+import { Check, X, ArrowRight, Zap, Shield, TrendingUp, Gauge } from "lucide-react";
 
 export default function Pricing() {
-  const tiers = [
+  const plans = [
     {
-      name: "Free Tier",
-      price: "$0",
-      period: "/mo",
+      name: "Starter",
+      tagline: "Safe Growth",
+      price: "$49",
+      period: "/month",
+      color: "from-green-500 to-emerald-500",
+      icon: "🟢",
+      description: "Best for new sites or small businesses starting SEO.",
       features: [
-        { label: "AI-generated articles/month", value: "3" },
-        { label: "Automatic publishing", value: "✅ 1 site" },
-        { label: "Keyword research & SEO optimization", value: "✅ Limited" },
-        { label: "Backlink starter pack", value: false },
-        { label: "Performance dashboard", value: false },
-        { label: "Human QA / content polishing", value: false },
-        { label: "Article length", value: "600–800 words" },
-        { label: "Multilingual support", value: false },
-        { label: "Free trial", value: false },
+        { label: "Sites", value: "1 website" },
+        { label: "Article Growth", value: "1 backlink per article, phased, SEO-safe" },
+        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
+        { label: "What's included", value: "AI-written posts, auto-publishing, per-article backlink building, built-in SEO protection" },
       ],
+      status: "Inactive",
+      whyWorks: "Ranklite paces growth conservatively so your site builds trust without triggering penalties.",
+      cta: "Start safe growth",
+      ctaLink: "/login",
     },
     {
-      name: "Pro Tier",
-      price: "$59",
-      period: "/mo",
-      isPopular: true,
-      features: [
-        { label: "AI-generated articles/month", value: "30" },
-        { label: "Automatic publishing", value: "✅ Multiple CMS (WordPress, Wix, Webflow)" },
-        { label: "Keyword research & SEO optimization", value: "✅ Full, advanced keyword optimization" },
-        { label: "Backlink starter pack", value: "✅ High-quality automated backlinks" },
-        { label: "Performance dashboard", value: "✅ Track rankings, traffic, published content" },
-        { label: "Human QA / content polishing", value: "✅ Optional light editing for higher rankings" },
-        { label: "Article length", value: "1,200–1,500 words" },
-        { label: "Multilingual support", value: "✅ Optional for niche markets" },
-        { label: "Free trial", value: "✅ 7-day free trial" },
-      ],
-    },
-    {
-      name: "Outrank.so",
+      name: "Growth",
+      tagline: "Balanced Growth",
       price: "$99",
-      period: "/mo",
+      period: "/month",
+      color: "from-blue-500 to-blue-600",
+      icon: "🔵",
+      isPopular: true,
+      description: "Designed for consistent rankings and steady traffic.",
       features: [
-        { label: "AI-generated articles/month", value: "30" },
-        { label: "Automatic publishing", value: "✅ Multiple CMS" },
-        { label: "Keyword research & SEO optimization", value: "✅ Full keyword optimization" },
-        { label: "Backlink starter pack", value: "✅ Limited / lower-quality backlinks" },
-        { label: "Performance dashboard", value: "✅ Dashboard (some limitations reported)" },
-        { label: "Human QA / content polishing", value: "❌ Mostly AI only" },
-        { label: "Article length", value: "1,200–1,500 words" },
-        { label: "Multilingual support", value: "✅ Available" },
-        { label: "Free trial", value: "❌  limited" },
+        { label: "Sites", value: "Up to 3 websites" },
+        { label: "Article Growth", value: "2–3 backlinks per article, attached to each post, progressive authority" },
+        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
+        { label: "What's included", value: "30-day AI content plan, daily publishing, per-article backlink generator, QA validation & indexing checks" },
       ],
+      whyWorks: "This plan mirrors how strong sites grow — consistent content, progressive authority, zero micromanagement.",
+      cta: "Start growing",
+      ctaLink: "/login",
     },
+    {
+      name: "Authority",
+      tagline: "Authority Growth",
+      price: "$199",
+      period: "/month",
+      color: "from-red-500 to-rose-600",
+      icon: "🔴",
+      description: "Built for established brands that want to move faster.",
+      features: [
+        { label: "Sites", value: "Up to 10 websites" },
+        { label: "Article Growth", value: "Up to 5 backlinks per article, scales after QA validation, optimized for aged domains" },
+        { label: "Integrations", value: "WordPress, Webflow, Shopify, Notion, Framer, Custom CMS via API" },
+        { label: "What's included", value: "Accelerated publishing, high-capacity per-article backlink generation, priority QA validation, advanced authority controls" },
+      ],
+      whyWorks: "Ranklite increases momentum only when your site is ready, protecting rankings while scaling.",
+      cta: "Scale authority",
+      ctaLink: "/login",
+    },
+  ];
+
+  const differentiators = [
+    {
+      title: "Most SEO tools give you:",
+      items: ["Data dashboards", "To-do lists", "Manual work"],
+    },
+    {
+      title: "Ranklite does the work for you.",
+      items: [
+        "We automatically control publishing, link building, and SEO pacing behind the scenes — so Google sees natural growth, not automation.",
+        "You never touch settings.",
+        "You never guess.",
+        "You just grow.",
+      ],
+      highlight: true,
+    },
+  ];
+
+  const safetyFeatures = [
+    { icon: Shield, text: "No link blasts" },
+    { icon: TrendingUp, text: "No content flooding" },
+    { icon: X, text: "No spam tactics" },
   ];
 
   return (
@@ -66,138 +96,151 @@ export default function Pricing() {
       </div>
 
       <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
+        {/* Header */}
         <div className="mx-auto mb-14 max-w-[700px] text-center lg:mb-20">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#F0FDF4] px-4 py-1.5 text-[13px] font-semibold text-[#16A34A]">
-            <Zap className="h-3.5 w-3.5" />
-            Pricing
-          </span>
           <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[40px] lg:text-[52px]">
-            Ranklite Pricing —{" "}
-            <span className="bg-gradient-to-r from-[#22C55E] to-[#16A34A] bg-clip-text text-transparent">
-              Free vs Pro
-            </span>
+            Ranklite Pricing
           </h2>
-          <p className="mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-muted-foreground lg:text-[18px]">
-            Automated Backlinks-Without Exchanges
+          <p className="mx-auto mt-5 max-w-[620px] text-[16px] leading-relaxed text-muted-foreground lg:text-[18px]">
+            SEO on autopilot — without burning your site
+          </p>
+          <p className="mx-auto mt-3 max-w-[620px] text-[15px] leading-relaxed text-muted-foreground lg:text-[16px]">
+            Ranklite automatically plans, writes, publishes, and grows your content — while quietly managing everything Google cares about in the background.
+          </p>
+          <p className="mx-auto mt-4 text-[14px] font-semibold text-foreground lg:text-[15px]">
+            No manual work. No risky shortcuts. No SEO guesswork.
           </p>
         </div>
 
-        {/* Mobile: Card view */}
-        <div className="mx-auto grid max-w-[1100px] gap-6 lg:hidden">
-          {tiers.map((tier, index) => (
+        {/* Pricing Cards */}
+        <div className="mx-auto grid max-w-[1200px] gap-6 lg:grid-cols-3">
+          {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative overflow-hidden rounded-3xl border bg-white p-6 shadow-lg ${
-                tier.isPopular ? "border-[#22C55E] shadow-green-500/10" : "border-border"
+              className={`relative overflow-hidden rounded-3xl border bg-white p-8 shadow-lg transition-all hover:shadow-xl ${
+                plan.isPopular ? "border-blue-500 shadow-blue-500/10 ring-2 ring-blue-500/20" : "border-border"
               }`}
             >
-              {tier.isPopular && (
-                <div className="absolute right-4 top-4 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-3 py-1 text-[11px] font-semibold text-white">
-                  BEST VALUE
+              {plan.isPopular && (
+                <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 text-[11px] font-semibold text-white">
+                  ⭐ Most Popular
                 </div>
               )}
-              <h3 className="font-display text-[20px] font-bold text-foreground">{tier.name}</h3>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-display text-[40px] font-bold text-foreground">{tier.price}</span>
-                <span className="text-[16px] text-muted-foreground">{tier.period}</span>
+              
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">{plan.icon}</span>
+                <div>
+                  <h3 className="font-display text-[20px] font-bold text-foreground">{plan.name}</h3>
+                  <p className="text-[13px] text-muted-foreground">{plan.tagline}</p>
+                </div>
               </div>
-              <ul className="mt-6 space-y-3">
-                {tier.features.map((feature, i) => (
+
+              <div className="mb-4 flex items-baseline gap-1">
+                <span className="font-display text-[40px] font-bold text-foreground">{plan.price}</span>
+                <span className="text-[16px] text-muted-foreground">{plan.period}</span>
+              </div>
+
+              <p className="mb-6 text-[14px] text-muted-foreground">{plan.description}</p>
+
+              <ul className="space-y-4 mb-6">
+                {plan.features.map((feature, i) => (
                   <li key={i} className="text-[14px]">
-                    <div className="font-semibold text-foreground">{feature.label}</div>
-                    <div className="mt-1 text-muted-foreground">
-                      {feature.value === false ? (
-                        <X className="inline h-4 w-4 text-red-500" />
-                      ) : (
-                        feature.value
-                      )}
-                    </div>
+                    <div className="font-semibold text-foreground mb-1">{feature.label}:</div>
+                    <div className="text-muted-foreground">{feature.value}</div>
                   </li>
                 ))}
               </ul>
-              {tier.isPopular && (
-                <Link
-                  href="/login"
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] py-3 text-[14px] font-semibold text-white shadow-lg shadow-green-500/20"
-                >
-                  Start Free Trial
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+
+              {plan.status && (
+                <div className="mb-4 inline-block rounded-full bg-gray-100 px-3 py-1 text-[12px] font-medium text-gray-600">
+                  Status: {plan.status}
+                </div>
               )}
+
+              <div className="mb-6 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+                <p className="text-[13px] font-semibold text-foreground mb-2">Why it works</p>
+                <p className="text-[13px] text-muted-foreground leading-relaxed">{plan.whyWorks}</p>
+              </div>
+
+              <Link
+                href={plan.ctaLink}
+                className={`flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r ${plan.color} py-3 text-[14px] font-semibold text-white shadow-lg transition-all hover:shadow-xl`}
+              >
+                {plan.cta}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           ))}
         </div>
 
-        {/* Desktop: Table view */}
-        <div className="mx-auto hidden max-w-[1100px] overflow-hidden rounded-3xl border border-border bg-white shadow-2xl shadow-black/[0.04] lg:block">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-gradient-to-r from-[#FAFFFE] to-[#F0FDF4]">
-                  <th className="py-6 pl-8 pr-4 text-left">
-                    <span className="font-display text-[18px] font-bold text-foreground">Feature</span>
-                  </th>
-                  {tiers.map((tier, index) => (
-                    <th key={index} className="relative px-4 py-6 text-center">
-                      {tier.isPopular && (
-                        <div className="absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-3 py-0.5 text-[10px] font-semibold text-white">
-                          BEST VALUE
-                        </div>
-                      )}
-                      <div className="font-display text-[18px] font-bold text-foreground">{tier.name}</div>
-                      <div className="mt-2 flex items-baseline justify-center gap-1">
-                        <span className="font-display text-[32px] font-bold text-foreground">{tier.price}</span>
-                        <span className="text-[14px] text-muted-foreground">{tier.period}</span>
-                      </div>
-                    </th>
+        {/* How Ranklite Is Different */}
+        <div className="mx-auto mt-20 max-w-[900px]">
+          <h3 className="mb-8 text-center font-display text-[28px] font-bold text-foreground sm:text-[32px]">
+            🧠 How Ranklite Is Different
+          </h3>
+          <div className="grid gap-6 md:grid-cols-2">
+            {differentiators.map((section, index) => (
+              <div
+                key={index}
+                className={`rounded-2xl border p-8 ${
+                  section.highlight
+                    ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+                    : "bg-white border-border"
+                }`}
+              >
+                <h4 className="mb-4 text-[18px] font-bold text-foreground">{section.title}</h4>
+                <ul className="space-y-2">
+                  {section.items.map((item, i) => (
+                    <li key={i} className="text-[14px] text-muted-foreground leading-relaxed">
+                      {section.highlight ? item : `• ${item}`}
+                    </li>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tiers[0].features.map((_, featureIndex) => (
-                  <tr key={featureIndex} className="border-b border-border last:border-b-0">
-                    <td className="py-4 pl-8 pr-4 text-[14px] font-medium text-foreground">
-                      {tiers[0].features[featureIndex].label}
-                    </td>
-                    {tiers.map((tier, tierIndex) => (
-                      <td key={tierIndex} className="px-4 py-4 text-center text-[14px] text-muted-foreground">
-                        {tier.features[featureIndex].value === false ? (
-                          <X className="inline h-4 w-4 text-red-500" />
-                        ) : typeof tier.features[featureIndex].value === "string" &&
-                          tier.features[featureIndex].value.includes("✅") ? (
-                          <span className="text-foreground">{tier.features[featureIndex].value}</span>
-                        ) : typeof tier.features[featureIndex].value === "string" &&
-                          tier.features[featureIndex].value.includes("❌") ? (
-                          <span className="text-foreground">{tier.features[featureIndex].value}</span>
-                        ) : (
-                          tier.features[featureIndex].value
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </ul>
+              </div>
+            ))}
           </div>
-          <div className="border-t border-border bg-gradient-to-r from-[#FAFFFE] to-[#F0FDF4] px-8 py-6">
-            <div className="flex items-center justify-center gap-6">
-              {tiers.map((tier, index) => (
-                <div key={index} className="flex-1 text-center">
-                  {tier.isPopular ? (
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-3 text-[14px] font-semibold text-white shadow-xl shadow-green-500/20 transition-all hover:shadow-2xl hover:shadow-green-500/30"
-                    >
-                      Start Free Trial
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  ) : (
-                    <div className="h-11" />
-                  )}
-                </div>
-              ))}
-            </div>
+        </div>
+
+        {/* SEO-Safe by Design */}
+        <div className="mx-auto mt-16 max-w-[800px] rounded-3xl border border-border bg-white p-8 shadow-lg">
+          <h3 className="mb-6 text-center font-display text-[24px] font-bold text-foreground">
+            🔒 SEO-Safe by Design
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-3 mb-6">
+            {safetyFeatures.map((feature, index) => (
+              <div key={index} className="flex items-center gap-3 rounded-xl bg-gray-50 p-4">
+                <feature.icon className="h-5 w-5 text-red-500" />
+                <span className="text-[14px] font-medium text-foreground">{feature.text}</span>
+              </div>
+            ))}
           </div>
+          <p className="text-center text-[14px] text-muted-foreground">
+            Ranklite adapts in real time to keep your site safe — even as it scales.
+          </p>
+        </div>
+
+        {/* Built for Founders */}
+        <div className="mx-auto mt-16 max-w-[700px] text-center">
+          <h3 className="mb-6 font-display text-[24px] font-bold text-foreground">
+            ⚡ Built for Founders, Not Agencies
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-3 mb-6">
+            {["Set it once", "Let it run", "Track results"].map((item, index) => (
+              <div key={index} className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+                <span className="text-[14px] font-semibold text-foreground">{item}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[14px] text-muted-foreground">
+            Perfect for startups, SaaS, local businesses, and creators who want SEO without babysitting tools.
+          </p>
+        </div>
+
+        {/* MVP Note */}
+        <div className="mx-auto mt-12 max-w-[600px] text-center">
+          <p className="text-[12px] text-muted-foreground/70">
+            🧪 <strong>MVP Note:</strong> Billing is currently in demo mode while we onboard early users.
+          </p>
         </div>
       </div>
     </section>
