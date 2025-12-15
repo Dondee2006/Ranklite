@@ -33,15 +33,9 @@ const companyLinks = [
 
 function RankliteLogo() {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-md shadow-green-500/20">
-        <Send className="h-4 w-4 text-white" />
-        <div className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#10B981] ring-2 ring-white" />
-      </div>
-      <span className="text-xl font-bold tracking-tight text-foreground" style={{ fontFamily: "var(--font-display)" }}>
-        Ranklite
-      </span>
-    </div>
+    <span className="text-[28px] font-bold tracking-tight text-[#22C55E]" style={{ fontFamily: "var(--font-display)" }}>
+      Ranklite
+    </span>
   );
 }
 
