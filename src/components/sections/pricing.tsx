@@ -56,7 +56,7 @@ export default function Pricing() {
       <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
         {/* Header */}
         <div className="mx-auto mb-14 max-w-[800px] text-center lg:mb-20">
-          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#6B47DC] sm:text-[48px] lg:text-[56px]">
+          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#10B981] sm:text-[48px] lg:text-[56px]">
             Choose Your Plan
           </h2>
           <p className="mx-auto mt-5 max-w-[620px] text-[18px] leading-relaxed text-[#4A5568] lg:text-[20px]">
