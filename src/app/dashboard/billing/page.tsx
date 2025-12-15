@@ -80,8 +80,9 @@ export default function BillingPage() {
     return true;
   }) : [];
 
-  const totalPages = Math.max(1, Math.ceil(filteredPlans.length / itemsPerPage));
-  const paginatedPlans = filteredPlans.slice(
+  const safeFilteredPlansLength = filteredPlans?.length || 0;
+  const totalPages = Math.max(1, Math.ceil(safeFilteredPlansLength / itemsPerPage));
+  const paginatedPlans = (filteredPlans || []).slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
