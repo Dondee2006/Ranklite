@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UpgradeCTA } from "@/components/dashboard/upgrade-cta";
+import { SEOCycleVisual } from "@/components/dashboard/seo-cycle-visual";
 
 interface Activity {
   id: string;
@@ -61,6 +62,10 @@ export default function DashboardOverviewPage() {
       </header>
 
       <div className="p-8">
+        <div className="mb-6">
+          <SEOCycleVisual />
+        </div>
+
         <div className="mb-6">
           <UpgradeCTA />
         </div>
