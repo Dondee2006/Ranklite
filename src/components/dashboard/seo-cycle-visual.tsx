@@ -81,7 +81,7 @@ export function SEOCycleVisual() {
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center gap-12">
+        <div className="flex items-center justify-center">
           {/* Circular visualization */}
           <div className="relative" style={{ width: 400, height: 400 }}>
             <svg width="400" height="400" className="transform -rotate-90">
@@ -199,63 +199,6 @@ export function SEOCycleVisual() {
                 </motion.div>
               );
             })}
-          </div>
-
-          {/* Stage details */}
-          <div className="flex-1 space-y-4 min-w-0">
-            {CYCLE_STAGES.map((stage, index) => (
-              <motion.div
-                key={stage.id}
-                initial={false}
-                animate={{
-                  opacity: activeStage === index ? 1 : 0.4,
-                  x: activeStage === index ? 0 : -10,
-                }}
-                transition={{ duration: 0.3 }}
-                onClick={() => {
-                  setActiveStage(index);
-                  setIsPlaying(false);
-                }}
-                className={`p-4 rounded-xl transition-all cursor-pointer border ${
-                  activeStage === index
-                    ? "bg-white border-[#2563EB]/30 shadow-sm ring-1 ring-[#2563EB]/10"
-                    : "bg-white border-[#E5E7EB] hover:bg-[#F9FAFB]"
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stage.gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}
-                  >
-                    {(() => {
-                      const Icon = stage.icon;
-                      return <Icon className="w-5 h-5 text-white" />;
-                    })()}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-semibold text-[#0F172A]">
-                        {index + 1}. {stage.name}
-                      </h3>
-                      {activeStage === index && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"
-                        />
-                      )}
-                    </div>
-                    <p className="text-sm text-[#475467]">{stage.description}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-
-            <div className="pt-4 mt-4 border-t border-[#E5E7EB]">
-              <div className="flex items-center gap-2 text-sm text-[#6B7280]">
-                <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                <span>Cycle repeats every 30 days automatically</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
