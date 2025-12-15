@@ -74,11 +74,7 @@ export function UpgradeCTA() {
         {currentPlan && (
           <div className="hidden md:block bg-white/10 backdrop-blur-sm rounded-lg p-4 ml-6">
             <div className="text-xs text-white/70 mb-1">Current Plan</div>
-            <div className="font-semibold mb-2">{currentPlan.name}</div>
-            <div className="text-xs space-y-1 text-white/90">
-              <div>• {currentPlan.posts_per_month} posts/month</div>
-              <div>• {currentPlan.backlinks_per_post} backlinks/post</div>
-            </div>
+            <div className="font-semibold">{currentPlan.name}</div>
           </div>
         )}
       </div>
