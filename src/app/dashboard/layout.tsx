@@ -184,9 +184,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <LogOut className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="mt-2 px-2 py-1 rounded-md bg-[#DBEAFE] text-center">
-            <span className="text-[10px] font-medium text-[#1E40AF]">Superadmin</span>
-          </div>
         </div>
       </aside>
 
