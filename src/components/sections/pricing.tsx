@@ -6,7 +6,7 @@ export default function Pricing() {
     {
       name: "Starter",
       subtitle: "Safe Growth",
-      price: 29,
+      price: 49,
       period: "/month",
       description: "Best for new sites or small businesses starting SEO",
       features: [
@@ -21,7 +21,7 @@ export default function Pricing() {
     {
       name: "Professional",
       subtitle: "Balanced Growth",
-      price: 79,
+      price: 99,
       period: "/month",
       description: "Designed for consistent rankings and steady traffic",
       features: [
