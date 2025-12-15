@@ -14,8 +14,12 @@ const faqs: FAQItem[] = [
     answer: "Ranklite is a complete SEO automation platform. We create a 30-day content calendar tailored to your niche, write and publish blog posts automatically, build high-quality backlinks for each article, and validate everything through QA checks—all without you lifting a finger."
   },
   {
-    question: "How does the automated backlink generation work?",
-    answer: "Ranklite generates backlinks by creating SEO tools and AI-discoverable content that naturally attracts links. Your content gets found and linked to by others—no exchanges, no trading, no waiting for reciprocal links. It's a white-hat, sustainable approach."
+    question: "What are backlinks, and why do they matter for my articles or blog posts?",
+    answer: "Backlinks are links from other websites that point to your article. They act as a vote of confidence, showing search engines that your content is credible and valuable. More high-quality backlinks can improve your article's visibility and ranking on search engines."
+  },
+  {
+    question: "How does Ranklite handle backlink generation for my content?",
+    answer: "Ranklite automatically generates backlinks for each article automatically published, attaching them directly to your posts. The system uses relevant anchor text and distributes links across diverse, trustworthy sources, boosting your SEO while keeping the process seamless and safe."
   },
   {
     question: "Do I need SEO experience to use Ranklite?",
@@ -40,10 +44,6 @@ const faqs: FAQItem[] = [
   {
     question: "Can I review content before it's published?",
     answer: "Yes. While Ranklite operates on autopilot by default, you can enable manual review mode in settings. This allows you to approve each article before publishing if you prefer more hands-on control."
-  },
-  {
-    question: "How are backlinks different from link exchanges?",
-    answer: "Traditional link exchanges involve trading links with other sites—risky and time-consuming. Ranklite creates valuable SEO resources that earn backlinks naturally through discovery, making your site a genuine authority that others want to reference."
   },
   {
     question: "What types of content does Ranklite create?",
