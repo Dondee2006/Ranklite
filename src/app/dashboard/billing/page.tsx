@@ -70,7 +70,7 @@ export default function BillingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filteredPlans = (plans || []).filter((plan) => {
+  const filteredPlans = Array.isArray(plans) ? plans.filter((plan) => {
     if (filter === "all") return true;
     if (filter === "active") return userPlan?.plan_id === plan.id && userPlan.status === "active";
     if (filter === "expired") return userPlan?.plan_id === plan.id && userPlan.status === "expired";
@@ -78,9 +78,9 @@ export default function BillingPage() {
     if (filter === "growth") return plan.name === "Growth";
     if (filter === "authority") return plan.name === "Authority";
     return true;
-  });
+  }) : [];
 
-  const totalPages = Math.max(1, Math.ceil((filteredPlans?.length || 0) / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredPlans.length / itemsPerPage));
   const paginatedPlans = filteredPlans.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
