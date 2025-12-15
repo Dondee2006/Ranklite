@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Check, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 type Plan = {
@@ -29,12 +30,20 @@ export function BillingPage() {
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
 
+  const supabase = createClient();
+
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       const [plansRes, userPlanRes] = await Promise.all([
         fetch("/api/billing/plans"),
         fetch("/api/billing/user-plan"),
