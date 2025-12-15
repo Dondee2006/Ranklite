@@ -6,25 +6,9 @@ import { Menu, X } from "lucide-react";
 
 function RankliteLogo() {
   return (
-    <div className="relative flex items-center">
-      <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
-        Ranklite
-      </span>
-      <svg 
-        width="32" 
-        height="32" 
-        viewBox="0 0 32 32" 
-        fill="none" 
-        className="shrink-0 absolute"
-        style={{ 
-          right: '-38px',
-          top: '-6px',
-        }}
-      >
-        <path d="M20 20L20 16L24 16" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
-        <path d="M28 12L28 8L32 8" stroke="#10B981" strokeWidth="3" strokeLinecap="square" strokeLinejoin="miter"/>
-      </svg>
-    </div>
+    <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
+      Ranklite
+    </span>
   );
 }
 
