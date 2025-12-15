@@ -81,17 +81,17 @@ export function BillingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">
             Choose Your Plan
           </h1>
           <p className="text-lg text-slate-600">
@@ -100,11 +100,11 @@ export function BillingPage() {
         </div>
 
         {userPlan && (
-          <div className="mb-8 p-6 bg-white/80 backdrop-blur-sm border border-indigo-200 rounded-2xl shadow-lg">
+          <div className="mb-8 p-6 bg-white/80 backdrop-blur-sm border border-green-200 rounded-2xl shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-600">Current Plan</p>
-                <p className="text-2xl font-bold text-indigo-900">
+                <p className="text-2xl font-bold text-green-900">
                   {userPlan.plans.name}
                 </p>
               </div>
@@ -131,8 +131,8 @@ export function BillingPage() {
                 className={cn(
                   "relative p-8 rounded-2xl border-2 transition-all duration-300 hover:shadow-2xl",
                   isCurrent
-                    ? "bg-gradient-to-br from-indigo-500 to-purple-600 border-indigo-600 text-white scale-105"
-                    : "bg-white/80 backdrop-blur-sm border-slate-200 hover:border-indigo-300"
+                    ? "bg-gradient-to-br from-green-500 to-emerald-600 border-green-600 text-white scale-105"
+                    : "bg-white/80 backdrop-blur-sm border-slate-200 hover:border-green-300"
                 )}
               >
                 {isCurrent && (
@@ -154,7 +154,7 @@ export function BillingPage() {
                     <span
                       className={cn(
                         "text-5xl font-extrabold",
-                        isCurrent ? "text-white" : "text-indigo-600"
+                        isCurrent ? "text-white" : "text-green-600"
                       )}
                     >
                       ${plan.price}
@@ -256,7 +256,7 @@ export function BillingPage() {
                     "w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200",
                     isCurrent
                       ? "bg-white/20 text-white cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg active:scale-95",
+                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 hover:shadow-lg active:scale-95",
                     isChanging && "opacity-50 cursor-wait"
                   )}
                 >
