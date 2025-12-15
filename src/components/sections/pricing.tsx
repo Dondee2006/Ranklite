@@ -1,7 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { Check, X, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Pricing() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const handlePlanClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated) {
+      e.preventDefault();
+      window.location.href = "/dashboard/overview";
+    }
+  };
+
   const plans = [
     {
       name: "Starter",
@@ -17,7 +39,7 @@ export default function Pricing() {
         { text: "Built-in SEO protection", included: true },
       ],
       cta: "Select Plan",
-      ctaLink: "/login",
+      ctaLink: "/signup",
     },
     {
       name: "Professional",
@@ -32,7 +54,7 @@ export default function Pricing() {
         { text: "QA validation & indexing checks", included: true },
       ],
       cta: "Select Plan",
-      ctaLink: "/login",
+      ctaLink: "/signup",
       popular: true,
     },
     {
@@ -48,7 +70,7 @@ export default function Pricing() {
         { text: "Advanced authority controls", included: true },
       ],
       cta: "Select Plan",
-      ctaLink: "/login",
+      ctaLink: "/signup",
     },
   ];
 
@@ -103,6 +125,7 @@ export default function Pricing() {
               {/* CTA Button */}
               <Link
                 href={plan.ctaLink}
+                onClick={handlePlanClick}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-4 text-[16px] font-semibold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
               >
                 {plan.cta}

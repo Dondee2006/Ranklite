@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { TrendingUp, Zap, Target, BarChart3, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 function StatBubble({ 
   icon: Icon, 
@@ -82,6 +84,24 @@ function PillTag({ children, variant = "green" }: { children: React.ReactNode; v
 }
 
 export default function HeroSection() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated) {
+      e.preventDefault();
+      window.location.href = "/dashboard/overview";
+    }
+  };
+
   return (
     <>
       <div className="relative overflow-hidden">
@@ -142,7 +162,8 @@ export default function HeroSection() {
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
                 <Link
-                  href="/login"
+                  href="/signup"
+                  onClick={handleButtonClick}
                   className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
                 >
                   <span className="relative z-10">Start Generating Backlinks</span>

@@ -1,7 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Link2, BarChart3, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function BoostVisibility() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const handleAuthClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated) {
+      e.preventDefault();
+      window.location.href = "/dashboard/overview";
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-white py-20 lg:py-32">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -32,6 +54,7 @@ export default function BoostVisibility() {
           </div>
           <Link
             href="/signup"
+            onClick={handleAuthClick}
             className="group flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30"
           >
             Generate Backlinks Instantly →

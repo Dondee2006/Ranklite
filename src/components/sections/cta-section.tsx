@@ -1,7 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Sparkles, Rocket, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function CtaSection() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const handleAuthClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated) {
+      e.preventDefault();
+      window.location.href = "/dashboard/overview";
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#FAFFFE] py-24 lg:py-32">
       <div className="pointer-events-none absolute inset-0">
@@ -43,7 +65,8 @@ export default function CtaSection() {
 
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
               <Link
-                href="/login"
+                href="/signup"
+                onClick={handleAuthClick}
                 className="group relative flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/20 transition-all hover:shadow-2xl hover:shadow-green-500/30"
               >
                 <Rocket className="h-5 w-5" />

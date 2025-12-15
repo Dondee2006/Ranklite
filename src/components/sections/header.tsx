@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 function RankliteLogo() {
   return (
@@ -14,6 +15,23 @@ function RankliteLogo() {
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
+
+  const handleAuthClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated) {
+      e.preventDefault();
+      window.location.href = "/dashboard/overview";
+    }
+  };
 
   return (
     <>
@@ -42,12 +60,14 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <Link
                 href="/login"
+                onClick={handleAuthClick}
                 className="hidden text-[15px] font-semibold text-foreground/70 transition-colors hover:text-foreground sm:block"
               >
                 Sign in
               </Link>
               <Link
-                href="/login"
+                href="/signup"
+                onClick={handleAuthClick}
                 className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-5 py-2.5 text-[15px] font-semibold text-white shadow-lg shadow-green-500/25 transition-all hover:shadow-green-500/40"
               >
                 <span className="relative z-10">Start Free Trial</span>
@@ -89,8 +109,9 @@ export default function Header() {
               <div className="mt-4 border-t border-border pt-4">
                 <Link
                   href="/login"
+                  onClick={handleAuthClick}
                   className="block rounded-xl px-4 py-3 text-center text-[15px] font-semibold text-foreground transition-colors hover:bg-muted"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClickCapture={() => setIsMobileMenuOpen(false)}
                 >
                   Sign in
                 </Link>
