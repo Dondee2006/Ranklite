@@ -1,0 +1,11 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow dashboard and API routes
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /checkout/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml

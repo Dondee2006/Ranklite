@@ -19,6 +19,8 @@ import {
   CreditCard,
   Calendar,
   Globe,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -83,6 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [websiteName, setWebsiteName] = useState("Website");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [faviconError, setFaviconError] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadUserData() {
@@ -116,7 +119,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen bg-[#FAFAFA]">
-      <aside className="fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-[#F7F7F7] border-r border-[#E5E5E5]">
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="fixed top-4 left-4 z-50 lg:hidden p-2 bg-white rounded-md shadow-md border border-[#E5E5E5]"
+        aria-label="Toggle menu"
+      >
+        {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+
+      <aside className={cn(
+        "fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-[#F7F7F7] border-r border-[#E5E5E5] transition-transform",
+        mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
         <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
           <div className="flex items-center gap-2">
             {websiteUrl && !faviconError ? (
@@ -152,6 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Link
                     key={item.id}
                     href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
                       "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
                       isActive(item.href)
@@ -187,7 +202,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      <main className="ml-[200px] flex-1">
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      <main className="lg:ml-[200px] flex-1 w-full">
         {children}
       </main>
     </div>

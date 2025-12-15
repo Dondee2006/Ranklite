@@ -19,6 +19,15 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/integrations");
 
   if (isPublicPage) {
+    const headers = supabaseResponse.headers;
+    headers.set("X-Frame-Options", "SAMEORIGIN");
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://www.google-analytics.com; frame-src https://js.stripe.com;"
+    );
     return supabaseResponse;
   }
 
@@ -64,6 +73,16 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
+
+  const headers = supabaseResponse.headers;
+  headers.set("X-Frame-Options", "SAMEORIGIN");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://www.google-analytics.com; frame-src https://js.stripe.com;"
+  );
 
   return supabaseResponse;
 }
