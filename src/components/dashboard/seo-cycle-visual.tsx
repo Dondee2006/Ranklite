@@ -66,22 +66,16 @@ export function SEOCycleVisual() {
   const centerY = 200;
 
   return (
-    <div className="relative w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-2xl p-8 overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000" />
-      </div>
-
+    <div className="relative w-full rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm overflow-hidden">
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white mb-1">The SEO Cycle</h2>
-            <p className="text-purple-200 text-sm">Your automated ranking engine</p>
+            <h2 className="text-2xl font-semibold text-[#0F172A] mb-1">The SEO Cycle</h2>
+            <p className="text-sm text-[#475467]">Your automated ranking engine</p>
           </div>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors text-sm font-medium"
+            className="px-4 py-2 rounded-lg border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] transition-colors text-sm font-medium shadow-sm"
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
@@ -97,7 +91,7 @@ export function SEOCycleVisual() {
                 cy={centerY}
                 r={radius}
                 fill="none"
-                stroke="rgba(255,255,255,0.1)"
+                stroke="#E5E7EB"
                 strokeWidth="2"
               />
 
@@ -122,9 +116,9 @@ export function SEOCycleVisual() {
 
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8B5CF6" />
-                  <stop offset="50%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#10B981" />
+                  <stop offset="0%" stopColor="#2563EB" />
+                  <stop offset="50%" stopColor="#10B981" />
+                  <stop offset="100%" stopColor="#F59E0B" />
                 </linearGradient>
               </defs>
             </svg>
@@ -142,17 +136,17 @@ export function SEOCycleVisual() {
                     className="flex flex-col items-center"
                   >
                     <div
-                      className={`w-20 h-20 rounded-full bg-gradient-to-br ${CYCLE_STAGES[activeStage].gradient} flex items-center justify-center mb-3 shadow-2xl`}
+                      className={`w-20 h-20 rounded-full bg-gradient-to-br ${CYCLE_STAGES[activeStage].gradient} flex items-center justify-center mb-3 shadow-md`}
                     >
                       {(() => {
                         const Icon = CYCLE_STAGES[activeStage].icon;
                         return <Icon className="w-10 h-10 text-white" />;
                       })()}
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">
+                    <div className="text-3xl font-bold text-[#0F172A] mb-1">
                       {CYCLE_STAGES[activeStage].name}
                     </div>
-                    <div className="text-sm text-purple-200 max-w-[160px]">
+                    <div className="text-sm text-[#475467] max-w-[200px]">
                       {CYCLE_STAGES[activeStage].description}
                     </div>
                   </motion.div>
@@ -188,13 +182,18 @@ export function SEOCycleVisual() {
                     }}
                     className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
                       activeStage === index
-                        ? `bg-gradient-to-br ${stage.gradient} shadow-2xl`
-                        : "bg-white/10 backdrop-blur-sm"
+                        ? `bg-gradient-to-br ${stage.gradient} shadow-lg`
+                        : "bg-white border border-[#E5E7EB] shadow-sm"
                     }`}
                   >
                     {(() => {
                       const Icon = stage.icon;
-                      return <Icon className="w-6 h-6 text-white" />;
+                      return (
+                        <Icon
+                          className="w-6 h-6"
+                          style={{ color: activeStage === index ? "#FFFFFF" : stage.color }}
+                        />
+                      );
                     })()}
                   </button>
                 </motion.div>
@@ -217,15 +216,15 @@ export function SEOCycleVisual() {
                   setActiveStage(index);
                   setIsPlaying(false);
                 }}
-                className={`p-4 rounded-xl backdrop-blur-sm transition-all cursor-pointer ${
+                className={`p-4 rounded-xl transition-all cursor-pointer border ${
                   activeStage === index
-                    ? "bg-white/20 shadow-xl"
-                    : "bg-white/5 hover:bg-white/10"
+                    ? "bg-white border-[#2563EB]/30 shadow-sm ring-1 ring-[#2563EB]/10"
+                    : "bg-white border-[#E5E7EB] hover:bg-[#F9FAFB]"
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stage.gradient} flex items-center justify-center flex-shrink-0`}
+                    className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stage.gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}
                   >
                     {(() => {
                       const Icon = stage.icon;
@@ -234,26 +233,26 @@ export function SEOCycleVisual() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-lg font-semibold text-[#0F172A]">
                         {index + 1}. {stage.name}
                       </h3>
                       {activeStage === index && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="w-2 h-2 rounded-full bg-green-400 animate-pulse"
+                          className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"
                         />
                       )}
                     </div>
-                    <p className="text-purple-200 text-sm">{stage.description}</p>
+                    <p className="text-sm text-[#475467]">{stage.description}</p>
                   </div>
                 </div>
               </motion.div>
             ))}
 
-            <div className="pt-4 mt-4 border-t border-white/10">
-              <div className="flex items-center gap-2 text-white/60 text-sm">
-                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+            <div className="pt-4 mt-4 border-t border-[#E5E7EB]">
+              <div className="flex items-center gap-2 text-sm text-[#6B7280]">
+                <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
                 <span>Cycle repeats every 30 days automatically</span>
               </div>
             </div>
