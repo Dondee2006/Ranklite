@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Check, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 type Plan = {
   id: string;
@@ -17,24 +19,31 @@ type UserPlan = {
   id: string;
   plan_id: string;
   status: string;
+  current_period_start: string | null;
   current_period_end: string | null;
   plans: Plan;
 };
 
-export default function BillingPage() {
+export function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
+  const supabase = createClient();
 
   useEffect(() => {
     loadData();
   }, []);
 
   async function loadData() {
-    setError(null);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       const [plansRes, userPlanRes] = await Promise.all([
         fetch("/api/billing/plans"),
         fetch("/api/billing/user-plan"),
@@ -43,13 +52,10 @@ export default function BillingPage() {
       const plansData = await plansRes.json();
       const userPlanData = await userPlanRes.json();
 
-      setPlans(Array.isArray(plansData.plans) ? plansData.plans : []);
+      setPlans(plansData.plans || []);
       setUserPlan(userPlanData.userPlan || null);
-    } catch (err: any) {
-      console.error("Error loading billing data:", err);
-      setError(err.message || "Failed to load billing data");
-      setPlans([]);
-      setUserPlan(null);
+    } catch (error) {
+      console.error("Failed to load billing data:", error);
     } finally {
       setLoading(false);
     }
@@ -58,59 +64,34 @@ export default function BillingPage() {
   async function handleChangePlan(planId: string) {
     setChangingPlan(planId);
     try {
-      const res = await fetch("/api/billing/change-plan", {
+      const response = await fetch("/api/billing/change-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId }),
       });
 
-      if (!res.ok) throw new Error("Failed to change plan");
-
-      await loadData();
+      if (response.ok) {
+        await loadData();
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to change plan");
+      }
     } catch (error) {
-      console.error("Error changing plan:", error);
+      console.error("Failed to change plan:", error);
       alert("Failed to change plan");
     } finally {
       setChangingPlan(null);
     }
   }
 
+  const isCurrentPlan = (planId: string) => {
+    return userPlan?.plan_id === planId && userPlan.status === "active";
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={loadData}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!plans || plans.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-slate-600 mb-4">No plans available</p>
-          <button
-            onClick={loadData}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Refresh
-          </button>
-        </div>
       </div>
     );
   }
@@ -127,7 +108,7 @@ export default function BillingPage() {
           </p>
         </div>
 
-        {userPlan?.plans && (
+        {userPlan && (
           <div className="mb-8 p-6 bg-white/80 backdrop-blur-sm border border-indigo-200 rounded-2xl shadow-lg">
             <div className="flex items-center justify-between">
               <div>
@@ -149,18 +130,19 @@ export default function BillingPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {Array.isArray(plans) && plans.map((plan) => {
-            const isCurrent = userPlan?.plan_id === plan.id && userPlan.status === "active";
+          {plans.map((plan) => {
+            const isCurrent = isCurrentPlan(plan.id);
             const isChanging = changingPlan === plan.id;
 
             return (
               <div
                 key={plan.id}
-                className={`relative p-8 rounded-2xl border-2 transition-all duration-300 hover:shadow-2xl ${
+                className={cn(
+                  "relative p-8 rounded-2xl border-2 transition-all duration-300 hover:shadow-2xl",
                   isCurrent
                     ? "bg-gradient-to-br from-indigo-500 to-purple-600 border-indigo-600 text-white scale-105"
                     : "bg-white/80 backdrop-blur-sm border-slate-200 hover:border-indigo-300"
-                }`}
+                )}
               >
                 {isCurrent && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-amber-900 text-xs font-bold rounded-full">
@@ -169,14 +151,29 @@ export default function BillingPage() {
                 )}
 
                 <div className="text-center mb-6">
-                  <h3 className={`text-2xl font-bold mb-2 ${isCurrent ? "text-white" : "text-slate-900"}`}>
+                  <h3
+                    className={cn(
+                      "text-2xl font-bold mb-2",
+                      isCurrent ? "text-white" : "text-slate-900"
+                    )}
+                  >
                     {plan.name}
                   </h3>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className={`text-5xl font-extrabold ${isCurrent ? "text-white" : "text-indigo-600"}`}>
+                    <span
+                      className={cn(
+                        "text-5xl font-extrabold",
+                        isCurrent ? "text-white" : "text-indigo-600"
+                      )}
+                    >
                       ${plan.price}
                     </span>
-                    <span className={`text-lg ${isCurrent ? "text-white/80" : "text-slate-600"}`}>
+                    <span
+                      className={cn(
+                        "text-lg",
+                        isCurrent ? "text-white/80" : "text-slate-600"
+                      )}
+                    >
                       /month
                     </span>
                   </div>
@@ -184,31 +181,79 @@ export default function BillingPage() {
 
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3">
-                    <Check className={`h-5 w-5 flex-shrink-0 ${isCurrent ? "text-white" : "text-green-500"}`} />
-                    <span className={`text-sm ${isCurrent ? "text-white" : "text-slate-700"}`}>
+                    <Check
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0",
+                        isCurrent ? "text-white" : "text-green-500"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isCurrent ? "text-white" : "text-slate-700"
+                      )}
+                    >
                       {plan.posts_per_month} posts per month
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <Check className={`h-5 w-5 flex-shrink-0 ${isCurrent ? "text-white" : "text-green-500"}`} />
-                    <span className={`text-sm ${isCurrent ? "text-white" : "text-slate-700"}`}>
+                    <Check
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0",
+                        isCurrent ? "text-white" : "text-green-500"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isCurrent ? "text-white" : "text-slate-700"
+                      )}
+                    >
                       {plan.backlinks_per_post} backlinks per post
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     {plan.qa_validation ? (
-                      <Check className={`h-5 w-5 flex-shrink-0 ${isCurrent ? "text-white" : "text-green-500"}`} />
+                      <Check
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isCurrent ? "text-white" : "text-green-500"
+                        )}
+                      />
                     ) : (
-                      <X className={`h-5 w-5 flex-shrink-0 ${isCurrent ? "text-white/60" : "text-red-500"}`} />
+                      <X
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isCurrent ? "text-white/60" : "text-red-500"
+                        )}
+                      />
                     )}
-                    <span className={`text-sm ${isCurrent ? "text-white" : "text-slate-700"}`}>
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isCurrent ? "text-white" : "text-slate-700"
+                      )}
+                    >
                       QA validation
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <Check className={`h-5 w-5 flex-shrink-0 ${isCurrent ? "text-white" : "text-green-500"}`} />
-                    <span className={`text-sm ${isCurrent ? "text-white" : "text-slate-700"}`}>
-                      {plan.integrations_limit === -1 ? "Unlimited" : plan.integrations_limit} integrations
+                    <Check
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0",
+                        isCurrent ? "text-white" : "text-green-500"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isCurrent ? "text-white" : "text-slate-700"
+                      )}
+                    >
+                      {plan.integrations_limit === -1
+                        ? "Unlimited"
+                        : plan.integrations_limit}{" "}
+                      integrations
                     </span>
                   </li>
                 </ul>
@@ -216,11 +261,13 @@ export default function BillingPage() {
                 <button
                   onClick={() => handleChangePlan(plan.id)}
                   disabled={isCurrent || isChanging}
-                  className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
+                  className={cn(
+                    "w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200",
                     isCurrent
                       ? "bg-white/20 text-white cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg active:scale-95"
-                  } ${isChanging ? "opacity-50 cursor-wait" : ""}`}
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg active:scale-95",
+                    isChanging && "opacity-50 cursor-wait"
+                  )}
                 >
                   {isChanging ? (
                     <span className="flex items-center justify-center gap-2">
@@ -241,3 +288,5 @@ export default function BillingPage() {
     </div>
   );
 }
+
+export default BillingPage;
