@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plug, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface Integration {
   id: string;
@@ -13,9 +14,48 @@ interface Integration {
 }
 
 const INTEGRATIONS: Integration[] = [
-  { id: "wordpress", name: "WordPress", status: "Not connected", last_sync: null, icon: "🔷" },
-  { id: "webflow", name: "Webflow", status: "Not connected", last_sync: null, icon: "⚡" },
-  { id: "shopify", name: "Shopify", status: "Not connected", last_sync: null, icon: "🛍️" },
+  { 
+    id: "wordpress", 
+    name: "WordPress", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-7-1765757064664.png?width=8000&height=8000&resize=contain" 
+  },
+  { 
+    id: "webflow", 
+    name: "Webflow", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-5-1765757166640.png?width=8000&height=8000&resize=contain" 
+  },
+  { 
+    id: "shopify", 
+    name: "Shopify", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Shopify-Emblem-1765757016807.png?width=8000&height=8000&resize=contain" 
+  },
+  { 
+    id: "notion", 
+    name: "Notion", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Notion-Logo-PNG-File-1765757016853.png?width=8000&height=8000&resize=contain" 
+  },
+  { 
+    id: "wix", 
+    name: "Wix", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/wix-logo_brandlogos.net_w0pfv-512x512-1765757027629.png?width=8000&height=8000&resize=contain" 
+  },
+  { 
+    id: "framer", 
+    name: "Framer", 
+    status: "Not connected", 
+    last_sync: null, 
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-6-1765757064675.png?width=8000&height=8000&resize=contain" 
+  },
   { id: "gsc", name: "Google Search Console", status: "Not connected", last_sync: null, icon: "🔍" },
   { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "📊" },
 ];
@@ -55,7 +95,18 @@ export default function IntegrationsPage() {
                   <tr key={integration.id} className="hover:bg-[#F9FAFB] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{integration.icon}</span>
+                        {integration.icon.startsWith('http') ? (
+                          <div className="relative w-8 h-8 flex-shrink-0">
+                            <Image 
+                              src={integration.icon} 
+                              alt={integration.name}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-2xl">{integration.icon}</span>
+                        )}
                         <span className="text-sm font-medium text-[#1A1A1A]">{integration.name}</span>
                       </div>
                     </td>
