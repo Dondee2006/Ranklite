@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
 
+function RankliteLogo() {
+  return (
+    <span className="text-[28px] font-bold tracking-tight text-[#22C55E]" style={{ fontFamily: "var(--font-display)" }}>
+      Ranklite
+    </span>
+  );
+}
+
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,11 +77,8 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-gray-900">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">R</span>
-            </div>
-            Ranklite
+          <Link href="/" className="inline-block">
+            <RankliteLogo />
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-gray-900">Create your account</h1>
           <p className="mt-2 text-gray-600">Start ranking higher with AI-powered content</p>
