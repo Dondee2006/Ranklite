@@ -38,6 +38,8 @@ export default function BillingPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        setPlans([]);
+        setUserPlan(null);
         setLoading(false);
         return;
       }
@@ -53,10 +55,12 @@ export default function BillingPage() {
         .eq("user_id", user.id)
         .single();
 
-      setPlans(plansData || []);
+      setPlans(Array.isArray(plansData) ? plansData : []);
       setUserPlan(userPlanData || null);
     } catch (error) {
       console.error("Error loading billing data:", error);
+      setPlans([]);
+      setUserPlan(null);
     } finally {
       setLoading(false);
     }
@@ -123,7 +127,7 @@ export default function BillingPage() {
           </p>
         </div>
 
-        {userPlan && (
+        {userPlan?.plans && (
           <div className="mb-8 p-6 bg-white/80 backdrop-blur-sm border border-indigo-200 rounded-2xl shadow-lg">
             <div className="flex items-center justify-between">
               <div>
@@ -145,7 +149,7 @@ export default function BillingPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan) => {
+          {Array.isArray(plans) && plans.map((plan) => {
             const isCurrent = userPlan?.plan_id === plan.id && userPlan.status === "active";
             const isChanging = changingPlan === plan.id;
 
