@@ -106,6 +106,7 @@ export default function IntegrationsPage() {
                               src={integration.icon} 
                               alt={integration.name}
                               fill
+                              sizes="(max-width: 768px) 40px, 40px"
                               className="object-contain"
                             />
                           </div>
