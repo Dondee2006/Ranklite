@@ -16,7 +16,7 @@ import {
   Flag,
   ClipboardList,
   LogOut,
-  Zap,
+  CreditCard,
   Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ const NAV_SECTIONS = [
     label: "CONFIGURATION",
     items: [
       { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
-      { id: "billing", label: "Upgrade", href: "/dashboard/billing", icon: Zap },
+      { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
       { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
     ],
   },
