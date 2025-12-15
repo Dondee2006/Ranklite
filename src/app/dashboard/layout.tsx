@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </button>
 
       <aside className={cn(
-        "fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-[#F7F7F7] border-r border-[#E5E5E5] transition-transform",
+        "fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-white border-r border-[#E5E5E5] transition-transform",
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
