@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Upload, Link2, CheckCircle2, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { FileText, Upload, Link2, CheckCircle2, TrendingUp, Clock, Sparkles, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CYCLE_STAGES = [
   {
     id: 1,
     name: "PLAN",
     description: "Keyword Research",
+    tooltip: "Articles in planning phase. Conducting keyword research, analyzing competition, and identifying content opportunities to target.",
     icon: FileText,
     color: "#8B5CF6",
     bgColor: "bg-[#F3F4F6]",
@@ -18,6 +20,7 @@ const CYCLE_STAGES = [
     id: 2,
     name: "CREATE",
     description: "Content Generation",
+    tooltip: "AI is actively generating high-quality, SEO-optimized content. Articles are being written, formatted, and prepared for publishing.",
     icon: Upload,
     color: "#3B82F6",
     bgColor: "bg-[#DBEAFE]",
@@ -27,6 +30,7 @@ const CYCLE_STAGES = [
     id: 3,
     name: "PUBLISH",
     description: "CMS Publishing",
+    tooltip: "Content is being published to your CMS. Articles are scheduled or live on your website and indexed by search engines.",
     icon: CheckCircle2,
     color: "#10B981",
     bgColor: "bg-[#D1FAE5]",
@@ -36,6 +40,7 @@ const CYCLE_STAGES = [
     id: 4,
     name: "PROMOTE",
     description: "Backlink Building",
+    tooltip: "Actively building backlinks through outreach. AI agent is submitting to directories, forums, and platforms to increase domain authority.",
     icon: Link2,
     color: "#F59E0B",
     bgColor: "bg-[#FEF3C7]",
@@ -45,6 +50,7 @@ const CYCLE_STAGES = [
     id: 5,
     name: "VALIDATE",
     description: "Quality Checks",
+    tooltip: "Verifying backlink quality and live status. Checking domain ratings, ensuring links are indexed, and validating they point to your site.",
     icon: CheckCircle2,
     color: "#06B6D4",
     bgColor: "bg-[#F3F4F6]",
@@ -54,6 +60,7 @@ const CYCLE_STAGES = [
     id: 6,
     name: "COMPLETE",
     description: "Ranking Ready",
+    tooltip: "Content is fully optimized with verified backlinks. Articles are ranking and driving organic traffic to your website.",
     icon: TrendingUp,
     color: "#10B981",
     bgColor: "bg-[#D1FAE5]",
@@ -167,22 +174,29 @@ export function SEOCycleVisual() {
             const Icon = stage.icon;
             const count = data.stageCounts[stage.name] || 0;
             return (
-              <div
-                key={stage.id}
-                className="relative rounded-xl border border-[#E5E5E5] bg-white p-4 hover:shadow-md transition-all"
-              >
-                <div className="flex flex-col items-center text-center">
-                  <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md ${stage.bgColor} ${stage.textColor} text-xs font-semibold mb-2 uppercase tracking-wide`}>
-                    {stage.name}
-                  </span>
-                  <div className="text-3xl font-bold text-[#1A1A1A] mb-1">
-                    {count}
+              <Tooltip key={stage.id}>
+                <TooltipTrigger asChild>
+                  <div
+                    className="relative rounded-xl border border-[#E5E5E5] bg-white p-4 hover:shadow-md transition-all cursor-help"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-md ${stage.bgColor} ${stage.textColor} text-xs font-semibold mb-2 uppercase tracking-wide`}>
+                        {stage.name}
+                      </span>
+                      <div className="text-3xl font-bold text-[#1A1A1A] mb-1">
+                        {count}
+                      </div>
+                      <div className="text-xs text-[#6B7280]">
+                        {stage.description}
+                      </div>
+                    </div>
+                    <Info className="absolute top-2 right-2 w-3.5 h-3.5 text-[#9CA3AF]" />
                   </div>
-                  <div className="text-xs text-[#6B7280]">
-                    {stage.description}
-                  </div>
-                </div>
-              </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs bg-[#1A1A1A] text-white">
+                  {stage.tooltip}
+                </TooltipContent>
+              </Tooltip>
             );
           })}
         </div>
