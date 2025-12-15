@@ -75,13 +75,13 @@ export async function GET(request: NextRequest) {
     const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
 
     // Get user's site
-    const { data: sites } = await supabase
+    const { data: site } = await supabase
       .from("sites")
-      .select("id")
+      .select("id, url")
       .eq("user_id", user.id)
       .single();
 
-    if (!sites) {
+    if (!site) {
       return NextResponse.redirect(
         new URL("/dashboard/settings?tab=gsc&error=no_site", request.url)
       );
@@ -91,7 +91,10 @@ export async function GET(request: NextRequest) {
     const { error: dbError } = await supabase
       .from("gsc_integrations")
       .upsert({
-        site_id: sites.id,
+        site_id: site.id,
+        user_id: user.id,
+        property_url: site.url,
+        site_url: site.url,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
         token_expires_at: expiresAt.toISOString(),
@@ -109,7 +112,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    syncGSCData(sites.id).catch((error) => {
+    syncGSCData(site.id).catch((error) => {
       console.error("Initial GSC sync failed:", error);
     });
 
