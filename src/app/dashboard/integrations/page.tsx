@@ -78,7 +78,7 @@ const INTEGRATIONS: Integration[] = [
     icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-6-1765757064675.png?width=8000&height=8000&resize=contain",
   },
   { id: "gsc", name: "Google Search Console", status: "Not connected", last_sync: null, icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/google-search-console-icon-logo-png_seeklogo-624699-1765807829593.png?width=8000&height=8000&resize=contain" },
-  { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "📊" },
+  { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/_google_analytics_icon-1765807972111.png?width=8000&height=8000&resize=contain" },
 ];
 
 const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix"];
