@@ -6,7 +6,7 @@ import { Menu, X } from "lucide-react";
 
 function RankliteLogo() {
   return (
-    <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
+    <span className="text-[28px] font-bold tracking-tight text-[#22C55E]" style={{ fontFamily: "var(--font-display)" }}>
       Ranklite
     </span>
   );
