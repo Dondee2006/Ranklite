@@ -49,13 +49,31 @@ export function BillingPage() {
         fetch("/api/billing/user-plan"),
       ]);
 
-      const plansData = await plansRes.json();
-      const userPlanData = await userPlanRes.json();
+      let plansData = { plans: [] };
+      let userPlanData = { userPlan: null };
 
-      setPlans(plansData.plans || []);
+      if (plansRes.ok) {
+        try {
+          plansData = await plansRes.json();
+        } catch (e) {
+          console.error("Failed to parse plans response:", e);
+        }
+      }
+
+      if (userPlanRes.ok) {
+        try {
+          userPlanData = await userPlanRes.json();
+        } catch (e) {
+          console.error("Failed to parse user plan response:", e);
+        }
+      }
+
+      setPlans(Array.isArray(plansData.plans) ? plansData.plans : []);
       setUserPlan(userPlanData.userPlan || null);
     } catch (error) {
       console.error("Failed to load billing data:", error);
+      setPlans([]);
+      setUserPlan(null);
     } finally {
       setLoading(false);
     }
