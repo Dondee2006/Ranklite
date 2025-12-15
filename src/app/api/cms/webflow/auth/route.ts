@@ -56,17 +56,17 @@ export async function POST(request: NextRequest) {
       .from("cms_integrations")
       .select("id")
       .eq("user_id", user.id)
-      .eq("cms_type", "webflow")
+      .eq("platform", "webflow")
       .single();
 
     if (existingIntegration) {
       const { error: updateError } = await supabase
         .from("cms_integrations")
         .update({
-          access_token,
+          credentials: { access_token },
           site_url: siteUrl,
           status: "connected",
-          settings: {
+          config: {
             site_id: selectedSite.id,
             site_name: selectedSite.displayName,
           },
@@ -87,12 +87,11 @@ export async function POST(request: NextRequest) {
       .from("cms_integrations")
       .insert({
         user_id: user.id,
-        cms_type: "webflow",
-        access_token,
+        platform: "webflow",
+        credentials: { access_token },
         site_url: siteUrl,
         status: "connected",
-        auto_publish_enabled: false,
-        settings: {
+        config: {
           site_id: selectedSite.id,
           site_name: selectedSite.displayName,
         },

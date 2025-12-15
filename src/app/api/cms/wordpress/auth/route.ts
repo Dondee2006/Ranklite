@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       .from('cms_integrations')
       .select('id')
       .eq('user_id', user.id)
-      .eq('cms_type', 'wordpress')
+      .eq('platform', 'wordpress')
       .eq('site_url', site_url)
       .single();
 
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       const { error: updateError } = await supabase
         .from('cms_integrations')
         .update({
-          access_token,
+          credentials: { access_token },
           status: 'connected',
           updated_at: new Date().toISOString(),
         })
@@ -62,11 +62,11 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         site_id: site_id || null,
-        cms_type: 'wordpress',
-        access_token,
+        platform: 'wordpress',
+        credentials: { access_token },
         site_url,
         status: 'connected',
-        settings: {},
+        config: {},
       })
       .select()
       .single();

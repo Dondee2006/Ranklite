@@ -52,8 +52,7 @@ export async function PATCH(
     };
 
     if (body.status !== undefined) updates.status = body.status;
-    if (body.auto_publish_enabled !== undefined) updates.auto_publish_enabled = body.auto_publish_enabled;
-    if (body.settings !== undefined) updates.settings = body.settings;
+    if (body.config !== undefined) updates.config = body.config;
     if (body.last_sync_at !== undefined) updates.last_sync_at = body.last_sync_at;
 
     const { data: integration, error } = await supabase
@@ -70,8 +69,7 @@ export async function PATCH(
       success: true,
       integration: {
         ...integration,
-        access_token: undefined,
-        refresh_token: undefined,
+        credentials: undefined,
       }
     });
 

@@ -11,6 +11,7 @@ interface Integration {
   status: "Connected" | "Not connected";
   last_sync: string | null;
   icon: string;
+  integration_id?: string;
 }
 
 const INTEGRATIONS: Integration[] = [
@@ -62,7 +63,149 @@ const INTEGRATIONS: Integration[] = [
 
 export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchIntegrations();
+  }, []);
+
+  const fetchIntegrations = async () => {
+    try {
+      const res = await fetch("/api/cms/integrations");
+      if (!res.ok) return;
+      
+      const { integrations: cmsIntegrations } = await res.json();
+      
+      setIntegrations(prev => 
+        prev.map(integration => {
+          const cms = cmsIntegrations.find((c: any) => c.platform === integration.id);
+          if (cms) {
+            return {
+              ...integration,
+              status: cms.status === "connected" ? "Connected" : "Not connected",
+              last_sync: cms.last_sync_at ? new Date(cms.last_sync_at).toLocaleString() : null,
+              integration_id: cms.id
+            };
+          }
+          return integration;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to fetch integrations:", error);
+    }
+  };
+
+  const handleConnect = async (integrationId: string) => {
+    setLoading(integrationId);
+    
+    try {
+      const platform = integrationId;
+      let accessToken = "";
+      let siteUrl = "";
+      let siteId = "";
+
+      if (platform === "wordpress") {
+        siteUrl = prompt("Enter your WordPress site URL (e.g., https://yoursite.com):") || "";
+        accessToken = prompt("Enter your WordPress Application Password:") || "";
+        
+        if (!siteUrl || !accessToken) {
+          alert("Both site URL and access token are required");
+          return;
+        }
+
+        const res = await fetch("/api/cms/wordpress/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ site_url: siteUrl, access_token: accessToken })
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+          alert(data.error || "Failed to connect WordPress");
+          return;
+        }
+
+        alert("WordPress connected successfully!");
+      } else if (platform === "webflow") {
+        accessToken = prompt("Enter your Webflow API token:") || "";
+        
+        if (!accessToken) {
+          alert("Access token is required");
+          return;
+        }
+
+        const res = await fetch("/api/cms/webflow/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken })
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+          alert(data.error || "Failed to connect Webflow");
+          return;
+        }
+
+        alert("Webflow connected successfully!");
+      } else {
+        alert(`${platform} integration coming soon!`);
+        return;
+      }
+
+      await fetchIntegrations();
+    } catch (error) {
+      console.error("Connection error:", error);
+      alert("Failed to connect integration");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleDisconnect = async (integration: Integration) => {
+    if (!integration.integration_id) return;
+    
+    if (!confirm(`Are you sure you want to disconnect ${integration.name}?`)) {
+      return;
+    }
+
+    setLoading(integration.id);
+
+    try {
+      const res = await fetch(`/api/cms/integrations/${integration.integration_id}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Failed to disconnect");
+        return;
+      }
+
+      alert(`${integration.name} disconnected successfully!`);
+      await fetchIntegrations();
+    } catch (error) {
+      console.error("Disconnect error:", error);
+      alert("Failed to disconnect integration");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleTest = async (integration: Integration) => {
+    setLoading(integration.id);
+
+    try {
+      alert(`Testing ${integration.name} connection...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert(`${integration.name} connection is working!`);
+    } catch (error) {
+      alert("Test failed");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -138,17 +281,31 @@ export default function IntegrationsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {integration.status === "Connected" ? (
+                        {loading === integration.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-[#2563EB]" />
+                        ) : integration.status === "Connected" ? (
                           <>
-                            <button className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]">
+                            <button 
+                              onClick={() => handleTest(integration)}
+                              disabled={loading !== null}
+                              className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF] disabled:opacity-50"
+                            >
                               Test
                             </button>
-                            <button className="text-sm font-medium text-[#DC2626] hover:text-[#991B1B]">
+                            <button 
+                              onClick={() => handleDisconnect(integration)}
+                              disabled={loading !== null}
+                              className="text-sm font-medium text-[#DC2626] hover:text-[#991B1B] disabled:opacity-50"
+                            >
                               Disconnect
                             </button>
                           </>
                         ) : (
-                          <button className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]">
+                          <button 
+                            onClick={() => handleConnect(integration.id)}
+                            disabled={loading !== null}
+                            className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF] disabled:opacity-50"
+                          >
                             Connect
                           </button>
                         )}

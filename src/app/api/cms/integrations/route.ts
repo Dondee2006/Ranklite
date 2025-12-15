@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
 
     const sanitizedIntegrations = integrations?.map(integration => ({
       ...integration,
-      access_token: undefined,
-      refresh_token: undefined,
+      credentials: undefined,
     }));
 
     return NextResponse.json({ integrations: sanitizedIntegrations });
@@ -58,9 +57,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { cms_type, access_token, site_url, settings, site_id } = body;
+    const { platform, access_token, site_url, config, site_id } = body;
 
-    if (!cms_type || !access_token) {
+    if (!platform || !access_token) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -69,11 +68,11 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         site_id: site_id || null,
-        cms_type,
-        access_token,
+        platform,
+        credentials: { access_token },
         site_url: site_url || 'unknown',
         status: 'connected',
-        settings: settings || {},
+        config: config || {},
       })
       .select()
       .single();
@@ -84,8 +83,7 @@ export async function POST(request: NextRequest) {
       success: true,
       integration: {
         ...integration,
-        access_token: undefined,
-        refresh_token: undefined,
+        credentials: undefined,
       }
     });
 
