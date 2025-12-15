@@ -81,7 +81,7 @@ const INTEGRATIONS: Integration[] = [
   { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/_google_analytics_icon-1765807972111.png?width=8000&height=8000&resize=contain" },
 ];
 
-const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix"];
+const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix", "framer"];
 
 type Feedback = { type: "success" | "error"; text: string } | null;
 
@@ -207,6 +207,15 @@ export default function IntegrationsPage() {
         }
         endpoint = "/api/cms/wix/auth";
         body = { app_id: form.appId, app_secret: form.appSecret, instance_id: form.instanceId };
+        break;
+
+      case "framer":
+        if (!form.accessToken) {
+          setFeedback({ type: "error", text: "API token is required." });
+          return;
+        }
+        endpoint = "/api/cms/framer/auth";
+        body = { access_token: form.accessToken };
         break;
 
       default:
@@ -429,6 +438,7 @@ export default function IntegrationsPage() {
               {currentPlatform === "shopify" && "Enter your Shopify shop URL and access token."}
               {currentPlatform === "notion" && "Provide your Notion integration token."}
               {currentPlatform === "wix" && "Enter your Wix app credentials to connect."}
+              {currentPlatform === "framer" && "Provide your Framer API token to connect."}
             </DialogDescription>
           </DialogHeader>
 
@@ -502,6 +512,7 @@ export default function IntegrationsPage() {
                   {currentPlatform === "webflow" && "API Token"}
                   {currentPlatform === "shopify" && "Access Token"}
                   {currentPlatform === "notion" && "Integration Token"}
+                  {currentPlatform === "framer" && "API Token"}
                 </Label>
                 <Input
                   id="accessToken"
@@ -511,6 +522,7 @@ export default function IntegrationsPage() {
                     currentPlatform === "webflow" ? "Enter your Webflow API token" :
                     currentPlatform === "shopify" ? "Enter your Shopify access token" :
                     currentPlatform === "notion" ? "Enter your Notion integration token" :
+                    currentPlatform === "framer" ? "Enter your Framer API token" :
                     "Enter your API token"
                   }
                   value={form.accessToken}
