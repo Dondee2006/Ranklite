@@ -451,6 +451,11 @@ export function SettingsContent() {
         {activeTab === "gsc" && (
           <>
             <div className="text-center mb-10">
+              <img
+                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/google-search-console-icon-logo-png_seeklogo-624699-1765824559889.png?width=8000&height=8000&resize=contain"
+                alt="Google Search Console logo"
+                className="mx-auto mb-4 h-20 w-20 object-contain"
+              />
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Google Search Console
               </h1>
