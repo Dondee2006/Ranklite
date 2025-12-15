@@ -96,7 +96,12 @@ export default function IntegrationsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {integration.icon.startsWith('http') ? (
-                          <div className="relative w-8 h-8 flex-shrink-0">
+                          <div className={cn(
+                            "relative flex-shrink-0",
+                            integration.id === "notion" || integration.id === "shopify" 
+                              ? "w-10 h-10" 
+                              : "w-8 h-8"
+                          )}>
                             <Image 
                               src={integration.icon} 
                               alt={integration.name}
