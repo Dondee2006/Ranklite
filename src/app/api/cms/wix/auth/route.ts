@@ -44,17 +44,17 @@ export async function POST(request: NextRequest) {
       .from("cms_integrations")
       .select("id")
       .eq("user_id", user.id)
-      .eq("cms_type", "wix")
+      .eq("platform", "wix")
       .single();
 
     if (existingIntegration) {
       const { error: updateError } = await supabase
         .from("cms_integrations")
         .update({
-          access_token: accessToken,
+          credentials: { access_token: accessToken },
           site_url: finalSiteUrl,
           status: "connected",
-          settings: {
+          config: {
             app_id,
             instance_id,
           },
@@ -74,12 +74,11 @@ export async function POST(request: NextRequest) {
       .from("cms_integrations")
       .insert({
         user_id: user.id,
-        cms_type: "wix",
-        access_token: accessToken,
+        platform: "wix",
+        credentials: { access_token: accessToken },
         site_url: finalSiteUrl,
         status: "connected",
-        auto_publish_enabled: false,
-        settings: {
+        config: {
           app_id,
           instance_id,
         },

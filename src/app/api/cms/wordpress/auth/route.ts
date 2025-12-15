@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         success: true, 
         integration_id: existingIntegration.id,
-        message: 'WordPress connection updated successfully' 
+        message: 'WordPress connected successfully' 
       });
     }
 

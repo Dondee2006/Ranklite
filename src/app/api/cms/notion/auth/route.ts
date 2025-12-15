@@ -40,18 +40,18 @@ export async function POST(request: NextRequest) {
       .from('cms_integrations')
       .select('id')
       .eq('user_id', user.id)
-      .eq('cms_type', 'notion')
+      .eq('platform', 'notion')
       .single();
 
-    const settings = database_id ? { database_id } : {};
+    const settingsObj = database_id ? { database_id } : {};
 
     if (existingIntegration) {
       const { error: updateError } = await supabase
         .from('cms_integrations')
         .update({
-          access_token,
+          credentials: { access_token },
           status: 'connected',
-          settings,
+          config: settingsObj,
           updated_at: new Date().toISOString(),
         })
         .eq('id', existingIntegration.id);
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         site_id: site_id || null,
-        cms_type: 'notion',
-        access_token,
+        platform: 'notion',
+        credentials: { access_token },
         site_url: 'notion.so',
         status: 'connected',
-        settings,
+        config: settingsObj,
       })
       .select()
       .single();

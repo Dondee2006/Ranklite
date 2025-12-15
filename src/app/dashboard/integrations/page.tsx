@@ -91,7 +91,14 @@ export default function IntegrationsPage() {
   const [connectOpen, setConnectOpen] = useState(false);
   const [disconnectTarget, setDisconnectTarget] = useState<Integration | null>(null);
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
-  const [form, setForm] = useState({ siteUrl: "", accessToken: "" });
+  const [form, setForm] = useState({ 
+    siteUrl: "", 
+    accessToken: "", 
+    shop: "",
+    appId: "",
+    appSecret: "",
+    instanceId: ""
+  });
   const [feedback, setFeedback] = useState<Feedback>(null);
 
   useEffect(() => {
@@ -100,6 +107,8 @@ export default function IntegrationsPage() {
 
   const currentPlatform = selectedIntegration?.id;
   const requiresSiteUrl = currentPlatform === "wordpress";
+  const requiresShop = currentPlatform === "shopify";
+  const requiresWixFields = currentPlatform === "wix";
 
   const fetchIntegrations = async () => {
     try {
@@ -133,7 +142,14 @@ export default function IntegrationsPage() {
       return;
     }
     setSelectedIntegration(integration);
-    setForm({ siteUrl: "", accessToken: "" });
+    setForm({ 
+      siteUrl: "", 
+      accessToken: "", 
+      shop: "",
+      appId: "",
+      appSecret: "",
+      instanceId: ""
+    });
     setFeedback(null);
     setConnectOpen(true);
   };
@@ -143,25 +159,65 @@ export default function IntegrationsPage() {
     if (!selectedIntegration) return;
 
     const platform = selectedIntegration.id;
-    if (platform === "wordpress" && (!form.siteUrl || !form.accessToken)) {
-      setFeedback({ type: "error", text: "Site URL and Application Password are required." });
-      return;
-    }
-    if (platform === "webflow" && !form.accessToken) {
-      setFeedback({ type: "error", text: "API token is required." });
-      return;
+    
+    let endpoint = "";
+    let body: any = {};
+
+    switch (platform) {
+      case "wordpress":
+        if (!form.siteUrl || !form.accessToken) {
+          setFeedback({ type: "error", text: "Site URL and Application Password are required." });
+          return;
+        }
+        endpoint = "/api/cms/wordpress/auth";
+        body = { site_url: form.siteUrl, access_token: form.accessToken };
+        break;
+
+      case "webflow":
+        if (!form.accessToken) {
+          setFeedback({ type: "error", text: "API token is required." });
+          return;
+        }
+        endpoint = "/api/cms/webflow/auth";
+        body = { access_token: form.accessToken };
+        break;
+
+      case "shopify":
+        if (!form.shop || !form.accessToken) {
+          setFeedback({ type: "error", text: "Shop URL and Access Token are required." });
+          return;
+        }
+        endpoint = "/api/cms/shopify/auth";
+        body = { shop: form.shop, access_token: form.accessToken };
+        break;
+
+      case "notion":
+        if (!form.accessToken) {
+          setFeedback({ type: "error", text: "Integration Token is required." });
+          return;
+        }
+        endpoint = "/api/cms/notion/auth";
+        body = { access_token: form.accessToken };
+        break;
+
+      case "wix":
+        if (!form.appId || !form.appSecret || !form.instanceId) {
+          setFeedback({ type: "error", text: "App ID, App Secret, and Instance ID are required." });
+          return;
+        }
+        endpoint = "/api/cms/wix/auth";
+        body = { app_id: form.appId, app_secret: form.appSecret, instance_id: form.instanceId };
+        break;
+
+      default:
+        setFeedback({ type: "error", text: "Unsupported platform." });
+        return;
     }
 
     setLoading(platform);
     setFeedback(null);
 
     try {
-      const endpoint = platform === "wordpress" ? "/api/cms/wordpress/auth" : "/api/cms/webflow/auth";
-      const body =
-        platform === "wordpress"
-          ? { site_url: form.siteUrl, access_token: form.accessToken }
-          : { access_token: form.accessToken };
-
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -368,9 +424,11 @@ export default function IntegrationsPage() {
           <DialogHeader>
             <DialogTitle>Connect {selectedIntegration?.name}</DialogTitle>
             <DialogDescription>
-              {selectedIntegration?.name === "WordPress"
-                ? "Enter your site URL and application password to validate the connection."
-                : "Provide your API token to connect."}
+              {currentPlatform === "wordpress" && "Enter your site URL and application password to validate the connection."}
+              {currentPlatform === "webflow" && "Provide your Webflow API token to connect."}
+              {currentPlatform === "shopify" && "Enter your Shopify shop URL and access token."}
+              {currentPlatform === "notion" && "Provide your Notion integration token."}
+              {currentPlatform === "wix" && "Enter your Wix app credentials to connect."}
             </DialogDescription>
           </DialogHeader>
 
@@ -388,19 +446,79 @@ export default function IntegrationsPage() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="accessToken">
-                {currentPlatform === "webflow" ? "API Token" : "Application Password"}
-              </Label>
-              <Input
-                id="accessToken"
-                type="password"
-                placeholder={currentPlatform === "webflow" ? "Enter your Webflow API token" : "Enter your WordPress application password"}
-                value={form.accessToken}
-                onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}
-                required
-              />
-            </div>
+            {requiresShop && (
+              <div className="space-y-2">
+                <Label htmlFor="shop">Shop URL</Label>
+                <Input
+                  id="shop"
+                  placeholder="your-shop.myshopify.com"
+                  value={form.shop}
+                  onChange={(e) => setForm((prev) => ({ ...prev, shop: e.target.value }))}
+                  required
+                />
+              </div>
+            )}
+
+            {requiresWixFields && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="appId">App ID</Label>
+                  <Input
+                    id="appId"
+                    placeholder="Enter your Wix App ID"
+                    value={form.appId}
+                    onChange={(e) => setForm((prev) => ({ ...prev, appId: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="appSecret">App Secret</Label>
+                  <Input
+                    id="appSecret"
+                    type="password"
+                    placeholder="Enter your Wix App Secret"
+                    value={form.appSecret}
+                    onChange={(e) => setForm((prev) => ({ ...prev, appSecret: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instanceId">Instance ID</Label>
+                  <Input
+                    id="instanceId"
+                    placeholder="Enter your Wix Instance ID"
+                    value={form.instanceId}
+                    onChange={(e) => setForm((prev) => ({ ...prev, instanceId: e.target.value }))}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {!requiresWixFields && (
+              <div className="space-y-2">
+                <Label htmlFor="accessToken">
+                  {currentPlatform === "wordpress" && "Application Password"}
+                  {currentPlatform === "webflow" && "API Token"}
+                  {currentPlatform === "shopify" && "Access Token"}
+                  {currentPlatform === "notion" && "Integration Token"}
+                </Label>
+                <Input
+                  id="accessToken"
+                  type="password"
+                  placeholder={
+                    currentPlatform === "wordpress" ? "Enter your WordPress application password" :
+                    currentPlatform === "webflow" ? "Enter your Webflow API token" :
+                    currentPlatform === "shopify" ? "Enter your Shopify access token" :
+                    currentPlatform === "notion" ? "Enter your Notion integration token" :
+                    "Enter your API token"
+                  }
+                  value={form.accessToken}
+                  onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}
+                  required
+                />
+              </div>
+            )}
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <Button
