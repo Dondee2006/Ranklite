@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, Check, Info } from "lucide-react";
+import { Zap, Check, Info, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type GrowthMode = "Safe Growth" | "Balanced Growth" | "Authority Growth";
@@ -68,6 +68,14 @@ export default function BillingPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+
+  const toggleRow = (planId: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [planId]: !prev[planId],
+    }));
+  };
 
   const handleUpgradeClick = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -196,17 +204,31 @@ export default function BillingPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <ul className="space-y-1.5">
-                        {plan.features.map((feature, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-start gap-2 text-xs text-[#4B5563]"
-                          >
-                            <Check className="h-3.5 w-3.5 text-[#10B981] mt-0.5 flex-shrink-0" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <button
+                        onClick={() => toggleRow(plan.id)}
+                        className="flex items-center gap-2 text-xs font-medium text-[#6B7280] hover:text-[#1A1A1A] transition-colors"
+                      >
+                        <span>{expandedRows[plan.id] ? "Hide" : "Show"} features</span>
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform",
+                            expandedRows[plan.id] && "rotate-180"
+                          )}
+                        />
+                      </button>
+                      {expandedRows[plan.id] && (
+                        <ul className="space-y-1.5 mt-3">
+                          {plan.features.map((feature, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-xs text-[#4B5563]"
+                            >
+                              <Check className="h-3.5 w-3.5 text-[#10B981] mt-0.5 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </td>
                     <td className="px-6 py-4">{getStatusBadge(plan.isActive)}</td>
                     <td className="px-6 py-4 text-right">
