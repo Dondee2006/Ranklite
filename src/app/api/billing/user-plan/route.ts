@@ -4,37 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!user) {
+      return NextResponse.json({ userPlan: null });
     }
 
-    const { data: userPlan, error: planError } = await supabase
+    const { data: userPlan } = await supabase
       .from("user_plans")
-      .select(`
-        *,
-        plans (*)
-      `)
+      .select("*, plans(*)")
       .eq("user_id", user.id)
       .single();
 
-    if (planError) {
-      return NextResponse.json({
-        userPlan: null,
-        message: "No active plan found"
-      });
-    }
-
-    return NextResponse.json({ userPlan });
+    return NextResponse.json({ userPlan: userPlan || null });
   } catch (error) {
-    console.error("Failed to fetch user plan:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Error fetching user plan:", error);
+    return NextResponse.json({ userPlan: null });
   }
 }
