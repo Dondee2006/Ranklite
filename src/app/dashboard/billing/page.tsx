@@ -69,7 +69,7 @@ export default function BillingPage() {
     loadData();
   }, [supabase]);
 
-  const filteredPlans = plans.filter((plan) => {
+  const filteredPlans = (plans || []).filter((plan) => {
     if (filter === "all") return true;
     if (filter === "active") return userPlan?.plan_id === plan.id && userPlan.status === "active";
     if (filter === "expired") return userPlan?.plan_id === plan.id && userPlan.status === "expired";
