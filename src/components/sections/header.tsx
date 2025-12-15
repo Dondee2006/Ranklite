@@ -8,7 +8,7 @@ function RankliteLogo() {
   return (
     <div className="relative flex items-center">
       <span className="text-[28px] font-bold tracking-tight text-[#10B981]" style={{ fontFamily: "var(--font-display)" }}>
-        ranklite
+        Ranklite
       </span>
       <svg 
         width="32" 
