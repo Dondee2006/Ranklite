@@ -1,9 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { Plug, CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Integration {
   id: string;
@@ -15,76 +35,88 @@ interface Integration {
 }
 
 const INTEGRATIONS: Integration[] = [
-  { 
-    id: "wordpress", 
-    name: "WordPress", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-7-1765757064664.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "wordpress",
+    name: "WordPress",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-7-1765757064664.png?width=8000&height=8000&resize=contain",
   },
-  { 
-    id: "webflow", 
-    name: "Webflow", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-5-1765757166640.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "webflow",
+    name: "Webflow",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-5-1765757166640.png?width=8000&height=8000&resize=contain",
   },
-  { 
-    id: "shopify", 
-    name: "Shopify", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Shopify-Emblem-1765757016807.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "shopify",
+    name: "Shopify",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Shopify-Emblem-1765757016807.png?width=8000&height=8000&resize=contain",
   },
-  { 
-    id: "notion", 
-    name: "Notion", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Notion-Logo-PNG-File-1765757016853.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "notion",
+    name: "Notion",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Notion-Logo-PNG-File-1765757016853.png?width=8000&height=8000&resize=contain",
   },
-  { 
-    id: "wix", 
-    name: "Wix", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/wix-logo_brandlogos.net_w0pfv-512x512-1765757027629.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "wix",
+    name: "Wix",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/wix-logo_brandlogos.net_w0pfv-512x512-1765757027629.png?width=8000&height=8000&resize=contain",
   },
-  { 
-    id: "framer", 
-    name: "Framer", 
-    status: "Not connected", 
-    last_sync: null, 
-    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-6-1765757064675.png?width=8000&height=8000&resize=contain" 
+  {
+    id: "framer",
+    name: "Framer",
+    status: "Not connected",
+    last_sync: null,
+    icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-6-1765757064675.png?width=8000&height=8000&resize=contain",
   },
   { id: "gsc", name: "Google Search Console", status: "Not connected", last_sync: null, icon: "🔍" },
   { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "📊" },
 ];
 
+const SUPPORTED_PLATFORMS = ["wordpress", "webflow"];
+
+type Feedback = { type: "success" | "error"; text: string } | null;
+
 export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [loading, setLoading] = useState<string | null>(null);
+  const [connectOpen, setConnectOpen] = useState(false);
+  const [disconnectTarget, setDisconnectTarget] = useState<Integration | null>(null);
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
+  const [form, setForm] = useState({ siteUrl: "", accessToken: "" });
+  const [feedback, setFeedback] = useState<Feedback>(null);
 
   useEffect(() => {
     fetchIntegrations();
   }, []);
 
+  const currentPlatform = selectedIntegration?.id;
+  const requiresSiteUrl = currentPlatform === "wordpress";
+
   const fetchIntegrations = async () => {
     try {
       const res = await fetch("/api/cms/integrations");
       if (!res.ok) return;
-      
+
       const { integrations: cmsIntegrations } = await res.json();
-      
-      setIntegrations(prev => 
-        prev.map(integration => {
+
+      setIntegrations((prev) =>
+        prev.map((integration) => {
           const cms = cmsIntegrations.find((c: any) => c.platform === integration.id);
           if (cms) {
             return {
               ...integration,
               status: cms.status === "connected" ? "Connected" : "Not connected",
               last_sync: cms.last_sync_at ? new Date(cms.last_sync_at).toLocaleString() : null,
-              integration_id: cms.id
+              integration_id: cms.id,
             };
           }
           return integration;
@@ -95,113 +127,101 @@ export default function IntegrationsPage() {
     }
   };
 
-  const handleConnect = async (integrationId: string) => {
-    setLoading(integrationId);
-    
+  const openConnectDialog = (integration: Integration) => {
+    if (!SUPPORTED_PLATFORMS.includes(integration.id)) {
+      setFeedback({ type: "error", text: `${integration.name} integration is coming soon.` });
+      return;
+    }
+    setSelectedIntegration(integration);
+    setForm({ siteUrl: "", accessToken: "" });
+    setFeedback(null);
+    setConnectOpen(true);
+  };
+
+  const handleConnect = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedIntegration) return;
+
+    const platform = selectedIntegration.id;
+    if (platform === "wordpress" && (!form.siteUrl || !form.accessToken)) {
+      setFeedback({ type: "error", text: "Site URL and Application Password are required." });
+      return;
+    }
+    if (platform === "webflow" && !form.accessToken) {
+      setFeedback({ type: "error", text: "API token is required." });
+      return;
+    }
+
+    setLoading(platform);
+    setFeedback(null);
+
     try {
-      const platform = integrationId;
-      let accessToken = "";
-      let siteUrl = "";
-      let siteId = "";
+      const endpoint = platform === "wordpress" ? "/api/cms/wordpress/auth" : "/api/cms/webflow/auth";
+      const body =
+        platform === "wordpress"
+          ? { site_url: form.siteUrl, access_token: form.accessToken }
+          : { access_token: form.accessToken };
 
-      if (platform === "wordpress") {
-        siteUrl = prompt("Enter your WordPress site URL (e.g., https://yoursite.com):") || "";
-        accessToken = prompt("Enter your WordPress Application Password:") || "";
-        
-        if (!siteUrl || !accessToken) {
-          alert("Both site URL and access token are required");
-          return;
-        }
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-        const res = await fetch("/api/cms/wordpress/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ site_url: siteUrl, access_token: accessToken })
-        });
+      const data = await res.json();
 
-        const data = await res.json();
-        
-        if (!res.ok) {
-          alert(data.error || "Failed to connect WordPress");
-          return;
-        }
-
-        alert("WordPress connected successfully!");
-      } else if (platform === "webflow") {
-        accessToken = prompt("Enter your Webflow API token:") || "";
-        
-        if (!accessToken) {
-          alert("Access token is required");
-          return;
-        }
-
-        const res = await fetch("/api/cms/webflow/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ access_token: accessToken })
-        });
-
-        const data = await res.json();
-        
-        if (!res.ok) {
-          alert(data.error || "Failed to connect Webflow");
-          return;
-        }
-
-        alert("Webflow connected successfully!");
-      } else {
-        alert(`${platform} integration coming soon!`);
+      if (!res.ok) {
+        setFeedback({ type: "error", text: data.error || "Failed to connect." });
         return;
       }
 
+      setFeedback({ type: "success", text: `${selectedIntegration.name} connected successfully.` });
+      setConnectOpen(false);
       await fetchIntegrations();
     } catch (error) {
       console.error("Connection error:", error);
-      alert("Failed to connect integration");
+      setFeedback({ type: "error", text: "Failed to connect integration." });
     } finally {
       setLoading(null);
     }
   };
 
-  const handleDisconnect = async (integration: Integration) => {
-    if (!integration.integration_id) return;
-    
-    if (!confirm(`Are you sure you want to disconnect ${integration.name}?`)) {
-      return;
-    }
+  const handleDisconnect = async () => {
+    if (!disconnectTarget?.integration_id) return;
 
-    setLoading(integration.id);
+    setLoading(disconnectTarget.id);
+    setFeedback(null);
 
     try {
-      const res = await fetch(`/api/cms/integrations/${integration.integration_id}`, {
-        method: "DELETE"
+      const res = await fetch(`/api/cms/integrations/${disconnectTarget.integration_id}`, {
+        method: "DELETE",
       });
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Failed to disconnect");
+        setFeedback({ type: "error", text: data.error || "Failed to disconnect." });
         return;
       }
 
-      alert(`${integration.name} disconnected successfully!`);
+      setFeedback({ type: "success", text: `${disconnectTarget.name} disconnected successfully.` });
       await fetchIntegrations();
     } catch (error) {
       console.error("Disconnect error:", error);
-      alert("Failed to disconnect integration");
+      setFeedback({ type: "error", text: "Failed to disconnect integration." });
     } finally {
       setLoading(null);
+      setDisconnectTarget(null);
     }
   };
 
   const handleTest = async (integration: Integration) => {
     setLoading(integration.id);
-
+    setFeedback(null);
     try {
-      alert(`Testing ${integration.name} connection...`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert(`${integration.name} connection is working!`);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setFeedback({ type: "success", text: `${integration.name} connection looks good.` });
     } catch (error) {
-      alert("Test failed");
+      setFeedback({ type: "error", text: "Test failed." });
     } finally {
       setLoading(null);
     }
@@ -210,10 +230,26 @@ export default function IntegrationsPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <header className="border-b border-[#E5E5E5] bg-white px-8 py-5">
-        <h1 className="text-2xl font-semibold text-[#1A1A1A]">Integrations</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-[#1A1A1A]">Integrations</h1>
+          <Plug className="h-5 w-5 text-[#6B7280]" />
+        </div>
       </header>
 
-      <div className="p-8">
+      <div className="p-8 space-y-3">
+        {feedback && (
+          <div
+            className={cn(
+              "rounded-md px-4 py-3 text-sm border",
+              feedback.type === "success"
+                ? "bg-[#ECFDF3] text-[#065F46] border-[#A7F3D0]"
+                : "bg-[#FEF2F2] text-[#991B1B] border-[#FECACA]"
+            )}
+          >
+            {feedback.text}
+          </div>
+        )}
+
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -238,15 +274,17 @@ export default function IntegrationsPage() {
                   <tr key={integration.id} className="hover:bg-[#F9FAFB] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {integration.icon.startsWith('http') ? (
-                          <div className={cn(
-                            "relative flex-shrink-0",
-                            integration.id === "notion" || integration.id === "shopify" 
-                              ? "w-10 h-10" 
-                              : "w-8 h-8"
-                          )}>
-                            <Image 
-                              src={integration.icon} 
+                        {integration.icon.startsWith("http") ? (
+                          <div
+                            className={cn(
+                              "relative flex-shrink-0",
+                              integration.id === "notion" || integration.id === "shopify"
+                                ? "w-10 h-10"
+                                : "w-8 h-8"
+                            )}
+                          >
+                            <Image
+                              src={integration.icon}
                               alt={integration.name}
                               fill
                               sizes="(max-width: 768px) 40px, 40px"
@@ -260,12 +298,14 @@ export default function IntegrationsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium",
-                        integration.status === "Connected"
-                          ? "bg-[#D1FAE5] text-[#065F46]"
-                          : "bg-[#F3F4F6] text-[#6B7280]"
-                      )}>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium",
+                          integration.status === "Connected"
+                            ? "bg-[#D1FAE5] text-[#065F46]"
+                            : "bg-[#F3F4F6] text-[#6B7280]"
+                        )}
+                      >
                         {integration.status === "Connected" ? (
                           <CheckCircle className="h-3 w-3" />
                         ) : (
@@ -275,9 +315,7 @@ export default function IntegrationsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-[#6B7280]">
-                        {integration.last_sync || "Never"}
-                      </div>
+                      <div className="text-sm text-[#6B7280]">{integration.last_sync || "Never"}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -285,29 +323,35 @@ export default function IntegrationsPage() {
                           <Loader2 className="h-4 w-4 animate-spin text-[#2563EB]" />
                         ) : integration.status === "Connected" ? (
                           <>
-                            <button 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleTest(integration)}
                               disabled={loading !== null}
-                              className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF] disabled:opacity-50"
+                              className="text-[#2563EB] hover:text-[#1E40AF]"
                             >
                               Test
-                            </button>
-                            <button 
-                              onClick={() => handleDisconnect(integration)}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDisconnectTarget(integration)}
                               disabled={loading !== null}
-                              className="text-sm font-medium text-[#DC2626] hover:text-[#991B1B] disabled:opacity-50"
+                              className="text-[#DC2626] hover:text-[#991B1B]"
                             >
                               Disconnect
-                            </button>
+                            </Button>
                           </>
                         ) : (
-                          <button 
-                            onClick={() => handleConnect(integration.id)}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openConnectDialog(integration)}
                             disabled={loading !== null}
-                            className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF] disabled:opacity-50"
+                            className="text-[#2563EB] hover:text-[#1E40AF]"
                           >
                             Connect
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>
@@ -318,6 +362,85 @@ export default function IntegrationsPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={connectOpen} onOpenChange={setConnectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect {selectedIntegration?.name}</DialogTitle>
+            <DialogDescription>
+              {selectedIntegration?.name === "WordPress"
+                ? "Enter your site URL and application password to validate the connection."
+                : "Provide your API token to connect."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="space-y-4" onSubmit={handleConnect}>
+            {requiresSiteUrl && (
+              <div className="space-y-2">
+                <Label htmlFor="siteUrl">Site URL</Label>
+                <Input
+                  id="siteUrl"
+                  placeholder="https://your-site.com"
+                  value={form.siteUrl}
+                  onChange={(e) => setForm((prev) => ({ ...prev, siteUrl: e.target.value }))}
+                  required
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="accessToken">
+                {currentPlatform === "webflow" ? "API Token" : "Application Password"}
+              </Label>
+              <Input
+                id="accessToken"
+                type="password"
+                placeholder={currentPlatform === "webflow" ? "Enter your Webflow API token" : "Enter your WordPress application password"}
+                value={form.accessToken}
+                onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setConnectOpen(false)}
+                disabled={loading !== null}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading !== null}>
+                {loading === selectedIntegration?.id ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Connecting
+                  </span>
+                ) : (
+                  "Connect"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={Boolean(disconnectTarget)} onOpenChange={(open) => !open && setDisconnectTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect {disconnectTarget?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the connection for this integration. You can reconnect anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading !== null}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDisconnect} disabled={loading !== null}>
+              {loading === disconnectTarget?.id ? "Disconnecting..." : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
