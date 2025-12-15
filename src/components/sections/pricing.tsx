@@ -160,27 +160,6 @@ export default function Pricing() {
               Ranklite adapts in real time to keep your site safe — even as it scales.
             </p>
           </div>
-
-          {/* Built for Founders */}
-          <div className="rounded-3xl border border-[#E2E8F0] bg-white p-10">
-            <h3 className="mb-6 text-center font-display text-[28px] font-bold text-[#1A202C]">
-              ⚡ Built for Founders, Not Agencies
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-3 mb-6">
-              <div className="rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 p-5 text-center">
-                <span className="text-[16px] font-semibold text-[#1A202C]">Set it once</span>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 p-5 text-center">
-                <span className="text-[16px] font-semibold text-[#1A202C]">Let it run</span>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 p-5 text-center">
-                <span className="text-[16px] font-semibold text-[#1A202C]">Track results</span>
-              </div>
-            </div>
-            <p className="text-center text-[15px] text-[#718096]">
-              Perfect for startups, SaaS, local businesses, and creators who want SEO without babysitting tools.
-            </p>
-          </div>
         </div>
 
         {/* MVP Note */}
