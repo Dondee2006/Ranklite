@@ -82,6 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userEmail, setUserEmail] = useState("");
   const [websiteName, setWebsiteName] = useState("Website");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [faviconError, setFaviconError] = useState(false);
 
   useEffect(() => {
     async function loadUserData() {
@@ -118,25 +119,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-[200px] flex-col bg-[#F7F7F7] border-r border-[#E5E5E5]">
         <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
           <div className="flex items-center gap-2">
-            {websiteUrl ? (
+            {websiteUrl && !faviconError ? (
               <img 
                 src={`https://www.google.com/s2/favicons?domain=${websiteUrl}&sz=128`}
                 alt={websiteName}
                 className="h-7 w-7 rounded-md"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
+                onError={() => setFaviconError(true)}
               />
-            ) : null}
-            <div className={cn(
-              "h-7 w-7 rounded-md bg-[#10B981] flex items-center justify-center",
-              websiteUrl && "hidden"
-            )}>
-              <span className="text-white text-xs font-bold">
-                {websiteName.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            ) : (
+              <div className="h-7 w-7 rounded-md bg-[#10B981] flex items-center justify-center">
+                <span className="text-white text-xs font-bold">
+                  {websiteName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
             <span className="text-sm font-semibold text-[#1A1A1A] truncate max-w-[100px]">
               {websiteName}
             </span>
