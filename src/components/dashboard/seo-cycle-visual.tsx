@@ -98,22 +98,44 @@ export function SEOCycleVisual() {
   const [data, setData] = useState<SEOCycleData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fallbackData: SEOCycleData = {
+      stageCounts: { PLAN: 0, CREATE: 0, PUBLISH: 0, PROMOTE: 0, VALIDATE: 0, COMPLETE: 0 },
+      metrics: {
+        totalBacklinks: 0,
+        uniqueSources: 0,
+        avgDomainRating: 0,
+        thisMonthBacklinks: 0,
+        dailySubmissionCount: 0,
+        maxDailySubmissions: 10,
+      },
+      agent: {
+        status: "idle",
+        currentStep: "Awaiting data",
+        isPaused: true,
+      },
+    };
+
     async function fetchData() {
       try {
         const response = await fetch("/api/seo-cycle");
-        if (response.ok) {
-          const result = await response.json();
-          setData(result);
-          
-          const stepIndex = AGENT_STEPS.findIndex(step => 
-            step.text.toLowerCase().includes(result.agent.currentStep?.toLowerCase() || "")
-          );
-          setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
-      } catch (error) {
-        console.error("Failed to fetch SEO cycle data:", error);
+        const result = await response.json();
+        setData(result);
+        setError(null);
+        
+        const stepIndex = AGENT_STEPS.findIndex(step => 
+          step.text.toLowerCase().includes(result.agent.currentStep?.toLowerCase() || "")
+        );
+        setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
+      } catch (err) {
+        console.error("Failed to fetch SEO cycle data:", err);
+        setError("We couldn't load your SEO cycle data right now. Showing the latest available snapshot.");
+        setData((prev) => prev || fallbackData);
       } finally {
         setLoading(false);
       }
@@ -145,6 +167,13 @@ export function SEOCycleVisual() {
 
   return (
     <div className="relative w-full rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
+      {error && (
+        <div className="px-8 pt-6">
+          <div className="rounded-md border border-[#FCA5A5] bg-[#FEF2F2] text-[#991B1B] px-4 py-3 text-sm">
+            {error}
+          </div>
+        </div>
+      )}
       <div className="px-8 py-6 border-b border-[#E5E5E5]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

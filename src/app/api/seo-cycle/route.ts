@@ -7,39 +7,64 @@ export async function GET(req: NextRequest) {
 
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = user.id;
 
-    const { data: campaign, error: campaignError } = await supabase
-      .from("backlink_campaigns")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
+    const fallback = {
+      stageCounts: {
+        PLAN: 0,
+        CREATE: 0,
+        PUBLISH: 0,
+        PROMOTE: 0,
+        VALIDATE: 0,
+        COMPLETE: 0,
+      },
+      metrics: {
+        totalBacklinks: 0,
+        uniqueSources: 0,
+        avgDomainRating: 0,
+        thisMonthBacklinks: 0,
+        dailySubmissionCount: 0,
+        maxDailySubmissions: 10,
+      },
+      agent: {
+        status: "idle",
+        currentStep: "Waiting to start",
+        isPaused: true,
+      },
+    };
 
-    if (campaignError) {
-      console.error("Campaign error:", campaignError);
-    }
+    const [campaignRes, articlesRes, tasksRes, submissionsTodayRes, submissionsThisMonthRes] =
+      await Promise.all([
+        supabase.from("backlink_campaigns").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("articles").select("status, site_id").eq("user_id", userId),
+        supabase.from("backlink_tasks").select("status, outreach_status"),
+        supabase
+          .from("backlink_tasks")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)
+          .lte("created_at", `${new Date().toISOString().split("T")[0]}T23:59:59Z`),
+        supabase
+          .from("backlink_tasks")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`),
+      ]);
 
-    const { data: articles, error: articlesError } = await supabase
-      .from("articles")
-      .select("status, site_id")
-      .eq("user_id", userId);
-
-    if (articlesError) {
-      console.error("Articles error:", articlesError);
-    }
-
-    const { data: backlinkTasks, error: tasksError } = await supabase
-      .from("backlink_tasks")
-      .select("status, outreach_status");
-
-    if (tasksError) {
-      console.error("Tasks error:", tasksError);
+    if (campaignRes.error || articlesRes.error || tasksRes.error || submissionsTodayRes.error || submissionsThisMonthRes.error) {
+      console.error("SEO cycle query errors:", {
+        campaign: campaignRes.error,
+        articles: articlesRes.error,
+        tasks: tasksRes.error,
+        today: submissionsTodayRes.error,
+        month: submissionsThisMonthRes.error,
+      });
+      return NextResponse.json(fallback, { status: 200 });
     }
 
     const stageMapping: Record<string, string> = {
@@ -62,33 +87,22 @@ export async function GET(req: NextRequest) {
       COMPLETE: 0,
     };
 
-    (articles || []).forEach((article) => {
-      const stage = stageMapping[article.status] || "PLAN";
-      stageCounts[stage]++;
+    (articlesRes.data || []).forEach((row) => {
+      const stage = stageMapping[row.status] || "PLAN";
+      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
     });
 
-    (backlinkTasks || []).forEach((task) => {
-      if (task.status === "pending") {
-        stageCounts.PROMOTE++;
-      } else if (task.status === "completed" && task.outreach_status !== "verified") {
-        stageCounts.VALIDATE++;
-      } else if (task.outreach_status === "verified") {
-        stageCounts.COMPLETE++;
+    (tasksRes.data || []).forEach((row) => {
+      if (row.status === "pending") {
+        stageCounts.PROMOTE += 1;
+      } else if (row.status === "completed" && row.outreach_status !== "verified") {
+        stageCounts.VALIDATE += 1;
+      } else if (row.outreach_status === "verified") {
+        stageCounts.COMPLETE += 1;
       }
     });
 
-    const today = new Date().toISOString().split("T")[0];
-    const { count: submissionsToday } = await supabase
-      .from("backlink_tasks")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", `${today}T00:00:00Z`)
-      .lte("created_at", `${today}T23:59:59Z`);
-
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const { count: submissionsThisMonth } = await supabase
-      .from("backlink_tasks")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", `${currentMonth}-01T00:00:00Z`);
+    const campaign = campaignRes.data;
 
     return NextResponse.json({
       stageCounts,
@@ -96,8 +110,8 @@ export async function GET(req: NextRequest) {
         totalBacklinks: campaign?.total_backlinks || 0,
         uniqueSources: campaign?.unique_sources || 0,
         avgDomainRating: parseFloat(campaign?.avg_domain_rating || "0"),
-        thisMonthBacklinks: submissionsThisMonth || 0,
-        dailySubmissionCount: submissionsToday || 0,
+        thisMonthBacklinks: submissionsThisMonthRes.count || 0,
+        dailySubmissionCount: submissionsTodayRes.count || 0,
         maxDailySubmissions: campaign?.max_daily_submissions || 10,
       },
       agent: {
@@ -109,8 +123,31 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("SEO cycle error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch SEO cycle data" },
-      { status: 500 }
+      {
+        stageCounts: {
+          PLAN: 0,
+          CREATE: 0,
+          PUBLISH: 0,
+          PROMOTE: 0,
+          VALIDATE: 0,
+          COMPLETE: 0,
+        },
+        metrics: {
+          totalBacklinks: 0,
+          uniqueSources: 0,
+          avgDomainRating: 0,
+          thisMonthBacklinks: 0,
+          dailySubmissionCount: 0,
+          maxDailySubmissions: 10,
+        },
+        agent: {
+          status: "idle",
+          currentStep: "Awaiting data",
+          isPaused: true,
+        },
+        error: "Failed to fetch SEO cycle data",
+      },
+      { status: 200 }
     );
   }
 }
