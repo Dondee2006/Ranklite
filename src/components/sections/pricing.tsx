@@ -92,7 +92,7 @@ export default function Pricing() {
         {/* Header */}
         <div className="mx-auto mb-14 max-w-[800px] text-center lg:mb-20">
           <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#22C55E] sm:text-[48px] lg:text-[56px]">
-            Choose Your Plan
+            Choose Your Plan (Updated)
           </h2>
           <p className="mx-auto mt-5 max-w-[620px] text-[18px] leading-relaxed text-[#4A5568] lg:text-[20px]">
             Select the perfect plan for your SEO needs
