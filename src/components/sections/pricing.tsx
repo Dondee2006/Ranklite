@@ -1,26 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import { Check, X, ArrowRight } from "lucide-react";
+import { Check, X, ArrowRight, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 export default function Pricing() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
+      setUser(user);
     };
     checkAuth();
   }, []);
 
-  const handlePlanClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAuthenticated) {
+  const handlePlanClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAuthenticated && user) {
       e.preventDefault();
-      window.location.href = "/dashboard/overview";
+      setLoading(true);
+
+      try {
+        const response = await fetch('/api/pesapal/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email?.split('@')[0],
+            amount: 1.00,
+            description: "Ranklite 3-Day Trial Activation"
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create payment order');
+        }
+
+        const data = await response.json();
+
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          toast.error("Failed to initiate payment. Please try again.");
+          setLoading(false);
+        }
+
+      } catch (error) {
+        console.error("Payment Error:", error);
+        toast.error("Something went wrong. Please try again.");
+        setLoading(false);
+      }
     }
   };
 
@@ -39,9 +78,9 @@ export default function Pricing() {
         { text: "Performance dashboard (traffic, rankings, publishing status)", included: true },
         { text: "High-quality backlink starter pack", included: true },
         { text: "Optional light human QA for higher-ranking content", included: true },
-        { text: "7-day free trial (no credit card required)", included: true },
+        { text: "3-day free trial ($1 activation fee)", included: true },
       ],
-      cta: "Start 7-Day Free Trial",
+      cta: "Start 3-Day Free Trial",
       ctaLink: "/signup",
       popular: true,
     },
@@ -60,65 +99,74 @@ export default function Pricing() {
           </p>
         </div>
 
-          {/* Pricing Card */}
-          <div className="mx-auto max-w-[900px]">
-            {plans.map((plan, index) => (
-              <div
-                key={index}
-                className="relative overflow-hidden rounded-3xl border-2 border-[#22C55E] bg-white p-10 shadow-2xl"
-              >
-                {/* Popular Badge */}
-                {plan.popular && (
-                  <div className="absolute top-0 right-8 -translate-y-1/2">
-                    <span className="inline-flex items-center rounded-full bg-[#22C55E] px-6 py-2 text-[14px] font-bold text-white shadow-lg">
-                      MOST POPULAR
-                    </span>
-                  </div>
-                )}
-
-                {/* Plan Header */}
-                <div className="mb-8 text-center">
-                  <h3 className="font-display text-[36px] font-bold text-[#1A202C]">{plan.name}</h3>
-                  <p className="mt-3 text-[16px] leading-relaxed text-[#718096]">{plan.subtitle}</p>
+        {/* Pricing Card */}
+        <div className="mx-auto max-w-[900px]">
+          {plans.map((plan, index) => (
+            <div
+              key={index}
+              className="relative overflow-hidden rounded-3xl border-2 border-[#22C55E] bg-white p-10 shadow-2xl"
+            >
+              {/* Popular Badge */}
+              {plan.popular && (
+                <div className="absolute top-0 right-8 -translate-y-1/2">
+                  <span className="inline-flex items-center rounded-full bg-[#22C55E] px-6 py-2 text-[14px] font-bold text-white shadow-lg">
+                    MOST POPULAR
+                  </span>
                 </div>
+              )}
 
-                {/* Price */}
-                <div className="mb-8 text-center">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="font-display text-[64px] font-bold text-[#22C55E]">${plan.price}</span>
-                    <span className="text-[20px] text-[#718096]">{plan.period}</span>
-                  </div>
-                  <p className="mt-3 text-[15px] text-[#22C55E] font-semibold">
-                    📈 {plan.description}
-                  </p>
-                </div>
-
-                {/* Features */}
-                <ul className="mb-10 grid gap-4 sm:grid-cols-2">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
-                      )}
-                      <span className="text-[15px] text-[#4A5568] leading-relaxed">{feature.text}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA Button */}
-                <Link
-                  href={plan.ctaLink}
-                  onClick={handlePlanClick}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
-                >
-                  {plan.cta}
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
+              {/* Plan Header */}
+              <div className="mb-8 text-center">
+                <h3 className="font-display text-[36px] font-bold text-[#1A202C]">{plan.name}</h3>
+                <p className="mt-3 text-[16px] leading-relaxed text-[#718096]">{plan.subtitle}</p>
               </div>
-            ))}
-          </div>
+
+              {/* Price */}
+              <div className="mb-8 text-center">
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="font-display text-[64px] font-bold text-[#22C55E]">${plan.price}</span>
+                  <span className="text-[20px] text-[#718096]">{plan.period}</span>
+                </div>
+                <p className="mt-3 text-[15px] text-[#22C55E] font-semibold">
+                  📈 {plan.description}
+                </p>
+              </div>
+
+              {/* Features */}
+              <ul className="mb-10 grid gap-4 sm:grid-cols-2">
+                {plan.features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    {feature.included ? (
+                      <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
+                    )}
+                    <span className="text-[15px] text-[#4A5568] leading-relaxed">{feature.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <Link
+                href={plan.ctaLink}
+                onClick={handlePlanClick}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    {plan.cta}
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </Link>
+              <p className="mt-4 text-center text-[13px] text-[#718096]">
+                * A one-time <strong>$1.00 USD</strong> activation fee applies to start the trial.
+              </p>
+            </div>
+          ))}
+        </div>
 
         {/* Additional Info Sections */}
         <div className="mx-auto mt-20 max-w-[1000px] space-y-16">
@@ -174,7 +222,7 @@ export default function Pricing() {
         {/* MVP Note */}
         <div className="mx-auto mt-12 max-w-[600px] text-center">
           <p className="text-[13px] text-[#A0AEC0]">
-            🧪 <strong>MVP Note:</strong> Billing is currently in demo mode while we onboard early users.
+            🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Pesapal.
           </p>
         </div>
       </div>
