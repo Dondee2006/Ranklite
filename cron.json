@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/publish-today",
+      "path": "/api/cms/cron/scheduled-publish",
       "schedule": "0 7 * * *"
     },
     {
