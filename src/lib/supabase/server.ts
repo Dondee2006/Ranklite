@@ -34,6 +34,13 @@ export async function createClient() {
         headers: {
           'x-client-info': 'ranklite-server',
         },
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            signal: AbortSignal.timeout(30000),
+            keepalive: true,
+          });
+        },
       },
     }
   );

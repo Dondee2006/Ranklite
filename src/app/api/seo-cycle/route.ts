@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
@@ -8,7 +24,7 @@ export async function GET(req: NextRequest) {
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser();
+    } = await retryWithBackoff(() => supabase.auth.getUser());
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -40,21 +56,23 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    const [campaignRes, articlesRes, tasksRes, submissionsTodayRes, submissionsThisMonthRes] =
-      await Promise.all([
-        supabase.from("backlink_campaigns").select("*").eq("user_id", userId).maybeSingle(),
-        supabase.from("articles").select("status, site_id").eq("user_id", userId),
-        supabase.from("backlink_tasks").select("status, outreach_status"),
-        supabase
-          .from("backlink_tasks")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)
-          .lte("created_at", `${new Date().toISOString().split("T")[0]}T23:59:59Z`),
-        supabase
-          .from("backlink_tasks")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`),
-      ]);
+      const [campaignRes, articlesRes, tasksRes, submissionsTodayRes, submissionsThisMonthRes] =
+        await retryWithBackoff(() =>
+          Promise.all([
+            supabase.from("backlink_campaigns").select("*").eq("user_id", userId).maybeSingle(),
+            supabase.from("articles").select("status, site_id").eq("user_id", userId),
+            supabase.from("backlink_tasks").select("status, outreach_status"),
+            supabase
+              .from("backlink_tasks")
+              .select("id", { count: "exact", head: true })
+              .gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)
+              .lte("created_at", `${new Date().toISOString().split("T")[0]}T23:59:59Z`),
+            supabase
+              .from("backlink_tasks")
+              .select("id", { count: "exact", head: true })
+              .gte("created_at", `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`),
+          ])
+        );
 
     if (campaignRes.error || articlesRes.error || tasksRes.error || submissionsTodayRes.error || submissionsThisMonthRes.error) {
       console.error("SEO cycle query errors:", {
