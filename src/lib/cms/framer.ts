@@ -6,14 +6,14 @@ interface FramerCollection {
   id: string;
   name: string;
   slug: string;
-  fields: any[];
+  fields: unknown[];
 }
 
 interface FramerCollectionItem {
   id: string;
   slug: string;
   fieldData: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -43,7 +43,7 @@ export class FramerService {
     }
   }
 
-  async getSites(): Promise<any[]> {
+  async getSites(): Promise<unknown[]> {
     try {
       const response = await fetch(`${this.baseUrl}/sites`, {
         headers: this.getHeaders(),
@@ -102,8 +102,8 @@ export class FramerService {
 
   async createCollectionItem(collectionId: string, itemData: {
     slug: string;
-    [key: string]: any;
-  }): Promise<any> {
+    [key: string]: unknown;
+  }): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/collections/${collectionId}/items`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -124,9 +124,9 @@ export class FramerService {
 
   async updateCollectionItem(collectionId: string, itemId: string, itemData: {
     slug?: string;
-    [key: string]: any;
-  }): Promise<any> {
-    const payload: any = {
+    [key: string]: unknown;
+  }): Promise<unknown> {
+    const payload: Record<string, unknown> = {
       fieldData: itemData,
     };
 
@@ -151,7 +151,7 @@ export class FramerService {
     return response.json();
   }
 
-  async deleteCollectionItem(collectionId: string, itemId: string): Promise<any> {
+  async deleteCollectionItem(collectionId: string, itemId: string): Promise<unknown> {
     const response = await fetch(
       `${this.baseUrl}/collections/${collectionId}/items/${itemId}`,
       {
@@ -168,7 +168,7 @@ export class FramerService {
     return response.ok ? { success: true } : response.json();
   }
 
-  async getSiteInfo(siteId: string): Promise<any> {
+  async getSiteInfo(siteId: string): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/sites/${siteId}`, {
       headers: this.getHeaders(),
     });

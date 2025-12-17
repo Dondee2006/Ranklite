@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createCMSClient } from '@/lib/cms';
+import { createCMSClient, WordPressClient, ShopifyClient, NotionClient } from '@/lib/cms';
 import { WixService } from '@/lib/cms/wix';
 import { WebflowService } from '@/lib/cms/webflow';
 
@@ -31,56 +31,57 @@ export async function POST(request: NextRequest) {
     }
 
     const client = createCMSClient(integration);
-    let result: any;
+    let result: unknown;
     let publishedUrl = '';
 
     if (integration.cms_type === 'wordpress') {
-      result = await client.createPost({
+      result = await (client as WordPressClient).createPost({
         title,
         content,
         excerpt,
         status: status || 'publish',
       });
-      publishedUrl = result.link || `${integration.site_url}/?p=${result.id}`;
+      const wpResult = result as { link?: string; id: number };
+      publishedUrl = wpResult.link || `${integration.site_url}/?p=${wpResult.id}`;
     } else if (integration.cms_type === 'shopify') {
       if (!blog_id) {
-        const blogs = await client.getBlogs();
+        const blogs = await (client as ShopifyClient).getBlogs();
         if (blogs.length === 0) {
           return NextResponse.json({ error: 'No Shopify blogs found' }, { status: 400 });
         }
-        result = await client.createArticle(blogs[0].id, {
+        result = await (client as ShopifyClient).createArticle(blogs[0].id, {
           title,
           body_html: content,
           summary_html: excerpt,
           published: status === 'publish',
         });
       } else {
-        result = await client.createArticle(blog_id, {
+        result = await (client as ShopifyClient).createArticle(blog_id, {
           title,
           body_html: content,
           summary_html: excerpt,
           published: status === 'publish',
         });
       }
-      publishedUrl = `https://${integration.site_url}/blogs/${result.handle}`;
+      publishedUrl = `https://${integration.site_url}/blogs/${(result as { handle: string }).handle}`;
     } else if (integration.cms_type === 'notion') {
       const databaseId = integration.settings?.database_id;
       if (!databaseId) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Notion database ID not configured',
           message: 'Please configure a database ID in integration settings'
         }, { status: 400 });
       }
-      
-      const blocks = client.textToBlocks(content);
-      result = await client.createPage({
+
+      const blocks = (client as NotionClient).textToBlocks(content);
+      result = await (client as NotionClient).createPage({
         parent: { database_id: databaseId },
         properties: {
           Name: { title: [{ text: { content: title } }] },
         },
         children: blocks,
       });
-      publishedUrl = result.url;
+      publishedUrl = (result as { url: string }).url;
     } else if (integration.cms_type === 'wix') {
       const wixService = new WixService({
         appId: integration.settings?.app_id,
@@ -96,20 +97,21 @@ export async function POST(request: NextRequest) {
         seoDescription: seo_description,
         publish: status === 'publish',
       });
-      publishedUrl = result.url || `${integration.site_url}/post/${result.slug}`;
+      const wixResult = result as { url?: string; slug: string };
+      publishedUrl = wixResult.url || `${integration.site_url}/post/${wixResult.slug}`;
     } else if (integration.cms_type === 'webflow') {
       const webflowService = new WebflowService({ accessToken: integration.access_token });
       const siteId = integration.settings?.site_id;
-      
+
       if (!collection_id) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Webflow collection ID required',
           message: 'Please provide collection_id for publishing'
         }, { status: 400 });
       }
 
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      
+
       result = await webflowService.createCollectionItem(collection_id, {
         name: title,
         slug,
@@ -119,24 +121,26 @@ export async function POST(request: NextRequest) {
         'meta-description': seo_description || excerpt,
       }, status !== 'publish');
 
-      if (status === 'publish' && !result.isDraft) {
-        await webflowService.publishCollectionItem(collection_id, result.id);
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      if (status === 'publish' && !(result as any).isDraft) {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        await webflowService.publishCollectionItem(collection_id, (result as any).id);
       }
 
-      publishedUrl = result.url || `${integration.site_url}/${slug}`;
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      publishedUrl = (result as { url?: string }).url || `${integration.site_url}/${slug}`;
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      published_id: result.id,
+      published_id: (result as { id: string | number }).id,
       published_url: publishedUrl,
       message: `Successfully published to ${integration.cms_type}`,
       result,
     });
-
   } catch (error) {
     console.error('CMS publish error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to publish to CMS',
       details: String(error)
     }, { status: 500 });

@@ -2,14 +2,14 @@ export interface NotionPage {
   id: string;
   created_time: string;
   last_edited_time: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   url: string;
 }
 
 export interface NotionDatabase {
   id: string;
   title: Array<{ plain_text: string }>;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }
 
 export interface NotionConfig {
@@ -55,7 +55,7 @@ export class NotionClient {
     return response.results as NotionDatabase[];
   }
 
-  async queryDatabase(databaseId: string, filter?: any) {
+  async queryDatabase(databaseId: string, filter?: unknown) {
     const response = await this.request(`/databases/${databaseId}/query`, {
       method: 'POST',
       body: JSON.stringify({ filter }),
@@ -74,8 +74,8 @@ export class NotionClient {
 
   async createPage(data: {
     parent: { database_id: string } | { page_id: string };
-    properties: Record<string, any>;
-    children?: any[];
+    properties: Record<string, unknown>;
+    children?: unknown[];
   }) {
     return this.request('/pages', {
       method: 'POST',
@@ -84,7 +84,7 @@ export class NotionClient {
   }
 
   async updatePage(pageId: string, data: {
-    properties?: Record<string, any>;
+    properties?: Record<string, unknown>;
   }) {
     return this.request(`/pages/${pageId}`, {
       method: 'PATCH',
@@ -92,7 +92,7 @@ export class NotionClient {
     }) as Promise<NotionPage>;
   }
 
-  async appendBlocks(pageId: string, blocks: any[]) {
+  async appendBlocks(pageId: string, blocks: unknown[]) {
     return this.request(`/blocks/${pageId}/children`, {
       method: 'PATCH',
       body: JSON.stringify({ children: blocks }),

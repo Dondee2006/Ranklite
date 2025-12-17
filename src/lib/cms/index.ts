@@ -10,7 +10,7 @@ export interface CMSIntegration {
   access_token: string;
   refresh_token?: string;
   site_url: string;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
 }
 
 export function createCMSClient(integration: CMSIntegration) {

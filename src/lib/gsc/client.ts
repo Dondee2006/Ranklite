@@ -72,7 +72,7 @@ export class GSCClient {
     return this.accessToken;
   }
 
-  private async makeRequest(url: string, options: RequestInit = {}, retries = 3): Promise<any> {
+  private async makeRequest(url: string, options: RequestInit = {}, retries = 3): Promise<unknown> {
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
         const response = await fetch(url, {
@@ -106,7 +106,7 @@ export class GSCClient {
     const data = await this.makeRequest(
       "https://www.googleapis.com/webmasters/v3/sites"
     );
-    return data.siteEntry || [];
+    return (data as { siteEntry?: unknown[] }).siteEntry || [];
   }
 
   async getPerformanceData(siteUrl: string, startDate: string, endDate: string) {
@@ -122,7 +122,7 @@ export class GSCClient {
         }),
       }
     );
-    return data.rows || [];
+    return (data as { rows?: unknown[] }).rows || [];
   }
 
   async getPagePerformance(siteUrl: string, startDate: string, endDate: string) {
@@ -138,7 +138,7 @@ export class GSCClient {
         }),
       }
     );
-    return data.rows || [];
+    return (data as { rows?: unknown[] }).rows || [];
   }
 
   async getQueryPerformance(siteUrl: string, startDate: string, endDate: string) {
@@ -154,14 +154,14 @@ export class GSCClient {
         }),
       }
     );
-    return data.rows || [];
+    return (data as { rows?: unknown[] }).rows || [];
   }
 
   async getSitemaps(siteUrl: string) {
     const data = await this.makeRequest(
       `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/sitemaps`
     );
-    return data.sitemap || [];
+    return (data as { sitemap?: unknown[] }).sitemap || [];
   }
 }
 

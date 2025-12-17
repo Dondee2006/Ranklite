@@ -324,7 +324,7 @@ function extractBusinessInfo(html: string, url: string) {
   ]);
 
   const jsonLdMatch = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
-  let orgInfo: { name?: string; description?: string; country?: string; address?: string } = {};
+  const orgInfo: { name?: string; description?: string; country?: string; address?: string } = {};
   
   if (jsonLdMatch) {
     for (const script of jsonLdMatch) {

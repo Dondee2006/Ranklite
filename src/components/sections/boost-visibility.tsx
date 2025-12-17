@@ -45,7 +45,7 @@ export default function BoostVisibility() {
               </span>
             </h2>
             <p className="mt-5 max-w-[550px] text-[16px] leading-relaxed text-muted-foreground lg:text-[17px]">
-              Join Ranklite's automated backlink generator and build high-quality links that increase your rankings, domain trust, and organic traffic — without cold outreach or manual submissions.
+              Join Ranklite&apos;s automated backlink generator and build high-quality links that increase your rankings, domain trust, and organic traffic — without cold outreach or manual submissions.
             </p>
             <p className="mt-4 flex items-center gap-2 text-[15px] font-medium text-foreground">
               <Link2 className="h-4 w-4 text-[#22C55E]" />
@@ -84,7 +84,7 @@ export default function BoostVisibility() {
               Automatic Backlink Generation
             </h4>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              Ranklite's AI automatically generates high-quality backlinks to your content. No cold outreach or manual submissions required.
+              Ranklite&apos;s AI automatically generates high-quality backlinks to your content. No cold outreach or manual submissions required.
             </p>
           </div>
 
@@ -141,7 +141,7 @@ export default function BoostVisibility() {
                     className="flex-1 rounded-t-sm transition-all group-hover:scale-y-105"
                     style={{
                       height: `${h}%`,
-                      background: i === 5 
+                      background: i === 5
                         ? "linear-gradient(to top, #22C55E, #16A34A)"
                         : `rgba(34, 197, 94, ${0.15 + i * 0.1})`,
                     }}

@@ -5,7 +5,7 @@ export interface WordPressPost {
   excerpt: { rendered: string };
   status: string;
   slug: string;
-  meta: Record<string, any>;
+  meta: Record<string, unknown>;
 }
 
 export interface WordPressConfig {
@@ -59,7 +59,7 @@ export class WordPressClient {
     content: string;
     status?: 'publish' | 'draft';
     excerpt?: string;
-    meta?: Record<string, any>;
+    meta?: Record<string, unknown>;
   }) {
     return this.request('/posts', {
       method: 'POST',
@@ -72,7 +72,7 @@ export class WordPressClient {
     content: string;
     status: 'publish' | 'draft';
     excerpt: string;
-    meta: Record<string, any>;
+    meta: Record<string, unknown>;
   }>) {
     return this.request(`/posts/${id}`, {
       method: 'POST',

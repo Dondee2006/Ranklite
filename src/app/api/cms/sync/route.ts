@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createCMSClient } from '@/lib/cms';
+import { createCMSClient, WordPressClient, ShopifyClient, NotionClient } from '@/lib/cms';
 import { WixService } from '@/lib/cms/wix';
 import { WebflowService } from '@/lib/cms/webflow';
 
@@ -32,24 +32,24 @@ export async function POST(request: NextRequest) {
 
     const client = createCMSClient(integration);
     let syncedItems = 0;
-    let syncedContent: any[] = [];
+    let syncedContent: unknown[] = [];
 
     if (integration.cms_type === 'wordpress') {
       const [posts, pages] = await Promise.all([
-        client.getPosts({ per_page: 100 }),
-        client.getPages({ per_page: 100 }),
+        (client as WordPressClient).getPosts({ per_page: 100 }),
+        (client as WordPressClient).getPages({ per_page: 100 }),
       ]);
       syncedContent = [...posts, ...pages];
       syncedItems = syncedContent.length;
     } else if (integration.cms_type === 'shopify') {
-      const blogs = await client.getBlogs();
+      const blogs = await (client as ShopifyClient).getBlogs();
       for (const blog of blogs) {
-        const articles = await client.getArticles(blog.id);
+        const articles = await (client as ShopifyClient).getArticles(blog.id);
         syncedContent.push(...articles);
       }
       syncedItems = syncedContent.length;
     } else if (integration.cms_type === 'notion') {
-      const databases = await client.searchDatabases();
+      const databases = await (client as NotionClient).searchDatabases();
       syncedItems = databases.length;
       syncedContent = databases;
     } else if (integration.cms_type === 'wix') {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', integration_id);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       synced_items: syncedItems,
       message: `Successfully synced ${syncedItems} items from ${integration.cms_type}`,
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('CMS sync error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to sync CMS content',
       details: String(error)
     }, { status: 500 });

@@ -1,6 +1,7 @@
 import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Users, Target, Zap, Award } from "lucide-react";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
@@ -15,7 +16,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-relaxed text-muted-foreground">
-            We're on a mission to make SEO accessible to everyone through AI-powered content creation.
+            We&apos;re on a mission to make SEO accessible to everyone through AI-powered content creation.
           </p>
         </div>
 
@@ -29,7 +30,7 @@ export default function AboutPage() {
               </p>
               <p>
                 We built Ranklite to level the playing field. By combining advanced AI technology with proven SEO best
-                practices, we've created a platform that helps anyone create content that ranks—without needing deep SEO
+                practices, we&apos;ve created a platform that helps anyone create content that ranks—without needing deep SEO
                 expertise or a large content team.
               </p>
               <p>
@@ -52,12 +53,12 @@ export default function AboutPage() {
               {
                 icon: Users,
                 title: "User-First",
-                description: "Every feature is designed with our users' success in mind.",
+                description: "Every feature is designed with our users&apos; success in mind.",
               },
               {
                 icon: Zap,
                 title: "Innovation",
-                description: "We constantly push the boundaries of what's possible with AI and SEO.",
+                description: "We constantly push the boundaries of what&apos;s possible with AI and SEO.",
               },
               {
                 icon: Award,
@@ -82,15 +83,15 @@ export default function AboutPage() {
         <div className="rounded-2xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] p-12 text-center shadow-xl">
           <h2 className="mb-4 font-display text-[32px] font-bold text-white">Join Us on Our Journey</h2>
           <p className="mx-auto mb-8 max-w-2xl text-[17px] leading-relaxed text-white/90">
-            We're just getting started. Join thousands of content creators and businesses who are already growing their
+            We&apos;re just getting started. Join thousands of content creators and businesses who are already growing their
             organic traffic with Ranklite.
           </p>
-          <a
+          <Link
             href="/#pricing"
             className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-[16px] font-semibold text-[#22C55E] shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             Get Started Today
-          </a>
+          </Link>
         </div>
       </main>
       <Footer />

@@ -86,7 +86,7 @@ export default function FAQSection() {
             </span>
           </h2>
           <p className="mt-5 text-[17px] leading-relaxed text-[#718096] lg:text-[18px]">
-            Got questions? We've got answers. Can't find what you're looking for? Reach out to our team.
+            Got questions? We&apos;ve got answers. Can&apos;t find what you&apos;re looking for? Reach out to our team.
           </p>
         </div>
 
@@ -94,11 +94,10 @@ export default function FAQSection() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className={`group overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
-                openIndex === index
-                  ? "border-[#22C55E]/40 shadow-lg shadow-[#22C55E]/10"
-                  : "border-[#E2E8F0] hover:border-[#22C55E]/20 hover:shadow-md"
-              }`}
+              className={`group overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${openIndex === index
+                ? "border-[#22C55E]/40 shadow-lg shadow-[#22C55E]/10"
+                : "border-[#E2E8F0] hover:border-[#22C55E]/20 hover:shadow-md"
+                }`}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -109,11 +108,10 @@ export default function FAQSection() {
                   {faq.question}
                 </span>
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-                    openIndex === index
-                      ? "bg-[#22C55E] text-white rotate-180"
-                      : "bg-[#F0FDF4] text-[#22C55E] group-hover:bg-[#DCFCE7]"
-                  }`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${openIndex === index
+                    ? "bg-[#22C55E] text-white rotate-180"
+                    : "bg-[#F0FDF4] text-[#22C55E] group-hover:bg-[#DCFCE7]"
+                    }`}
                 >
                   {openIndex === index ? (
                     <Minus className="h-5 w-5" strokeWidth={2.5} />
@@ -122,11 +120,10 @@ export default function FAQSection() {
                   )}
                 </span>
               </button>
-              
+
               <div
-                className={`grid transition-all duration-300 ease-in-out ${
-                  openIndex === index ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                }`}
+                className={`grid transition-all duration-300 ease-in-out ${openIndex === index ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  }`}
               >
                 <div className="overflow-hidden">
                   <div className="border-t border-[#F0F0F0] px-6 pb-6 pt-4 text-[16px] leading-relaxed text-[#4A5568] lg:px-7 lg:pb-7 lg:pt-5 lg:text-[17px]">
@@ -144,7 +141,7 @@ export default function FAQSection() {
               Still have questions?
             </h3>
             <p className="mb-6 text-[16px] text-[#718096] lg:text-[17px]">
-              Our team is here to help. Get in touch and we'll answer any questions you have about Ranklite.
+              Our team is here to help. Get in touch and we&apos;ll answer any questions you have about Ranklite.
             </p>
             <a
               href="mailto:support@ranklite.com"

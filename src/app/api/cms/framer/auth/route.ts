@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const selectedSite = site_id 
-      ? sites.find((s: any) => s.id === site_id) 
+    const selectedSite = site_id
+      ? sites.find((s) => (s as { id: string }).id === site_id)
       : sites[0];
 
     if (!selectedSite) {
@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const siteUrl = selectedSite.customDomain || selectedSite.url || selectedSite.domain;
+    const site = selectedSite as { id: string; url?: string; customDomain?: string; domain?: string; name?: string; displayName?: string };
+    const siteUrl = site.customDomain || site.url || site.domain;
 
     const { data: existingIntegration } = await supabase
       .from("cms_integrations")
@@ -67,8 +68,8 @@ export async function POST(request: NextRequest) {
           site_url: siteUrl,
           status: "connected",
           config: {
-            site_id: selectedSite.id,
-            site_name: selectedSite.name || selectedSite.displayName,
+            site_id: site.id,
+            site_name: site.name || site.displayName,
           },
           updated_at: new Date().toISOString(),
         })
@@ -92,8 +93,8 @@ export async function POST(request: NextRequest) {
         site_url: siteUrl,
         status: "connected",
         config: {
-          site_id: selectedSite.id,
-          site_name: selectedSite.name || selectedSite.displayName,
+          site_id: site.id,
+          site_name: site.name || site.displayName,
         },
       })
       .select()
@@ -106,10 +107,11 @@ export async function POST(request: NextRequest) {
       integration_id: integration.id,
       site: selectedSite,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Framer auth error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to connect Framer";
     return NextResponse.json(
-      { error: error.message || "Failed to connect Framer" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

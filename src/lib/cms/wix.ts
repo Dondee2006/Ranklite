@@ -133,7 +133,7 @@ export class WixService {
     seoTitle?: string;
     seoDescription?: string;
     publish?: boolean;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const response = await fetch('https://www.wixapis.com/v3/posts', {
       method: 'POST',
       headers: {
@@ -169,7 +169,7 @@ export class WixService {
     seoTitle?: string;
     seoDescription?: string;
     publish?: boolean;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const response = await fetch(`https://www.wixapis.com/v3/posts/${postId}`, {
       method: 'PATCH',
       headers: {
@@ -197,7 +197,7 @@ export class WixService {
     return response.json();
   }
 
-  async getSiteInfo(accessToken: string): Promise<any> {
+  async getSiteInfo(accessToken: string): Promise<unknown> {
     const response = await fetch('https://www.wixapis.com/site-properties/v4/properties', {
       headers: {
         Authorization: `Bearer ${accessToken}`,

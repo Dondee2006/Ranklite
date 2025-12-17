@@ -15,7 +15,7 @@ interface WebflowCollection {
   displayName: string;
   slug: string;
   singularName: string;
-  fields: any[];
+  fields: unknown[];
 }
 
 interface WebflowCollectionItem {
@@ -23,7 +23,7 @@ interface WebflowCollectionItem {
   fieldData: {
     name: string;
     slug: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   isDraft: boolean;
   isArchived: boolean;
@@ -118,8 +118,8 @@ export class WebflowService {
   async createCollectionItem(collectionId: string, itemData: {
     name: string;
     slug: string;
-    [key: string]: any;
-  }, isDraft = false): Promise<any> {
+    [key: string]: unknown;
+  }, isDraft = false): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/collections/${collectionId}/items`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -140,9 +140,9 @@ export class WebflowService {
   async updateCollectionItem(collectionId: string, itemId: string, itemData: {
     name?: string;
     slug?: string;
-    [key: string]: any;
-  }, isDraft?: boolean): Promise<any> {
-    const payload: any = {
+    [key: string]: unknown;
+  }, isDraft?: boolean): Promise<unknown> {
+    const payload: Record<string, unknown> = {
       fieldData: itemData,
     };
 
@@ -167,7 +167,7 @@ export class WebflowService {
     return response.json();
   }
 
-  async publishCollectionItem(collectionId: string, itemId: string): Promise<any> {
+  async publishCollectionItem(collectionId: string, itemId: string): Promise<unknown> {
     const response = await fetch(
       `${this.baseUrl}/collections/${collectionId}/items/${itemId}/publish`,
       {
@@ -184,7 +184,7 @@ export class WebflowService {
     return response.json();
   }
 
-  async unpublishCollectionItem(collectionId: string, itemId: string): Promise<any> {
+  async unpublishCollectionItem(collectionId: string, itemId: string): Promise<unknown> {
     const response = await fetch(
       `${this.baseUrl}/collections/${collectionId}/items/${itemId}`,
       {

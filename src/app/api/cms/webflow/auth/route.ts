@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const selectedSite = site_id 
-      ? sites.find(s => s.id === site_id) 
+    const selectedSite = site_id
+      ? sites.find(s => s.id === site_id)
       : sites[0];
 
     if (!selectedSite) {
@@ -106,10 +106,11 @@ export async function POST(request: NextRequest) {
       integration_id: integration.id,
       site: selectedSite,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Webflow auth error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to connect Webflow";
     return NextResponse.json(
-      { error: error.message || "Failed to connect Webflow" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

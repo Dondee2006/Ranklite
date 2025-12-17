@@ -26,7 +26,7 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Failed to delete CMS integration:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to delete integration',
       details: String(error)
     }, { status: 500 });
@@ -47,7 +47,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 
@@ -65,7 +65,7 @@ export async function PATCH(
 
     if (error) throw error;
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       integration: {
         ...integration,
@@ -75,7 +75,7 @@ export async function PATCH(
 
   } catch (error) {
     console.error('Failed to update CMS integration:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to update integration',
       details: String(error)
     }, { status: 500 });

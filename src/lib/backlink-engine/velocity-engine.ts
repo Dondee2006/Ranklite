@@ -24,7 +24,7 @@ const ANCHOR_DISTRIBUTION: AnchorDistribution = {
 
 export function generateAnchorTypes(totalBacklinks: number): AnchorType[] {
   const anchors: AnchorType[] = [];
-  
+
   const counts = {
     branded: Math.floor(totalBacklinks * ANCHOR_DISTRIBUTION.branded),
     partial_match: Math.floor(totalBacklinks * ANCHOR_DISTRIBUTION.partial_match),
@@ -70,26 +70,26 @@ export function calculateDripSchedule(
 ): { dates: Date[]; dripDays: number } {
   const minDays = 7;
   const maxDays = 21;
-  
+
   const dripDays = Math.min(maxDays, Math.max(minDays, Math.ceil(totalBacklinks / 3)));
-  
+
   const dates: Date[] = [];
   const backlinksPerDay = Math.ceil(totalBacklinks / dripDays);
-  
+
   for (let i = 0; i < totalBacklinks; i++) {
     const dayOffset = Math.floor(i / backlinksPerDay);
     const scheduledDate = new Date(startDate);
     scheduledDate.setDate(scheduledDate.getDate() + dayOffset);
     dates.push(scheduledDate);
   }
-  
+
   return { dates, dripDays };
 }
 
 export async function checkDomainAge(url: string): Promise<{ isNew: boolean; ageInMonths: number }> {
   try {
     const domain = new URL(url).hostname;
-    
+
     const { data: site } = await supabaseAdmin
       .from("sites")
       .select("created_at")
@@ -196,7 +196,7 @@ export async function createBacklinkSchedule(
   totalBacklinks: number
 ): Promise<string> {
   const { dates, dripDays } = calculateDripSchedule(totalBacklinks);
-  
+
   const { data: schedule, error } = await supabaseAdmin
     .from("backlink_schedule")
     .insert({
@@ -212,11 +212,11 @@ export async function createBacklinkSchedule(
     .single();
 
   if (error) throw error;
-  
+
   return schedule.id;
 }
 
-export async function getDueBacklinks(userId: string): Promise<any[]> {
+export async function getDueBacklinks(userId: string): Promise<unknown[]> {
   const today = new Date().toISOString().split("T")[0];
 
   const { data: tasks } = await supabaseAdmin

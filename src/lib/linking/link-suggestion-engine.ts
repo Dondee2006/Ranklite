@@ -38,7 +38,7 @@ export async function generateLinkSuggestions(
             model: openai('gpt-4o-mini'),
             prompt,
             temperature: 0.7,
-            maxTokens: 4000,
+
         });
 
         return parseSuggestions(text);
@@ -128,29 +128,38 @@ function parseSuggestions(response: string): LinkSuggestion[] {
 /**
  * Validate a suggestion object
  */
-function isValidSuggestion(suggestion: any): boolean {
+function isValidSuggestion(suggestion: unknown): boolean {
+    const s = suggestion as Record<string, unknown>;
     return (
-        typeof suggestion === 'object' &&
-        typeof suggestion.sourceUrl === 'string' &&
-        typeof suggestion.targetUrl === 'string' &&
-        typeof suggestion.anchorText === 'string' &&
-        typeof suggestion.relevanceScore === 'number' &&
-        suggestion.sourceUrl !== suggestion.targetUrl &&
-        suggestion.relevanceScore >= 0 &&
-        suggestion.relevanceScore <= 100
+        typeof s === 'object' &&
+        s !== null &&
+        typeof s.sourceUrl === 'string' &&
+        typeof s.targetUrl === 'string' &&
+        typeof s.anchorText === 'string' &&
+        typeof s.relevanceScore === 'number' &&
+        s.sourceUrl !== s.targetUrl &&
+        s.relevanceScore >= 0 &&
+        s.relevanceScore <= 100
     );
 }
 
 /**
  * Normalize a suggestion object
  */
-function normalizeSuggestion(suggestion: any): LinkSuggestion {
+function normalizeSuggestion(suggestion: unknown): LinkSuggestion {
+    const s = suggestion as {
+        sourceUrl: string;
+        targetUrl: string;
+        anchorText: string;
+        relevanceScore: number;
+        reasoning?: string;
+    };
     return {
-        sourceUrl: suggestion.sourceUrl.trim(),
-        targetUrl: suggestion.targetUrl.trim(),
-        anchorText: suggestion.anchorText.trim(),
-        relevanceScore: Math.min(100, Math.max(0, Math.round(suggestion.relevanceScore))),
-        reasoning: (suggestion.reasoning || '').trim(),
+        sourceUrl: s.sourceUrl.trim(),
+        targetUrl: s.targetUrl.trim(),
+        anchorText: s.anchorText.trim(),
+        relevanceScore: Math.min(100, Math.max(0, Math.round(s.relevanceScore))),
+        reasoning: (s.reasoning || '').trim(),
     };
 }
 
