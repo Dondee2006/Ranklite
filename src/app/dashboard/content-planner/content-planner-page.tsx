@@ -209,6 +209,7 @@ export default function ContentPlannerPage() {
     const router = useRouter();
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [welcomeStep, setWelcomeStep] = useState<"loading" | "success">("loading");
+    const autoGenerateLock = useRef(false);
 
     useEffect(() => {
         if (searchParams.get("welcome") === "true") {
@@ -219,6 +220,42 @@ export default function ContentPlannerPage() {
             return () => clearTimeout(timer);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        // Auto-generate the initial 30 articles after onboarding *once the user is subscribed*
+        // (so the user never needs to click "Generate 30 Articles").
+        // Only auto-run on the first post-onboarding visit
+        if (searchParams.get("welcome") !== "true") return;
+
+        const now = new Date();
+        const isCurrentMonth = currentMonth === now.getMonth() && currentYear === now.getFullYear();
+        if (!isCurrentMonth) return;
+        if (loading) return;
+        if (generating) return;
+        if (autoGenerateLock.current) return;
+
+        const hasGeneratedArticles = articles.some((a) => a.status === "generated");
+        if (hasGeneratedArticles) return;
+
+        autoGenerateLock.current = true;
+
+        (async () => {
+            try {
+                const planRes = await fetch("/api/billing/current-plan");
+                const planData = await planRes.json();
+
+                const postsPerMonth = planData?.plan?.posts_per_month ?? 0;
+                const planStatus = planData?.status;
+
+                // Only auto-generate after the paid tier (30 posts/month) is active
+                if (planStatus !== "active" || postsPerMonth < 30) return;
+
+                await generateMonthlyCalendar();
+            } catch (error) {
+                console.error("Failed to auto-generate initial articles:", error);
+            }
+        })();
+    }, [articles, currentMonth, currentYear, generating, loading, searchParams]);
 
     const handleCloseWelcome = () => {
         setShowWelcomeModal(false);

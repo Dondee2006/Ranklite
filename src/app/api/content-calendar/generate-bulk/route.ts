@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 const ARTICLE_TYPES = [
   { type: "listicle", weight: 20 },
@@ -152,17 +151,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  await supabase
-    .from("content_calendar")
-    .upsert({
-      site_id: site.id,
-      month,
-      year,
-      generated_at: new Date().toISOString(),
-      status: "active",
-    }, { onConflict: "site_id,month,year" });
-
-  return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
+    return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
 }
 
 async function generateArticleContent(params: {
@@ -204,21 +193,21 @@ Return a JSON object with:
   "readabilityScore": 75
 }`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: "You are an expert SEO content writer. Write high-quality, human-sounding articles that rank well and engage readers.",
-      },
-      { role: "user", content: prompt },
-    ],
-    temperature: 0.8,
-    response_format: { type: "json_object" },
-  });
+  const { text } = await generateText({
+      model: openai("gpt-4o"),
+      system:
+        "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
+      prompt,
+      temperature: 0.8,
+      maxTokens: 4096,
+    });
 
-  const result = JSON.parse(completion.choices[0].message.content || "{}");
-  return result;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("AI did not return a JSON object");
+    }
+
+    return JSON.parse(jsonMatch[0]);
 }
 
 function generateKeywordsForNiche(niche: string, count: number) {
