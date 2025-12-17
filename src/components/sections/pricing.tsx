@@ -26,51 +26,24 @@ export default function Pricing() {
 
   const plans = [
     {
-      name: "Starter",
-      subtitle: "Safe Growth",
-      price: 49,
+      name: "Pro Tier",
+      subtitle: "Perfect for: Small businesses, founders, and content-driven sites that want full SEO automation",
+      price: 59,
       period: "/month",
-      description: "Best for new sites or small businesses starting SEO",
+      description: "Ranklite gives you all core features Outrank offers — but at ~$40/month less.",
       features: [
-        { text: "AI-written blog posts", included: true },
-        { text: "1 website", included: true },
-        { text: "Auto-publishing", included: true },
-        { text: "Per-article backlinks", included: true },
-        { text: "Built-in SEO protection", included: true },
+        { text: "30 SEO articles generated on autopilot per month", included: true },
+        { text: "AI-generated images included per article", included: true },
+        { text: "Automatic publishing to multiple CMS (WordPress, Wix, Webflow)", included: true },
+        { text: "Full keyword research & optimization for Google ranking", included: true },
+        { text: "Performance dashboard (traffic, rankings, publishing status)", included: true },
+        { text: "High-quality backlink starter pack", included: true },
+        { text: "Optional light human QA for higher-ranking content", included: true },
+        { text: "7-day free trial (no credit card required)", included: true },
       ],
-      cta: "Select Plan",
-      ctaLink: "/signup",
-    },
-    {
-      name: "Professional",
-      subtitle: "Balanced Growth",
-      price: 99,
-      period: "/month",
-      description: "Designed for consistent rankings and steady traffic",
-      features: [
-        { text: "Full 30-day content plan", included: true },
-        { text: "Daily publishing", included: true },
-        { text: "Per-article backlink generator", included: true },
-        { text: "QA validation & indexing checks", included: true },
-      ],
-      cta: "Select Plan",
+      cta: "Start 7-Day Free Trial",
       ctaLink: "/signup",
       popular: true,
-    },
-    {
-      name: "Enterprise",
-      subtitle: "Authority Growth",
-      price: 199,
-      period: "/month",
-      description: "Built for established brands that want to move faster",
-      features: [
-        { text: "Accelerated publishing", included: true },
-        { text: "High-capacity backlink generation", included: true },
-        { text: "Priority QA validation", included: true },
-        { text: "Advanced authority controls", included: true },
-      ],
-      cta: "Select Plan",
-      ctaLink: "/signup",
     },
   ];
 
@@ -87,52 +60,65 @@ export default function Pricing() {
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="mx-auto grid max-w-[1200px] gap-8 lg:grid-cols-3">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className="relative overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white p-8 shadow-sm transition-all hover:shadow-xl"
-            >
-              {/* Plan Header */}
-              <div className="mb-6">
-                <h3 className="font-display text-[28px] font-bold text-[#1A202C]">{plan.name}</h3>
-                <p className="mt-1 text-[15px] text-[#718096]">{plan.subtitle}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-[56px] font-bold text-[#22C55E]">${plan.price}</span>
-                  <span className="text-[18px] text-[#718096]">{plan.period}</span>
-                </div>
-              </div>
-
-              {/* Features */}
-              <ul className="mb-8 space-y-3">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    {feature.included ? (
-                      <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
-                    )}
-                    <span className="text-[15px] text-[#4A5568]">{feature.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <Link
-                href={plan.ctaLink}
-                onClick={handlePlanClick}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-4 text-[16px] font-semibold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
+          {/* Pricing Card */}
+          <div className="mx-auto max-w-[900px]">
+            {plans.map((plan, index) => (
+              <div
+                key={index}
+                className="relative overflow-hidden rounded-3xl border-2 border-[#22C55E] bg-white p-10 shadow-2xl"
               >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute top-0 right-8 -translate-y-1/2">
+                    <span className="inline-flex items-center rounded-full bg-[#22C55E] px-6 py-2 text-[14px] font-bold text-white shadow-lg">
+                      MOST POPULAR
+                    </span>
+                  </div>
+                )}
+
+                {/* Plan Header */}
+                <div className="mb-8 text-center">
+                  <h3 className="font-display text-[36px] font-bold text-[#1A202C]">{plan.name}</h3>
+                  <p className="mt-3 text-[16px] leading-relaxed text-[#718096]">{plan.subtitle}</p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8 text-center">
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="font-display text-[64px] font-bold text-[#22C55E]">${plan.price}</span>
+                    <span className="text-[20px] text-[#718096]">{plan.period}</span>
+                  </div>
+                  <p className="mt-3 text-[15px] text-[#22C55E] font-semibold">
+                    📈 {plan.description}
+                  </p>
+                </div>
+
+                {/* Features */}
+                <ul className="mb-10 grid gap-4 sm:grid-cols-2">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      {feature.included ? (
+                        <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
+                      )}
+                      <span className="text-[15px] text-[#4A5568] leading-relaxed">{feature.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                <Link
+                  href={plan.ctaLink}
+                  onClick={handlePlanClick}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
+                >
+                  {plan.cta}
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+            ))}
+          </div>
 
         {/* Additional Info Sections */}
         <div className="mx-auto mt-20 max-w-[1000px] space-y-16">
