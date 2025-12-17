@@ -26,7 +26,11 @@ async function getPesapalAccessToken() {
         throw new Error("Missing Pesapal credentials");
     }
 
+<<<<<<< HEAD
     const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
+=======
+    const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/GetNotificationId`, {
+>>>>>>> 7504f29 (Implement Pesapal payments for  trial)
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
