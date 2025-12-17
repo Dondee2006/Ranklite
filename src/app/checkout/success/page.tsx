@@ -1,6 +1,7 @@
 import SuccessClient from "./success-client";
 
-export const dynamic = "force-dynamic"; // Tell Next.js to skip prerendering
+// Force dynamic rendering so Next.js skips static pre-render
+export const dynamic = "force-dynamic";
 
 export default function CheckoutSuccessPage() {
   return <SuccessClient />;
