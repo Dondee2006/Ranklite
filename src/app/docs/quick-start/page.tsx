@@ -73,7 +73,7 @@ export default function QuickStartPage() {
                   <li>Your name</li>
                 </ul>
                 <p>
-                  No credit card is required for the 7-day free trial. You'll receive a confirmation email with a link to verify your account.
+                  A small <strong>$1 activation fee</strong> applies for the 3-day free trial. You'll receive a confirmation email with a link to verify your account.
                 </p>
               </div>
             </section>
