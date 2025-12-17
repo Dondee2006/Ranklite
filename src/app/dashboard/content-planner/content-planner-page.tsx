@@ -318,22 +318,32 @@ export default function ContentPlannerPage() {
     async function generateMonthlyCalendar() {
         setGenerating(true);
         try {
-            const response = await fetch("/api/content-calendar/generate-bulk", {
+            const startResponse = await fetch("/api/content-calendar/generate-bulk/start", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     month: currentMonth,
                     year: currentYear,
-                    generateContent: true,
                 }),
             });
-            const data = await response.json();
-            if (data.success) {
-                await loadArticles();
-            }
+            const { jobId } = await startResponse.json();
+
+            const pollInterval = setInterval(async () => {
+                const statusResponse = await fetch(`/api/content-calendar/generate-bulk/status/${jobId}`);
+                const status = await statusResponse.json();
+
+                if (status.status === "completed") {
+                    clearInterval(pollInterval);
+                    await loadArticles();
+                    setGenerating(false);
+                } else if (status.status === "failed") {
+                    clearInterval(pollInterval);
+                    console.error("Generation failed:", status.error);
+                    setGenerating(false);
+                }
+            }, 3000);
         } catch (error) {
-            console.error("Failed to generate calendar:", error);
-        } finally {
+            console.error("Failed to start generation:", error);
             setGenerating(false);
         }
     }
