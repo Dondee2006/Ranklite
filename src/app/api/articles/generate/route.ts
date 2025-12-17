@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { checkPostGenerationLimit, incrementPostUsage } from "@/lib/usage-limits";
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
     .not("content", "is", null);
 
   const outline = generateOutline(article.title, article.keyword, article.article_type);
-  const content = generateArticleContent(
+  const content = await generateArticleContent(
     article.title,
     article.keyword,
     article.secondary_keywords || [],
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
 
   const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
   const markdownContent = generateMarkdown(content, article.title, images, internalLinks, externalLinks);
-  const metaDescription = generateMetaDescription(article.keyword);
+  const metaDescription = await generateMetaDescription(article.keyword, article.title);
   const slug = article.slug || generateSlug(article.title);
 
   const cmsExports = {
@@ -243,50 +245,54 @@ function generateOutline(title: string, keyword: string, articleType: string): o
   return outlines[articleType] || outlines.guide;
 }
 
-function generateArticleContent(
+async function generateArticleContent(
   title: string,
   keyword: string,
   secondaryKeywords: string[],
   outline: object
-): string {
+): Promise<string> {
   const sections = (outline as { sections: { title: string; wordCount: number }[] }).sections;
   let content = "";
 
   for (const section of sections) {
     content += `## ${section.title}\n\n`;
-    content += generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount);
+    const sectionContent = await generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount);
+    content += sectionContent;
     content += "\n\n";
   }
 
   return content.trim();
 }
 
-function generateSectionContent(sectionTitle: string, keyword: string, secondaryKeywords: string[], wordCount: number): string {
-  const paragraphs = Math.ceil(wordCount / 80);
-  let content = "";
+async function generateSectionContent(sectionTitle: string, keyword: string, secondaryKeywords: string[], wordCount: number): Promise<string> {
+  try {
+    const { text } = await generateText({
+      model: openai("gpt-4o"),
+      prompt: `Write a detailed, engaging section for an SEO article with the following specifications:
 
-  const templates = [
-    `When it comes to ${keyword}, understanding the fundamentals is crucial for success. Many professionals in this field have discovered that taking a systematic approach yields the best results. The key is to focus on what truly matters and eliminate distractions that don't contribute to your goals.`,
-    `${keyword} has become increasingly important in today's competitive landscape. Organizations that master these concepts gain a significant advantage over their competitors. By implementing proven strategies and staying up-to-date with industry trends, you can achieve remarkable outcomes.`,
-    `One of the most effective ways to approach ${keyword} is to start with a solid foundation. This means understanding the core principles before diving into advanced techniques. Take the time to learn the basics, and you'll find that more complex concepts become much easier to grasp.`,
-    `Research shows that successful implementation of ${keyword} requires both strategic planning and tactical execution. Without a clear roadmap, it's easy to get lost in the details and lose sight of your ultimate objectives. Creating a step-by-step plan helps ensure consistent progress.`,
-    `The landscape of ${keyword} continues to evolve rapidly. What worked yesterday may not be as effective tomorrow, which is why staying informed about the latest developments is essential. Subscribe to industry publications, attend conferences, and network with other professionals to stay ahead.`,
-    `Many experts recommend focusing on quality over quantity when it comes to ${keyword}. Instead of trying to do everything at once, concentrate on a few key areas and excel in those before expanding your efforts. This approach leads to more sustainable, long-term success.`,
-    `Understanding your audience is fundamental to ${keyword} success. Take the time to research their needs, preferences, and pain points. This knowledge allows you to tailor your approach and deliver solutions that truly resonate with your target market.`,
-    `Data-driven decision making is becoming increasingly important in ${keyword}. By tracking key metrics and analyzing results, you can identify what's working and what needs improvement. This iterative approach helps optimize your strategy over time.`,
-  ];
+Section Title: ${sectionTitle}
+Target Keyword: ${keyword}
+Secondary Keywords: ${secondaryKeywords.join(", ")}
+Target Word Count: ${wordCount} words
 
-  for (let i = 0; i < paragraphs; i++) {
-    const template = templates[i % templates.length];
-    content += template + "\n\n";
+Requirements:
+- Write in a professional, informative tone
+- Naturally incorporate the target keyword and secondary keywords
+- Provide actionable insights and practical information
+- Use clear, concise language
+- Include specific examples or data points when relevant
+- Ensure the content flows naturally and is engaging to read
+- Do NOT include the section title in the output
 
-    if (secondaryKeywords.length > 0 && i % 2 === 0) {
-      const secondaryKw = secondaryKeywords[i % secondaryKeywords.length];
-      content += `Additionally, considering ${secondaryKw} can further enhance your results. Integrating these complementary concepts creates a more comprehensive approach that addresses multiple aspects of the challenge.\n\n`;
-    }
+Write the section content now:`,
+      maxTokens: Math.ceil(wordCount * 2),
+    });
+
+    return text.trim();
+  } catch (error) {
+    console.error("OpenAI generation error:", error);
+    return `Content about ${keyword} related to ${sectionTitle}. This section covers important aspects of ${keyword} and provides valuable insights for readers. ${secondaryKeywords.length > 0 ? `Additionally, we explore related topics including ${secondaryKeywords.slice(0, 2).join(" and ")}.` : ""}`;
   }
-
-  return content.trim();
 }
 
 function detectInternalLinks(content: string, existingArticles: { id: string; title: string; slug: string; keyword: string }[], domain: string): object[] {
@@ -417,13 +423,31 @@ function generateMarkdown(content: string, title: string, images: object[], inte
   return md;
 }
 
-function generateMetaDescription(keyword: string): string {
-  const templates = [
-    `Discover everything you need to know about ${keyword}. Our comprehensive guide covers tips, strategies, and expert insights to help you succeed.`,
-    `Learn ${keyword} with our detailed guide. Get actionable tips, best practices, and proven strategies from industry experts.`,
-    `Master ${keyword} with this complete guide. Includes step-by-step instructions, examples, and expert recommendations for 2025.`,
-  ];
-  return templates[Math.floor(Math.random() * templates.length)].slice(0, 160);
+async function generateMetaDescription(keyword: string, title: string): Promise<string> {
+  try {
+    const { text } = await generateText({
+      model: openai("gpt-4o"),
+      prompt: `Write a compelling SEO meta description for an article about "${title}".
+
+Target Keyword: ${keyword}
+
+Requirements:
+- Maximum 155 characters
+- Include the target keyword naturally
+- Make it engaging and click-worthy
+- Clearly communicate the value of the article
+- Use active voice
+- Do NOT include quotes or special formatting
+
+Write only the meta description:`,
+      maxTokens: 100,
+    });
+
+    return text.trim().slice(0, 160);
+  } catch (error) {
+    console.error("Meta description generation error:", error);
+    return `Discover everything you need to know about ${keyword}. Our comprehensive guide covers tips, strategies, and expert insights to help you succeed.`.slice(0, 160);
+  }
 }
 
 function generateSlug(title: string): string {
