@@ -21,10 +21,14 @@ async function getPesapalAccessToken() {
     if (!consumerKey || !consumerSecret) throw new Error("Missing Pesapal credentials");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
 =======
     const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/GetNotificationId`, {
 >>>>>>> 7504f29 (Implement Pesapal payments for  trial)
+=======
+    const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
+>>>>>>> 747d473 (Auto-sync on project load)
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ consumer_key: consumerKey, consumer_secret: consumerSecret }),

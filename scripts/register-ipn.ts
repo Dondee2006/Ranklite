@@ -120,7 +120,11 @@ async function registerIpn() {
         console.error("============================================");
         console.error("\nPlease add this IPN ID to your .env file as PESAPAL_IPN_ID");
 
+<<<<<<< HEAD
+        fs.writeFileSync('ipn_id.txt', `***REMOVED***${data.ipn_id}`);
+=======
         fs.writeFileSync('ipn_id.txt', `PESAPAL_IPN_ID=${data.ipn_id}`);
+>>>>>>> 747d473 (Auto-sync on project load)
         console.error("Saved IPN ID to ipn_id.txt");
 
     } catch (error) {
