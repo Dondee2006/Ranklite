@@ -1,9 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import { TrendingUp, Zap, Target, BarChart3, Star } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 function StatBubble({ 
   icon: Icon, 
@@ -84,24 +80,6 @@ function PillTag({ children, variant = "green" }: { children: React.ReactNode; v
 }
 
 export default function HeroSection() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-    };
-    checkAuth();
-  }, []);
-
-  const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAuthenticated) {
-      e.preventDefault();
-      window.location.href = "/dashboard/overview";
-    }
-  };
-
   return (
     <>
       <div className="relative overflow-hidden">

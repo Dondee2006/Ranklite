@@ -1,68 +1,6 @@
-"use client";
-
-import Link from "next/link";
-import { Check, X, ArrowRight, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
-import { toast } from "sonner";
+import { Check, X, ArrowRight } from "lucide-react";
 
 export default function Pricing() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setUser(user);
-    };
-    checkAuth();
-  }, []);
-
-  const handlePlanClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAuthenticated && user) {
-      e.preventDefault();
-      setLoading(true);
-
-      try {
-        const response = await fetch('/api/pesapal/create-order', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            email: user.email,
-            name: user.user_metadata?.full_name || user.email?.split('@')[0],
-            amount: 1.00,
-            description: "Ranklite 3-Day Trial Activation"
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create payment order');
-        }
-
-        const data = await response.json();
-
-        if (data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          toast.error("Failed to initiate payment. Please try again.");
-          setLoading(false);
-        }
-
-      } catch (error) {
-        console.error("Payment Error:", error);
-        toast.error("Something went wrong. Please try again.");
-        setLoading(false);
-      }
-    }
-  };
-
   const plans = [
     {
       name: "Pro Tier",
