@@ -54,8 +54,6 @@ export default function BoostVisibility() {
           </div>
 <a
               href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-              target="_blank"
-              rel="noopener noreferrer"
               className="group flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30"
             >
               Generate Backlinks Instantly →

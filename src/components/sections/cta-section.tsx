@@ -66,8 +66,6 @@ export default function CtaSection() {
               <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row">
                 <a
                   href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group relative flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/20 transition-all hover:shadow-2xl hover:shadow-green-500/30"
                 >
                   <Rocket className="h-5 w-5" />

@@ -67,8 +67,6 @@ export default function Header() {
               </Link>
                 <a
                   href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-5 py-2.5 text-[15px] font-semibold text-white shadow-lg shadow-green-500/25 transition-all hover:shadow-green-500/40"
                 >
                   <span className="relative z-10">Start Free Trial</span>

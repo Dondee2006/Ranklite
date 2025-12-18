@@ -163,8 +163,6 @@ export default function HeroSection() {
                 <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
                   <a
                     href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
                   >
                     <span className="relative z-10">Start Generating Backlinks</span>
