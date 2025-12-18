@@ -43,14 +43,6 @@
 >>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
-    "@tiptap/extension-image": "^2.27.1",
-    "@tiptap/extension-link": "^2.27.1",
-    "@tiptap/extension-placeholder": "^2.27.1",
-    "@tiptap/extension-youtube": "^2.27.1",
-    "@tiptap/pm": "^2.27.1",
-    "@tiptap/react": "^2.27.1",
-    "@tiptap/starter-kit": "^2.27.1",
-    "@types/uuid": "^10.0.0",
     "ai": "^5.0.112",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -73,7 +65,6 @@
     "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "uuid": "^13.0.0",
     "vaul": "^1.1.2",
     "zod": "^4.1.12"
   },

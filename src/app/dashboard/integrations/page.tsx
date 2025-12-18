@@ -91,14 +91,13 @@ export default function IntegrationsPage() {
   const [connectOpen, setConnectOpen] = useState(false);
   const [disconnectTarget, setDisconnectTarget] = useState<Integration | null>(null);
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
-  const [form, setForm] = useState({
-    siteUrl: "",
-    accessToken: "",
+  const [form, setForm] = useState({ 
+    siteUrl: "", 
+    accessToken: "", 
     shop: "",
     appId: "",
     appSecret: "",
-    instanceId: "",
-    databaseId: ""
+    instanceId: ""
   });
   const [feedback, setFeedback] = useState<Feedback>(null);
 
@@ -120,11 +119,11 @@ export default function IntegrationsPage() {
 
       setIntegrations((prev) =>
         prev.map((integration) => {
-          const cms = cmsIntegrations.find((c: { platform: string }) => c.platform === integration.id);
+          const cms = cmsIntegrations.find((c: any) => c.platform === integration.id);
           if (cms) {
             return {
               ...integration,
-              status: cms.status === "active" ? "Connected" : "Not connected",
+              status: cms.status === "connected" ? "Connected" : "Not connected",
               last_sync: cms.last_sync_at ? new Date(cms.last_sync_at).toLocaleString() : null,
               integration_id: cms.id,
             };
@@ -143,14 +142,13 @@ export default function IntegrationsPage() {
       return;
     }
     setSelectedIntegration(integration);
-    setForm({
-      siteUrl: "",
-      accessToken: "",
+    setForm({ 
+      siteUrl: "", 
+      accessToken: "", 
       shop: "",
       appId: "",
       appSecret: "",
-      instanceId: "",
-      databaseId: ""
+      instanceId: ""
     });
     setFeedback(null);
     setConnectOpen(true);
@@ -161,9 +159,9 @@ export default function IntegrationsPage() {
     if (!selectedIntegration) return;
 
     const platform = selectedIntegration.id;
-
+    
     let endpoint = "";
-    let body: Record<string, string> = {};
+    let body: any = {};
 
     switch (platform) {
       case "wordpress":
@@ -194,12 +192,12 @@ export default function IntegrationsPage() {
         break;
 
       case "notion":
-        if (!form.accessToken || !form.databaseId) {
-          setFeedback({ type: "error", text: "Integration Token and Database ID are required." });
+        if (!form.accessToken) {
+          setFeedback({ type: "error", text: "Integration Token is required." });
           return;
         }
         endpoint = "/api/cms/notion/auth";
-        body = { access_token: form.accessToken, database_id: form.databaseId };
+        body = { access_token: form.accessToken };
         break;
 
       case "wix":
@@ -521,11 +519,11 @@ export default function IntegrationsPage() {
                   type="password"
                   placeholder={
                     currentPlatform === "wordpress" ? "Enter your WordPress application password" :
-                      currentPlatform === "webflow" ? "Enter your Webflow API token" :
-                        currentPlatform === "shopify" ? "Enter your Shopify access token" :
-                          currentPlatform === "notion" ? "Enter your Notion integration token" :
-                            currentPlatform === "framer" ? "Enter your Framer API token" :
-                              "Enter your API token"
+                    currentPlatform === "webflow" ? "Enter your Webflow API token" :
+                    currentPlatform === "shopify" ? "Enter your Shopify access token" :
+                    currentPlatform === "notion" ? "Enter your Notion integration token" :
+                    currentPlatform === "framer" ? "Enter your Framer API token" :
+                    "Enter your API token"
                   }
                   value={form.accessToken}
                   onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}
@@ -534,24 +532,7 @@ export default function IntegrationsPage() {
               </div>
             )}
 
-            {currentPlatform === "notion" && (
-              <div className="space-y-2 pb-2">
-                <Label htmlFor="databaseId">Database ID</Label>
-                <Input
-                  id="databaseId"
-                  placeholder="Enter your Notion database ID"
-                  value={form.databaseId}
-                  onChange={(e) => setForm((prev) => ({ ...prev, databaseId: e.target.value }))}
-                  required
-                />
-                <p className="text-[10px] text-gray-500 font-medium italic leading-relaxed">
-                  Find the ID in your Notion database URL:<br />
-                  notion.so/workspace/<b>[DATABASE_ID]</b>?v=...
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"

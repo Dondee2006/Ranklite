@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'development';
-
+    
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -19,15 +19,15 @@ export async function GET(request: NextRequest) {
     const { data: integrations, error } = await supabase
       .from('cms_integrations')
       .select('*')
-      .eq('status', 'active')
+      .eq('status', 'connected')
       .eq('auto_publish_enabled', true);
 
     if (error) throw error;
 
     if (!integrations || integrations.length === 0) {
-      return NextResponse.json({
+      return NextResponse.json({ 
         message: 'No integrations configured for auto-sync',
-        synced: 0
+        synced: 0 
       });
     }
 
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return NextResponse.json({ 
       message: 'Daily sync completed',
       total_integrations: integrations.length,
       results,
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Daily sync cron error:', error);
-    return NextResponse.json({
+    return NextResponse.json({ 
       error: 'Failed to run daily sync',
       details: String(error)
     }, { status: 500 });

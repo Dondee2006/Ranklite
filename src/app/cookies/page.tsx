@@ -70,6 +70,9 @@ export default function CookiesPage() {
                   <strong>Google Analytics:</strong> For website analytics and performance tracking
                 </li>
                 <li>
+                  <strong>Stripe:</strong> For secure payment processing
+                </li>
+                <li>
                   <strong>Supabase:</strong> For authentication and database services
                 </li>
                 <li>
@@ -122,7 +125,7 @@ export default function CookiesPage() {
               <h3 className="mt-6 font-semibold text-foreground">Browser Settings</h3>
               <p>
                 Most browsers allow you to refuse or accept cookies, delete existing cookies, and set preferences for
-                certain websites. You can usually find these settings in your browser&apos;s options or preferences menu.
+                certain websites. You can usually find these settings in your browser's options or preferences menu.
               </p>
 
               <h3 className="mt-6 font-semibold text-foreground">Third-Party Opt-Out Tools</h3>
@@ -145,7 +148,7 @@ export default function CookiesPage() {
           <section className="mb-10">
             <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">7. Do Not Track Signals</h2>
             <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-              Some browsers include a &quot;Do Not Track&quot; (DNT) feature that signals to websites that you do not want to have
+              Some browsers include a "Do Not Track" (DNT) feature that signals to websites that you do not want to have
               your online activity tracked. Currently, there is no industry standard for how to respond to DNT signals.
               At this time, our Service does not respond to DNT browser signals.
             </p>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Check, ChevronRight, HelpCircle, Loader2, RefreshCw } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 type ImageStyle = "brand-text" | "watercolor" | "cinematic" | "illustration" | "sketch";
 type SettingsTab = "articles" | "blog";
@@ -45,7 +43,7 @@ export default function ArticlesSettingsPage() {
   const [ctaText, setCtaText] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [aiImages, setAiImages] = useState(true);
-
+  
   // Blog settings
   const [sitemapUrl, setSitemapUrl] = useState("");
   const [mainBlogAddress, setMainBlogAddress] = useState("");
@@ -66,7 +64,7 @@ export default function ArticlesSettingsPage() {
 
   async function fetchBlogInfo() {
     if (!siteUrl || fetchingBlogInfo) return;
-
+    
     setFetchingBlogInfo(true);
     try {
       const response = await fetch("/api/scrape-website", {
@@ -74,9 +72,9 @@ export default function ArticlesSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: siteUrl }),
       });
-
+      
       const data = await response.json();
-
+      
       if (data.success && data.data) {
         if (data.data.sitemapUrl && !sitemapUrl) {
           setSitemapUrl(data.data.sitemapUrl);
@@ -143,10 +141,8 @@ export default function ArticlesSettingsPage() {
           example_urls: exampleUrls.filter(u => u.trim()),
         }),
       });
-      toast.success("Settings saved successfully");
     } catch (error) {
       console.error("Failed to save settings:", error);
-      toast.error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -216,7 +212,7 @@ export default function ArticlesSettingsPage() {
                         <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        Your website&apos;s sitemap URL
+                        Your website's sitemap URL
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -291,7 +287,7 @@ export default function ArticlesSettingsPage() {
             </div>
 
             <div className="mt-8">
-              <Button
+              <Button 
                 onClick={saveSettings}
                 disabled={saving}
                 className="w-full bg-[#22C55E] hover:bg-[#16A34A] h-12 text-base"
@@ -391,27 +387,10 @@ export default function ArticlesSettingsPage() {
               <section>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Images & Media</h2>
                 <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="h-10 w-10 rounded-xl border border-gray-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-green-500/20 transition-all"
-                        style={{ backgroundColor: brandColor }}
-                        onClick={() => document.getElementById('color-picker')?.click()}
-                      />
-                      <Input
-                        value={brandColor}
-                        onChange={(e) => setBrandColor(e.target.value)}
-                        className="h-11 w-32 font-mono text-sm"
-                        placeholder="#000000"
-                      />
-                      <input
-                        id="color-picker"
-                        type="color"
-                        value={brandColor}
-                        onChange={(e) => setBrandColor(e.target.value)}
-                        className="hidden"
-                      />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">AI Generated Images</div>
+                      <div className="text-sm text-gray-500">Automatically generate images for articles</div>
                     </div>
                     <Switch
                       checked={aiImages}
@@ -420,62 +399,26 @@ export default function ArticlesSettingsPage() {
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="block text-sm font-medium text-gray-700">Image Style</label>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-[11px] font-bold border-green-200 text-green-700 hover:bg-green-50"
-                        onClick={async () => {
-                          const promise = new Promise(async (resolve, reject) => {
-                            try {
-                              const res = await fetch("/api/articles/test-image", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ style: selectedImageStyle, brandColor }),
-                              });
-                              const data = await res.json();
-                              if (data.url) resolve(data.url);
-                              else reject(data.error || "Failed to generate");
-                            } catch (e) { reject(e); }
-                          });
-
-                          toast.promise(promise, {
-                            loading: 'Generating style preview...',
-                            success: (url: any) => {
-                              window.open(url, '_blank');
-                              return 'Preview generated successfully!';
-                            },
-                            error: (err) => `Error: ${err}`,
-                          });
-                        }}
-                      >
-                        <RefreshCw className="mr-1.5 h-3 w-3" />
-                        Test Style
-                      </Button>
-                    </div>
+                    <div className="text-sm font-medium text-gray-700 mb-3">Image Style</div>
                     <div className="grid grid-cols-5 gap-3">
                       {IMAGE_STYLES.map((style) => (
                         <button
                           key={style.id}
                           onClick={() => setSelectedImageStyle(style.id)}
                           className={cn(
-                            "flex flex-col items-center gap-2 rounded-xl border-2 p-2 transition-all",
+                            "relative rounded-xl overflow-hidden border-2 transition-all p-3",
                             selectedImageStyle === style.id
                               ? "border-[#22C55E] bg-[#F0FDF4]"
-                              : "border-gray-100 hover:border-gray-200 bg-white"
+                              : "border-gray-200 hover:border-gray-300"
                           )}
                         >
-                          <div className="h-20 w-full rounded-lg bg-gray-100 overflow-hidden">
-                            <img
-                              src={`/images/article-styles/${style.id}.png`}
-                              alt={style.label}
-                              className="w-full h-full object-cover transition-transform hover:scale-105"
-                            />
-                          </div>
-                          <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-700">
-                            {style.label}
-                          </span>
+                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-2" />
+                          {selectedImageStyle === style.id && (
+                            <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-[#22C55E] flex items-center justify-center">
+                              <Check className="h-3 w-3 text-white" />
+                            </div>
+                          )}
+                          <span className="text-xs font-medium text-gray-700">{style.label}</span>
                         </button>
                       ))}
                     </div>
@@ -524,7 +467,7 @@ export default function ArticlesSettingsPage() {
             </div>
 
             <div className="mt-8">
-              <Button
+              <Button 
                 onClick={saveSettings}
                 disabled={saving}
                 className="w-full bg-[#22C55E] hover:bg-[#16A34A] h-12 text-base"
@@ -537,16 +480,12 @@ export default function ArticlesSettingsPage() {
         )}
 
         <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
-          <Link href="/dashboard">
-            <Button variant="outline" className="px-6">
-              Back
-            </Button>
-          </Link>
-          <Link href="/dashboard/content-planner">
-            <Button className="bg-[#22C55E] hover:bg-[#16A34A] px-8">
-              Continue
-            </Button>
-          </Link>
+          <Button variant="outline" className="px-6">
+            Back
+          </Button>
+          <Button className="bg-[#22C55E] hover:bg-[#16A34A] px-8">
+            Continue
+          </Button>
         </div>
       </div>
     </div>

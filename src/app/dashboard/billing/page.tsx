@@ -161,7 +161,7 @@ export default function BillingPage() {
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    What&apos;s included
+                    What's included
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                     Status

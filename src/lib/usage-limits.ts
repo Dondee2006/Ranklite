@@ -80,30 +80,8 @@ export async function getUserPlanAndUsage(userId: string): Promise<{
 export async function checkPostGenerationLimit(
   userId: string
 ): Promise<UsageStatus> {
-  // DEVELOPMENT MODE: Bypass all limits
-  console.log("⚠️ DEV MODE: Usage limits bypassed");
-
   const { plan, usage, status } = await getUserPlanAndUsage(userId);
 
-  // Always allow in development
-  return {
-    allowed: true,
-    usage: usage || {
-      posts_generated: 0,
-      backlinks_generated: 0,
-      period_start: new Date().toISOString(),
-      period_end: new Date().toISOString(),
-    },
-    limits: plan || {
-      posts_per_month: 999999,
-      backlinks_per_post: 999999,
-      qa_validation: true,
-      integrations_limit: -1,
-    },
-    percentUsed: { posts: 0, backlinks: 0 },
-  };
-
-  /* ORIGINAL CODE - Commented out for development
   if (!plan || !usage) {
     return {
       allowed: false,
@@ -123,7 +101,6 @@ export async function checkPostGenerationLimit(
       message: "No active plan found. Please subscribe to a plan.",
     };
   }
-  */
 
   if (status !== "active") {
     return {

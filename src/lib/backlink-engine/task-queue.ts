@@ -3,14 +3,15 @@ import type { BacklinkTask, Platform, SubmissionData, TaskStatus } from "./types
 import { runPolicyCheck, shouldRequireManualReview } from "./policy-engine";
 import { checkBacklinkGenerationLimit, incrementBacklinkUsage } from "@/lib/usage-limits";
 
-const FOUNDATION_CATEGORIES = ["Business Directory", "Local Directory", "Review Platform"];
+const MAX_DAILY_SUBMISSIONS = 10;
+const MIN_DELAY_BETWEEN_SUBMISSIONS_MS = 5 * 60 * 1000;
+const EXPONENTIAL_BACKOFF_BASE = 2;
 
 export async function createTasksForUser(
   userId: string,
   websiteUrl: string,
   siteName: string,
-  description: string,
-  articleId?: string
+  description: string
 ): Promise<{ created: number; skipped: number; blocked: number }> {
   const { data: platforms } = await supabaseAdmin
     .from("backlink_platforms")
@@ -28,84 +29,40 @@ export async function createTasksForUser(
     return { created: 0, skipped: 0, blocked: 0 };
   }
 
-  // Fetch all existing tasks for this user to check for duplicates
   const { data: existingTasks } = await supabaseAdmin
     .from("backlink_tasks")
-    .select("platform_id, article_id")
+    .select("platform_id")
     .eq("user_id", userId);
 
   const existingPlatformIds = new Set(existingTasks?.map((t) => t.platform_id) || []);
-  const articlePlatformIds = new Set(
-    existingTasks?.filter(t => t.article_id === articleId).map(t => t.platform_id) || []
-  );
 
   let created = 0;
   let skipped = 0;
   let blocked = 0;
   const now = new Date();
 
-  // Sort platforms: Prioritize Growth for fast-start if articleId is provided
-  const sortedPlatforms = [...platforms].sort((a, b) => {
-    const aIsFoundation = FOUNDATION_CATEGORIES.includes(a.category || "");
-    const bIsFoundation = FOUNDATION_CATEGORIES.includes(b.category || "");
-    if (aIsFoundation && !bIsFoundation) return 1;
-    if (!aIsFoundation && bIsFoundation) return -1;
-    return (b.domain_rating || 0) - (a.domain_rating || 0);
-  });
+  for (let i = 0; i < platforms.length; i++) {
+    const platform = platforms[i] as Platform;
 
-  for (let i = 0; i < sortedPlatforms.length; i++) {
-    const platform = sortedPlatforms[i] as Platform;
-    const isFoundation = FOUNDATION_CATEGORIES.includes(platform.category || "");
-
-    // Logic:
-    // 1. If Foundation: Skip if site already has this platform.
-    // 2. If Growth: Skip only if this SPECIFIC ARTICLE already has this platform.
-    if (isFoundation) {
-      if (existingPlatformIds.has(platform.id)) {
-        skipped++;
-        continue;
-      }
-    } else {
-      if (articlePlatformIds.has(platform.id)) {
-        skipped++;
-        continue;
-      }
-      // For growth links on an article, we might want to cap it to 10 per article if not specifically requested
-      if (articleId && created >= 15 && !isFoundation) {
-        skipped++;
-        continue;
-      }
+    if (existingPlatformIds.has(platform.id)) {
+      skipped++;
+      continue;
     }
 
     const policyResult = await runPolicyCheck(platform, platform.submission_url || undefined);
     const manualReviewCheck = shouldRequireManualReview(policyResult);
 
-    // Fast-Start Scheduling:
-    // First 5 tasks: 15 mins apart (for instant feedback)
-    // Next 10 tasks: 2 hours apart
-    // Rest: 6 hours apart
-    let delay = i * MIN_DELAY_BETWEEN_SUBMISSIONS_MS;
-    if (i < 5) {
-      delay = i * (15 * 60 * 1000);
-    } else if (i < 15) {
-      delay = 5 * (15 * 60 * 1000) + (i - 5) * (120 * 60 * 1000);
-    } else {
-      delay = 5 * (15 * 60 * 1000) + 10 * (120 * 60 * 1000) + (i - 15) * (360 * 60 * 1000);
-    }
-
-    const scheduledFor = new Date(now.getTime() + delay);
+    const scheduledFor = new Date(now.getTime() + i * MIN_DELAY_BETWEEN_SUBMISSIONS_MS);
 
     const submissionData: SubmissionData = {
       business_name: siteName,
       website_url: websiteUrl,
       description: description,
-      article_id: articleId,
     };
 
     const task: Partial<BacklinkTask> = {
       user_id: userId,
       platform_id: platform.id,
-      article_id: articleId,
       website_url: websiteUrl,
       status: manualReviewCheck.required ? "require_manual" : "pending",
       priority: Math.ceil((platform.domain_rating || 50) / 10),

@@ -56,12 +56,12 @@ export default function WebhookSecurityPage() {
 
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
           <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Implementing Signature Verification</h2>
-
+          
           <div className="mb-8">
             <h3 className="mb-4 text-[20px] font-semibold text-foreground">Node.js / Express</h3>
             <div className="overflow-x-auto">
               <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-                {`import crypto from 'crypto';
+{`import crypto from 'crypto';
 import express from 'express';
 
 const app = express();
@@ -104,7 +104,7 @@ app.post('/api/webhooks/ranklite', (req, res) => {
             <h3 className="mb-4 text-[20px] font-semibold text-foreground">Python / Flask</h3>
             <div className="overflow-x-auto">
               <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-                {`import hmac
+{`import hmac
 import hashlib
 import os
 from flask import Flask, request, abort
@@ -140,7 +140,7 @@ def webhook():
             <h3 className="mb-4 text-[20px] font-semibold text-foreground">PHP</h3>
             <div className="overflow-x-auto">
               <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-                {`<?php
+{`<?php
 function verifyWebhookSignature($payload, $signature, $secret) {
     $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
     return hash_equals($expectedSignature, $signature);
@@ -238,7 +238,7 @@ echo 'OK';
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0FDF4] text-[14px] font-semibold text-[#22C55E]">3</span>
               <div>
                 <p className="text-[15px] font-semibold text-foreground">Test Verification</p>
-                <p className="text-[14px] text-muted-foreground">Use the &quot;Test Webhook&quot; button to verify the new secret works</p>
+                <p className="text-[14px] text-muted-foreground">Use the "Test Webhook" button to verify the new secret works</p>
               </div>
             </li>
           </ol>
@@ -259,7 +259,7 @@ echo 'OK';
           </p>
           <div className="overflow-x-auto">
             <pre className="rounded-lg bg-slate-900 p-4 text-[12px] text-slate-100">
-              {`Secret: whsec_test_secret_12345
+{`Secret: whsec_test_secret_12345
 Payload: {"id":"evt_test","type":"article.published","created":1734134400}
 Expected Signature: sha256=9c5b94b1e7f3d6c4a8f2e1d3b5c7a9e2f4d6c8b0a1e3c5d7e9b2a4c6d8e0f2`}
             </pre>

@@ -41,7 +41,7 @@ export function LinkingConfigurationPage() {
     const fetchUserSite = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-
+      
       if (user) {
         const { data: site } = await supabase
           .from('sites')
@@ -50,12 +50,12 @@ export function LinkingConfigurationPage() {
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
-
+        
         if (site?.url) {
           const baseUrl = site.url.replace(/\/$/, '');
           const defaultSitemapUrl = `${baseUrl}/sitemap.xml`;
           setSitemapUrl(defaultSitemapUrl);
-
+          
           // Automatically detect links from default sitemap
           detectLinksFromUrl(defaultSitemapUrl);
         }
@@ -174,7 +174,7 @@ export function LinkingConfigurationPage() {
               </h2>
               <Popover open={sourcePopoverOpen} onOpenChange={setSourcePopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button
+                  <button 
                     className="ml-auto text-gray-400 hover:text-gray-600"
                     onMouseEnter={() => setSourcePopoverOpen(true)}
                     onMouseLeave={() => setSourcePopoverOpen(false)}
@@ -182,7 +182,7 @@ export function LinkingConfigurationPage() {
                     <Info className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent
+                <PopoverContent 
                   className="w-80"
                   onMouseEnter={() => setSourcePopoverOpen(true)}
                   onMouseLeave={() => setSourcePopoverOpen(false)}
@@ -190,8 +190,8 @@ export function LinkingConfigurationPage() {
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm">Source Configuration</h4>
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      Configure where to find pages on your website. You can scan your sitemap XML,
-                      RSS feed, or manually add URLs. We&apos;ll analyze these pages to find internal linking
+                      Configure where to find pages on your website. You can scan your sitemap XML, 
+                      RSS feed, or manually add URLs. We'll analyze these pages to find internal linking 
                       opportunities and build a page inventory for backlink exchanges.
                     </p>
                   </div>
@@ -316,7 +316,7 @@ export function LinkingConfigurationPage() {
               </h2>
               <Popover open={detectedPopoverOpen} onOpenChange={setDetectedPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <button
+                  <button 
                     className="ml-auto text-gray-400 hover:text-gray-600"
                     onMouseEnter={() => setDetectedPopoverOpen(true)}
                     onMouseLeave={() => setDetectedPopoverOpen(false)}
@@ -324,7 +324,7 @@ export function LinkingConfigurationPage() {
                     <Info className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent
+                <PopoverContent 
                   className="w-80"
                   onMouseEnter={() => setDetectedPopoverOpen(true)}
                   onMouseLeave={() => setDetectedPopoverOpen(false)}
@@ -332,8 +332,8 @@ export function LinkingConfigurationPage() {
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm">Detected Links</h4>
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      All pages found from your sitemap or RSS feed. These pages are used to generate
-                      internal linking suggestions and are available for backlink exchanges. The more
+                      All pages found from your sitemap or RSS feed. These pages are used to generate 
+                      internal linking suggestions and are available for backlink exchanges. The more 
                       pages detected, the better our AI can suggest relevant internal links.
                     </p>
                   </div>
@@ -350,7 +350,7 @@ export function LinkingConfigurationPage() {
                   Run a Link Detection to see the result
                 </h3>
                 <p className="text-sm text-gray-500 max-w-xs">
-                  Choose your link source and click &quot;Detect Links&quot; to find links from your website.
+                  Choose your link source and click "Detect Links" to find links from your website.
                 </p>
               </div>
             ) : (
@@ -363,9 +363,9 @@ export function LinkingConfigurationPage() {
                     <h4 className="text-sm font-medium text-gray-900 mb-1">
                       {link.title}
                     </h4>
-                    <a
-                      href={link.url}
-                      target="_blank"
+                    <a 
+                      href={link.url} 
+                      target="_blank" 
                       rel="noopener noreferrer"
                       className="text-xs text-blue-600 hover:text-blue-800 hover:underline truncate block"
                     >
@@ -407,9 +407,9 @@ export function LinkingConfigurationPage() {
                   {linkSuggestions.map((suggestion) => (
                     <tr key={suggestion.id} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium truncate max-w-xs" title={suggestion.source_url}>
-                        <a
-                          href={suggestion.source_url}
-                          target="_blank"
+                        <a 
+                          href={suggestion.source_url} 
+                          target="_blank" 
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 hover:underline"
                         >
@@ -417,9 +417,9 @@ export function LinkingConfigurationPage() {
                         </a>
                       </td>
                       <td className="px-6 py-4 truncate max-w-xs" title={suggestion.target_url}>
-                        <a
-                          href={suggestion.target_url}
-                          target="_blank"
+                        <a 
+                          href={suggestion.target_url} 
+                          target="_blank" 
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:text-blue-800 hover:underline"
                         >

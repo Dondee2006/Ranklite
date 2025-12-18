@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           <section className="mb-10">
             <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">1. Introduction</h2>
             <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-              Ranklite (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how
+              Ranklite ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how
               we collect, use, disclose, and safeguard your information when you use our Service.
             </p>
           </section>
@@ -151,7 +151,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="mb-10">
-            <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">10. Children&apos;s Privacy</h2>
+            <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">10. Children's Privacy</h2>
             <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
               Our Service is not intended for children under 13 years of age. We do not knowingly collect personal
               information from children under 13. If you believe we have collected information from a child under 13,
@@ -172,7 +172,7 @@ export default function PrivacyPage() {
             <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">12. Changes to This Policy</h2>
             <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
               We may update this Privacy Policy from time to time. We will notify you of any material changes by posting
-              the new policy on this page and updating the &quot;Last updated&quot; date. Your continued use of the Service after
+              the new policy on this page and updating the "Last updated" date. Your continued use of the Service after
               such changes constitutes acceptance of the updated policy.
             </p>
           </section>
