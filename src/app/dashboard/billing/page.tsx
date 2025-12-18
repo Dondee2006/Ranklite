@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Zap, Check, Info, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type GrowthMode = "Manual Growth" | "Safe Growth" | "Balanced Growth" | "Authority Growth";
+type GrowthMode = "Safe Growth" | "Balanced Growth" | "Authority Growth";
 
 type Plan = {
   id: string;
@@ -18,35 +18,47 @@ type Plan = {
 
 const PLANS: Plan[] = [
   {
-    id: "free",
-    name: "Free",
-    price: 0,
-    growthMode: "Manual Growth",
+    id: "starter",
+    name: "Starter",
+    price: 49,
+    growthMode: "Safe Growth",
     features: [
-      "Basic SEO dashboard",
-      "Manual article creation",
-      "Basic keyword tracking",
-      "Standard support",
+      "AI content generation",
+      "Automated publishing",
+      "Gradual backlink building",
+      "Built-in SEO safety controls",
     ],
     color: "green",
     isActive: false,
   },
   {
-    id: "pro",
-    name: "Pro Tier",
-    price: 59,
-    growthMode: "Authority Growth",
+    id: "growth",
+    name: "Growth",
+    price: 99,
+    growthMode: "Balanced Growth",
     features: [
-      "30 SEO articles generated on autopilot per month",
-      "AI-generated images included per article",
-      "Automatic publishing to WordPress, Wix, Webflow",
-      "Full keyword research & optimization",
-      "High-quality backlink starter pack",
-      "Optional light human QA for content",
-      "3-day free trial ($1 activation fee)",
+      "Full 30-day AI content plan",
+      "Daily blog publishing",
+      "Automated backlink generator",
+      "QA validation & indexing checks",
+      "Natural, penalty-safe growth",
     ],
     color: "blue",
     isActive: true,
+  },
+  {
+    id: "authority",
+    name: "Authority",
+    price: 199,
+    growthMode: "Authority Growth",
+    features: [
+      "Accelerated content publishing",
+      "Higher backlink capacity",
+      "Priority QA validation",
+      "Optimized for established sites",
+    ],
+    color: "purple",
+    isActive: false,
   },
 ];
 
@@ -149,7 +161,7 @@ export default function BillingPage() {
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    What&apos;s included
+                    What's included
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                     Status

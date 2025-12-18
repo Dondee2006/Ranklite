@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   if (quantity > plan.backlinks_per_post) {
     return NextResponse.json(
-      {
+      { 
         error: `Requested quantity (${quantity}) exceeds plan limit of ${plan.backlinks_per_post} backlinks per post.`,
         limit: plan.backlinks_per_post,
         requested: quantity,
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
   if (backlinksThisMonth + quantity > monthlyBacklinkCap) {
     return NextResponse.json(
-      {
+      { 
         error: `Monthly backlink limit would be exceeded. Current: ${backlinksThisMonth}, Cap: ${monthlyBacklinkCap}, Requested: ${quantity}`,
         monthlyUsed: backlinksThisMonth,
         monthlyCap: monthlyBacklinkCap,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
   const todayBacklinksUsed = lastBacklinkDate === today ? backlinksToday : 0;
   if (todayBacklinksUsed + quantity > dailyBacklinkCap) {
     return NextResponse.json(
-      {
+      { 
         error: `Daily backlink limit would be exceeded. Use daily drip scheduling to stay safe.`,
         dailyUsed: todayBacklinksUsed,
         dailyCap: dailyBacklinkCap,
@@ -128,16 +128,8 @@ export async function POST(request: Request) {
 
   const daysToDistribute = Math.ceil(quantity / dailyBacklinkCap);
   const baseDate = new Date();
-  const { data: platforms } = await supabase
-    .from("backlink_platforms")
-    .select("id, site_name, site_domain, automation_allowed, submission_type, domain_rating")
-    .eq("automation_allowed", true);
-
   const tasks: Array<{
     user_id: string;
-    site_id: string;
-    article_id: string;
-    platform_id: string | null;
     website_url: string;
     status: string;
     priority: number;
@@ -165,18 +157,12 @@ export async function POST(request: Request) {
       const randomMinute = Math.floor(Math.random() * 60);
       scheduledDate.setHours(randomHour, randomMinute, 0, 0);
 
-      const platformIdx = tasks.length % (platforms?.length || 1);
-      const platform = platforms?.[platformIdx];
-
       tasks.push({
         user_id: user.id,
-        site_id: article.site_id,
-        article_id: articleId,
-        platform_id: platform?.id || null,
         website_url: targetUrl,
-        status: (platform?.automation_allowed) ? "pending" : "require_manual",
-        priority: platform?.domain_rating ? Math.ceil(platform.domain_rating / 10) : 5,
-        submission_type: platform?.submission_type || "automated",
+        status: "queued",
+        priority: 5,
+        submission_type: "automated",
         anchor_type: anchorType,
         scheduled_date: scheduledDate.toISOString().split("T")[0],
         scheduled_for: scheduledDate.toISOString(),

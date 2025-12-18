@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,13 +24,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!testResponse.ok) {
-      return NextResponse.json({
+      return NextResponse.json({ 
         error: 'Failed to validate WordPress connection',
         details: await testResponse.text()
       }, { status: 400 });
     }
 
-    const { data: existingIntegration } = await supabaseAdmin
+    const { data: existingIntegration } = await supabase
       .from('cms_integrations')
       .select('id')
       .eq('user_id', user.id)
@@ -40,25 +39,25 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingIntegration) {
-      const { error: updateError } = await supabaseAdmin
+      const { error: updateError } = await supabase
         .from('cms_integrations')
         .update({
           credentials: { access_token },
-          status: 'active',
+          status: 'connected',
           updated_at: new Date().toISOString(),
         })
         .eq('id', existingIntegration.id);
 
       if (updateError) throw updateError;
 
-      return NextResponse.json({
-        success: true,
+      return NextResponse.json({ 
+        success: true, 
         integration_id: existingIntegration.id,
-        message: 'WordPress connected successfully'
+        message: 'WordPress connected successfully' 
       });
     }
 
-    const { data: integration, error: insertError } = await supabaseAdmin
+    const { data: integration, error: insertError } = await supabase
       .from('cms_integrations')
       .insert({
         user_id: user.id,
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
         platform: 'wordpress',
         credentials: { access_token },
         site_url,
-        status: 'active',
+        status: 'connected',
         config: {},
       })
       .select()
@@ -74,15 +73,15 @@ export async function POST(request: NextRequest) {
 
     if (insertError) throw insertError;
 
-    return NextResponse.json({
-      success: true,
+    return NextResponse.json({ 
+      success: true, 
       integration_id: integration.id,
-      message: 'WordPress connected successfully'
+      message: 'WordPress connected successfully' 
     });
 
   } catch (error) {
     console.error('WordPress auth error:', error);
-    return NextResponse.json({
+    return NextResponse.json({ 
       error: 'Failed to connect WordPress',
       details: String(error)
     }, { status: 500 });

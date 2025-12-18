@@ -15,9 +15,9 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("articles")
-    .select("*")
+    .select("*, sites!inner(user_id)")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("sites.user_id", user.id)
     .single();
 
   if (error) {
@@ -43,9 +43,9 @@ export async function PATCH(
 
   const { data: article } = await supabase
     .from("articles")
-    .select("*")
+    .select("*, sites!inner(user_id)")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("sites.user_id", user.id)
     .single();
 
   if (!article) {
@@ -83,9 +83,9 @@ export async function DELETE(
 
   const { data: article } = await supabase
     .from("articles")
-    .select("*")
+    .select("*, sites!inner(user_id)")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("sites.user_id", user.id)
     .single();
 
   if (!article) {

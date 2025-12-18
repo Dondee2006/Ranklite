@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   try {
     const supabase = await createClient();
-
+    
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -33,16 +33,12 @@ export async function GET() {
       id: article.id,
       title: article.title,
       target_keyword: article.keyword || "N/A",
-      status: article.status === "published" ? "Published" :
-        article.status === "generated" || article.status === "draft" ? "Generated" :
-          article.status === "qa_validated" ? "Generated" : "Planned",
+      status: article.status === "published" ? "Published" : article.status === "generating" ? "Generated" : "Planned",
       backlinks_assigned: 0,
       indexing_status: "Pending",
-      published_date: article.published_at
-        ? new Date(article.published_at).toLocaleDateString()
-        : article.scheduled_date
-          ? new Date(article.scheduled_date).toLocaleDateString()
-          : "Not scheduled",
+      published_date: article.published_at 
+        ? new Date(article.published_at).toLocaleDateString() 
+        : "Not published",
     }));
 
     return NextResponse.json({ posts });

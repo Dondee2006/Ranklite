@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import { Check, X, HelpCircle, Loader2, Sparkles, CheckCircle, Plus, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 const STEPS = [
   { id: "website", label: "Business" },
@@ -232,20 +231,6 @@ export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?
           businessDescription: formData.description,
           targetAudience: formData.targetAudiences.join(", "),
           competitors: formData.competitors,
-          sitemapUrl: formData.sitemapUrl,
-          blogAddress: formData.blogAddress,
-          articleExamples: formData.articleUrls,
-          autoPublish: formData.autoPublish,
-          articleStyle: formData.articleStyle,
-          internalLinks: formData.internalLinks,
-          globalInstructions: formData.globalInstructions,
-          brandColor: formData.brandColor,
-          imageStyle: formData.imageStyle,
-          titleBasedImage: formData.titleBasedImage,
-          youtubeVideo: formData.youtubeVideo,
-          callToAction: formData.callToAction,
-          includeInfographics: formData.includeInfographics,
-          includeEmojis: formData.includeEmojis,
         }),
       });
 
@@ -263,10 +248,8 @@ export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?
       }
 
       if (isAddingNewSite) {
-        toast.success("Site successfully added!");
         router.push("/dashboard/settings");
       } else {
-        toast.success("Welcome aboard! Site setup complete.");
         router.push("/dashboard/content-planner?welcome=true");
       }
       router.refresh();

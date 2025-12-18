@@ -25,9 +25,9 @@ export async function GET() {
     .eq("site_id", site.id)
     .single();
 
-  return NextResponse.json({
+  return NextResponse.json({ 
     settings: data,
-    siteUrl: site.url
+    siteUrl: site.url 
   });
 }
 
@@ -61,20 +61,18 @@ export async function PATCH(request: Request) {
     const { error } = await supabase
       .from("article_settings")
       .update({
-        sitemap_url: body.sitemapUrl,
-        blog_address: body.blogAddress,
-        example_urls: body.articleExamples || [],
-        auto_publish: body.autoPublish,
-        article_style: body.articleStyle,
-        internal_links: body.internalLinks,
-        global_instructions: body.globalInstructions,
-        brand_color: body.brandColor,
-        image_style: body.imageStyle,
-        title_based_image: body.titleBasedImage,
-        youtube_video: body.youtubeVideo,
-        call_to_action: body.callToAction,
-        include_infographics: body.includeInfographics,
-        include_emojis: body.includeEmojis,
+        style: body.style,
+        length: body.length,
+        ai_images: body.ai_images,
+        image_style: body.image_style,
+        internal_links: body.internal_links,
+        cta_enabled: body.cta_enabled,
+        cta_text: body.cta_text,
+        cta_url: body.cta_url,
+        custom_instructions: body.custom_instructions,
+        sitemap_url: body.sitemap_url,
+        blog_address: body.blog_address,
+        example_urls: body.example_urls,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -85,20 +83,18 @@ export async function PATCH(request: Request) {
   } else {
     const { error } = await supabase.from("article_settings").insert({
       site_id: site.id,
-      sitemap_url: body.sitemapUrl,
-      blog_address: body.blogAddress,
-      example_urls: body.articleExamples || [],
-      auto_publish: body.autoPublish,
-      article_style: body.articleStyle,
-      internal_links: body.internalLinks,
-      global_instructions: body.globalInstructions,
-      brand_color: body.brandColor,
-      image_style: body.imageStyle,
-      title_based_image: body.titleBasedImage,
-      youtube_video: body.youtubeVideo,
-      call_to_action: body.callToAction,
-      include_infographics: body.includeInfographics,
-      include_emojis: body.includeEmojis,
+      style: body.style,
+      length: body.length,
+      ai_images: body.ai_images,
+      image_style: body.image_style,
+      internal_links: body.internal_links,
+      cta_enabled: body.cta_enabled,
+      cta_text: body.cta_text,
+      cta_url: body.cta_url,
+      custom_instructions: body.custom_instructions,
+      sitemap_url: body.sitemap_url,
+      blog_address: body.blog_address,
+      example_urls: body.example_urls,
     });
 
     if (error) {

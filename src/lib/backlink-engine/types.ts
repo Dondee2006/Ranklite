@@ -21,7 +21,6 @@ export interface Platform {
 export interface BacklinkTask {
   id: string;
   user_id: string;
-  article_id?: string | null;
   platform_id: string | null;
   website_url: string;
   status: TaskStatus;
@@ -40,8 +39,6 @@ export interface BacklinkTask {
   response_html: string | null;
   requires_manual_review: boolean;
   manual_review_reason: string | null;
-  outreach_status: string | null;
-  verification_status: string | null;
   created_at: string;
   updated_at: string;
   platform?: Platform;

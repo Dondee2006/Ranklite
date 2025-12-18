@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  CreditCard,
-  Lock,
-  Shield,
+import { 
+  CreditCard, 
+  Lock, 
+  Shield, 
   CheckCircle2,
   ArrowLeft,
   Building2,
@@ -32,7 +32,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    
     // Simulate payment processing
     setTimeout(() => {
       setLoading(false);
@@ -55,9 +55,9 @@ export default function CheckoutPage() {
                 <Shield className="h-3 w-3" />
                 Secure Checkout
               </Badge>
-              <img
-                src="https://flutterwave.com/images/logo/full.svg"
-                alt="Flutterwave"
+              <img 
+                src="https://flutterwave.com/images/logo/full.svg" 
+                alt="Flutterwave" 
                 className="h-6"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Contact Information</h2>
-                    <p className="text-sm text-gray-500">We&apos;ll send your receipt here</p>
+                    <p className="text-sm text-gray-500">We'll send your receipt here</p>
                   </div>
                 </div>
 

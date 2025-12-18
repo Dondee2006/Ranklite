@@ -27,7 +27,7 @@ export default function WebhookSetupPage() {
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
           <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">What are Webhooks?</h2>
           <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-            Webhooks allow you to receive HTTP POST notifications whenever specific events occur in your Ranklite account.
+            Webhooks allow you to receive HTTP POST notifications whenever specific events occur in your Ranklite account. 
             This enables real-time integrations with your own systems, automation workflows, and custom applications.
           </p>
           <div className="rounded-lg bg-[#F0FDF4] p-6">
@@ -62,9 +62,9 @@ export default function WebhookSetupPage() {
                 2
               </div>
               <div className="flex-1">
-                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Click &quot;Add Webhook&quot;</h3>
+                <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Click "Add Webhook"</h3>
                 <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-                  Click the &quot;Add New Webhook&quot; button to open the configuration form.
+                  Click the "Add New Webhook" button to open the configuration form.
                 </p>
               </div>
             </div>
@@ -104,7 +104,7 @@ export default function WebhookSetupPage() {
               <div className="flex-1">
                 <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Save and Get Signing Secret</h3>
                 <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-                  After saving, you&apos;ll receive a signing secret. Store this securely - you&apos;ll need it to verify webhook authenticity.
+                  After saving, you'll receive a signing secret. Store this securely - you'll need it to verify webhook authenticity.
                 </p>
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <div className="flex items-start gap-3">
@@ -126,7 +126,7 @@ export default function WebhookSetupPage() {
           </p>
           <div className="overflow-x-auto">
             <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-              {`{
+{`{
   "id": "evt_1234567890",
   "type": "article.published",
   "created": 1734134400,
@@ -155,7 +155,7 @@ export default function WebhookSetupPage() {
             <li className="flex gap-4">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F0FDF4] text-[14px] font-semibold text-[#22C55E]">1</span>
               <div>
-                <p className="text-[15px] font-semibold text-foreground">Click &quot;Test Webhook&quot;</p>
+                <p className="text-[15px] font-semibold text-foreground">Click "Test Webhook"</p>
                 <p className="text-[14px] text-muted-foreground">This sends a sample payload to your endpoint</p>
               </div>
             </li>
@@ -179,11 +179,11 @@ export default function WebhookSetupPage() {
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
           <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">Example Implementation</h2>
           <p className="mb-4 text-[16px] text-muted-foreground">
-            Here&apos;s a basic Node.js/Express example:
+            Here's a basic Node.js/Express example:
           </p>
           <div className="overflow-x-auto">
             <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-              {`import express from 'express';
+{`import express from 'express';
 import crypto from 'crypto';
 
 const app = express();

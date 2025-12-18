@@ -20,7 +20,6 @@ export async function POST(request: Request) {
         user_id: user.id,
         name: body.businessName || "My Site",
         url: body.websiteUrl,
-        niche: body.niche || body.businessName,
         language: body.language || "en",
         country: body.country || "US",
         description: body.businessDescription,
@@ -50,20 +49,6 @@ export async function POST(request: Request) {
 
     await supabase.from("article_settings").insert({
       site_id: site.id,
-      sitemap_url: body.sitemapUrl,
-      blog_address: body.blogAddress,
-      example_urls: body.articleExamples || [],
-      auto_publish: body.autoPublish ?? true,
-      article_style: body.articleStyle || "Informative",
-      internal_links: body.internalLinks || "3 links per article",
-      global_instructions: body.globalInstructions,
-      brand_color: body.brandColor || "#000000",
-      image_style: body.imageStyle || "brand-text",
-      title_based_image: body.titleBasedImage ?? false,
-      youtube_video: body.youtubeVideo ?? false,
-      call_to_action: body.callToAction ?? false,
-      include_infographics: body.includeInfographics ?? false,
-      include_emojis: body.includeEmojis ?? false,
     });
 
     await supabase.from("autopilot_settings").upsert({
@@ -83,7 +68,7 @@ export async function POST(request: Request) {
     const { data: starterPlan } = await supabase
       .from("plans")
       .select("id")
-      .eq("name", "Pro Tier")
+      .eq("name", "Starter")
       .single();
 
     if (starterPlan) {
@@ -97,7 +82,7 @@ export async function POST(request: Request) {
 
     const nextRunDate = new Date();
     nextRunDate.setDate(nextRunDate.getDate() + 1);
-
+    
     await supabase.from("seo_cycles").insert({
       user_id: user.id,
       site_id: site.id,
@@ -170,7 +155,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function seedThirtyDayPlan(supabase: any, site: { id: string; user_id: string; name?: string }, body: any) {
+async function seedThirtyDayPlan(supabase: any, site: any, body: any) {
   const today = new Date();
   const dates: string[] = [];
   for (let i = 0; i < 30; i++) {

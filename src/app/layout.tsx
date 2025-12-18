@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
+import { VisualEditsMessenger } from "orchids-visual-edits";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
-  title: "Ranklite – Automated Organic Traffic Growth",
-  description: "Scale your search engine presence with automated content, authority backlinks, and technical SEO tools. Ranklite simplifies organic growth for modern businesses.",
-  keywords: ["SEO", "organic traffic", "content marketing", "backlinks", "automated SEO", "Google ranking", "traffic growth"],
+  title: "Ranklite - Grow Organic Traffic on Auto-Pilot",
+  description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
+  keywords: ["SEO", "organic traffic", "content marketing", "backlinks", "ChatGPT", "Google ranking", "autopilot SEO"],
   authors: [{ name: "Ranklite" }],
   metadataBase: new URL(process.env.SITE_URL || 'https://yourdomain.com'),
   openGraph: {
-    title: "Ranklite – Automated Organic Traffic Growth",
-    description: "Scale your search engine presence with automated content, authority backlinks, and technical SEO tools. Ranklite simplifies organic growth for modern businesses.",
+    title: "Ranklite - Grow Organic Traffic on Auto-Pilot",
+    description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
     url: process.env.SITE_URL || 'https://yourdomain.com',
     siteName: "Ranklite",
     type: "website",
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ranklite – Automated Organic Traffic Growth",
+        alt: "Ranklite - Organic Traffic Growth Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ranklite – Automated Organic Traffic Growth",
-    description: "Scale your search engine presence with automated content, authority backlinks, and technical SEO tools. Ranklite simplifies organic growth for modern businesses.",
+    title: "Ranklite - Grow Organic Traffic on Auto-Pilot",
+    description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -42,14 +42,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: [
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-  },
 };
 
 export default function RootLayout({
@@ -60,14 +52,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
         {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
         )}

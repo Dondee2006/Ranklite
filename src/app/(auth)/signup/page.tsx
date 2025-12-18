@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
-import { GoogleSignIn } from "@/components/auth/google-sign-in";
 
 function RankliteLogo() {
   return (
@@ -41,8 +40,8 @@ export default function SignupPage() {
     }
 
     if (data.user && data.session) {
-      // Redirect to Whop Checkout for 1 USD activation
-      window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
+      router.push("/onboarding");
+      router.refresh();
     } else if (data.user && !data.session) {
       setSuccess(true);
       setLoading(false);
@@ -59,7 +58,7 @@ export default function SignupPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
             <p className="text-gray-600 mb-6">
-              We&apos;ve sent a confirmation link to <strong>{email}</strong>.
+              We&apos;ve sent a confirmation link to <strong>{email}</strong>. 
               Please check your inbox and click the link to activate your account.
             </p>
             <Link
@@ -86,73 +85,60 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <div className="space-y-6">
-            <GoogleSignIn text="Sign up with Google" />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-100"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-4 text-gray-400 font-medium">Or continue with email</span>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                placeholder="you@example.com"
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
-                  placeholder="••••••••"
-                />
-                <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Create account
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-green-600 font-semibold hover:underline">
-                  Sign in
-                </Link>
-              </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                placeholder="••••••••"
+              />
+              <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
             </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Create account
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-green-600 font-semibold hover:underline">
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>

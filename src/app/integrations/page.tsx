@@ -69,10 +69,11 @@ export default function IntegrationsPage() {
           {["All", "CMS", "E-commerce", "Analytics", "Productivity"].map((category) => (
             <button
               key={category}
-              className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${category === "All"
+              className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${
+                category === "All"
                   ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
                   : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
-                }`}
+              }`}
             >
               {category}
             </button>
@@ -87,8 +88,8 @@ export default function IntegrationsPage() {
             >
               <div className="flex items-center gap-4 border-b border-border p-6">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-md">
-                  <Image
-                    src={integration.logo}
+                  <Image 
+                    src={integration.logo} 
                     alt={`${integration.name} logo`}
                     width={32}
                     height={32}
@@ -123,7 +124,7 @@ export default function IntegrationsPage() {
         <div className="mt-20 rounded-2xl bg-gradient-to-br from-[#F0FDF4] to-white p-12 text-center">
           <h2 className="mb-4 font-display text-[32px] font-bold text-foreground">Need a Custom Integration?</h2>
           <p className="mx-auto mb-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-            We&apos;re constantly adding new integrations. Let us know which tools you&apos;d like to connect with Ranklite.
+            We're constantly adding new integrations. Let us know which tools you'd like to connect with Ranklite.
           </p>
           <a
             href="mailto:integrations@ranklite.com?subject=Integration Request"

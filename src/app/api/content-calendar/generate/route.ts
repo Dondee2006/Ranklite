@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, url, name, niche, description")
+    .select("id, domain, name")
     .eq("user_id", user.id)
     .single();
 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   const keywordPool = keywords?.length > 0
     ? keywords
-    : generateKeywordsForNiche(niche || site.niche || site.description || site.name, TARGET_ARTICLE_COUNT);
+    : generateKeywordsForNiche(niche || site.name, TARGET_ARTICLE_COUNT);
 
   const articles = [];
   const currentDate = new Date(startDate);
@@ -85,12 +85,12 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const keywordItem: any = keywordPool[articles.length % keywordPool.length];
+    const keyword = keywordPool[articles.length % keywordPool.length];
     const articleType = selectArticleType();
     const searchIntent = determineSearchIntent(articleType);
 
     const title = generateTitle(
-      typeof keywordItem === "string" ? keywordItem : keywordItem.primary,
+      typeof keyword === "string" ? keyword : keyword.primary,
       articleType
     );
 
@@ -98,13 +98,13 @@ export async function POST(request: Request) {
       site_id: site.id,
       title,
       slug: generateSlug(title),
-      keyword: typeof keywordItem === "string" ? keywordItem : keywordItem.primary,
-      secondary_keywords: typeof keywordItem === "string"
-        ? generateSecondaryKeywords(keywordItem)
-        : keywordItem.secondary || [],
+      keyword: typeof keyword === "string" ? keyword : keyword.primary,
+      secondary_keywords: typeof keyword === "string"
+        ? generateSecondaryKeywords(keyword)
+        : keyword.secondary || [],
       search_intent: searchIntent,
       article_type: articleType,
-      word_count: 3000 + Math.floor(Math.random() * 500),
+      word_count: 1500 + Math.floor(Math.random() * 1000),
       cta_placement: ["beginning", "middle", "end", "both"][Math.floor(Math.random() * 4)],
       status: "planned",
       scheduled_date: dateStr,
@@ -138,36 +138,36 @@ export async function POST(request: Request) {
 
 function generateKeywordsForNiche(niche: string, count: number) {
   const templates = [
-    `best ${niche} for small business`,
-    `${niche} guide for 2025`,
-    `how to automate ${niche} for growth`,
-    `${niche} strategies for high rankings`,
-    `${niche} for beginners: complete roadmap`,
-    `advanced ${niche} for experts`,
-    `${niche} tools to boost productivity`,
-    `${niche} examples from successful sites`,
-    `${niche} best practices for 10x growth`,
-    `${niche} tutorial for non-technical owners`,
-    `${niche} vs manual SEO: which is better?`,
-    `${niche} alternatives for better results`,
-    `common ${niche} mistakes to avoid`,
-    `${niche} benefits for organic traffic`,
-    `${niche} vs content marketing`,
-    `free ${niche} resources and tools`,
-    `${niche} checklist for perfect execution`,
-    `${niche} templates for faster results`,
-    `${niche} case study: $0 to $10k`,
-    `${niche} statistics you must know`,
-    `${niche} trends for the next generation`,
-    `${niche} software: what to look for`,
-    `${niche} services vs in-house teams`,
-    `top 15 ${niche} hacks for 2025`,
-    `${niche} pricing: is it worth the investment?`,
-    `${niche} features for maximal authority`,
-    `${niche} solutions for enterprise scale`,
-    `${niche} workflow for maximum efficiency`,
-    `${niche} for local business SEO`,
-    `${niche} secrets the pros use`,
+    `best ${niche}`,
+    `${niche} guide`,
+    `how to ${niche}`,
+    `${niche} tips`,
+    `${niche} for beginners`,
+    `advanced ${niche}`,
+    `${niche} strategies`,
+    `${niche} tools`,
+    `${niche} examples`,
+    `${niche} best practices`,
+    `${niche} tutorial`,
+    `${niche} review`,
+    `${niche} comparison`,
+    `${niche} alternatives`,
+    `${niche} mistakes`,
+    `${niche} benefits`,
+    `${niche} vs`,
+    `free ${niche}`,
+    `${niche} checklist`,
+    `${niche} templates`,
+    `${niche} case study`,
+    `${niche} statistics`,
+    `${niche} trends 2025`,
+    `${niche} software`,
+    `${niche} services`,
+    `top ${niche}`,
+    `${niche} pricing`,
+    `${niche} features`,
+    `${niche} solutions`,
+    `${niche} workflow`,
   ];
 
   return templates.slice(0, Math.min(count, templates.length));
@@ -202,45 +202,45 @@ function determineSearchIntent(articleType: string): string {
 function generateTitle(keyword: string, articleType: string): string {
   const templates: Record<string, string[]> = {
     listicle: [
-      `15 Best ${capitalizeFirst(keyword)} Tips for Exponential Growth in 2025`,
-      `7 ${capitalizeFirst(keyword)} Strategies the Pros Don't Want You to Know`,
-      `The Ultimate ${capitalizeFirst(keyword)} Masterclass: 15 Proven Tactics`,
-      `12 Creative ${capitalizeFirst(keyword)} Ideas to Dominate Your Niche`,
+      `10 Best ${capitalizeFirst(keyword)} Tips for 2025`,
+      `7 ${capitalizeFirst(keyword)} Strategies That Actually Work`,
+      `15 Proven Ways to Master ${capitalizeFirst(keyword)}`,
+      `12 ${capitalizeFirst(keyword)} Ideas You Haven't Tried`,
     ],
     comparison: [
-      `${capitalizeFirst(keyword)} vs The Competition: An Unfiltered 2025 Comparison`,
-      `Is ${capitalizeFirst(keyword)} Still the Best? A Head-to-Head Deep Dive`,
-      `Comparing the Top-Rated ${capitalizeFirst(keyword)} Solutions of 2025`,
+      `${capitalizeFirst(keyword)}: Complete Comparison Guide`,
+      `${capitalizeFirst(keyword)} vs Alternatives: Honest Review`,
+      `Comparing the Best ${capitalizeFirst(keyword)} Options`,
     ],
     "how-to": [
-      `The Definitive Guide on How to ${capitalizeFirst(keyword)} from Scratch`,
-      `Mastering ${capitalizeFirst(keyword)}: A Step-by-Step Roadmap to Success`,
-      `The Efficient Way to ${capitalizeFirst(keyword)} (Tested and Validated)`,
+      `How to ${capitalizeFirst(keyword)}: Step-by-Step Guide`,
+      `How to ${capitalizeFirst(keyword)} (Complete 2025 Guide)`,
+      `The Right Way to ${capitalizeFirst(keyword)}`,
     ],
     guide: [
-      `The 2025 Ultimate Guide to ${capitalizeFirst(keyword)} Mastery`,
-      `Everything You Ever Wanted to Know About ${capitalizeFirst(keyword)}`,
-      `${capitalizeFirst(keyword)} Demystified: The Comprehensive Handbook`,
+      `Ultimate Guide to ${capitalizeFirst(keyword)}`,
+      `The Complete ${capitalizeFirst(keyword)} Guide for 2025`,
+      `${capitalizeFirst(keyword)}: Everything You Need to Know`,
     ],
     review: [
-      `${capitalizeFirst(keyword)} Review: Is It the Game-Changer You Need?`,
-      `Testing ${capitalizeFirst(keyword)}: An Honest, In-Depth Performance Review`,
-      `${capitalizeFirst(keyword)}: The Good, The Bad, and The Verdict`,
+      `${capitalizeFirst(keyword)} Review: Is It Worth It?`,
+      `Honest ${capitalizeFirst(keyword)} Review 2025`,
+      `${capitalizeFirst(keyword)}: Pros, Cons & Verdict`,
     ],
     "q-and-a": [
-      `${capitalizeFirst(keyword)} Insider Secrets: Your Toughest Questions Answered`,
-      `The ${capitalizeFirst(keyword)} FAQ: Expert Insights for 2025`,
-      `Everything You Need to Ask About ${capitalizeFirst(keyword)} (Answered)`,
+      `${capitalizeFirst(keyword)}: Your Questions Answered`,
+      `FAQ: Everything About ${capitalizeFirst(keyword)}`,
+      `${capitalizeFirst(keyword)} Q&A: Expert Answers`,
     ],
     tutorial: [
-      `${capitalizeFirst(keyword)} Masterclass: From Beginner to Pro in 30 Minutes`,
-      `A Complete, Practical Tutorial on ${capitalizeFirst(keyword)} Mastery`,
-      `Learn ${capitalizeFirst(keyword)} the Smart Way: A Detailed Step-by-Step`,
+      `${capitalizeFirst(keyword)} Tutorial for Beginners`,
+      `Master ${capitalizeFirst(keyword)}: Complete Tutorial`,
+      `Learn ${capitalizeFirst(keyword)} in 30 Minutes`,
     ],
     "problem-solution": [
-      `Struggling with ${capitalizeFirst(keyword)}? Here's the Permanent Fix`,
-      `Solving the Most Frustrating ${capitalizeFirst(keyword)} Challenges`,
-      `${capitalizeFirst(keyword)} Not Working for You? Try This Proven Solution`,
+      `${capitalizeFirst(keyword)} Problems? Here's How to Fix Them`,
+      `Solving Common ${capitalizeFirst(keyword)} Issues`,
+      `${capitalizeFirst(keyword)} Not Working? Try This`,
     ],
   };
 

@@ -169,12 +169,12 @@ export default function WebhookTroubleshootingPage() {
           <p className="mb-6 text-[16px] text-muted-foreground">
             To test webhooks on your local development environment, use a tunneling service:
           </p>
-
+          
           <div className="mb-6">
             <h3 className="mb-3 text-[18px] font-semibold text-foreground">Using ngrok</h3>
             <div className="overflow-x-auto">
               <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-                {`# Install ngrok
+{`# Install ngrok
 npm install -g ngrok
 
 # Start your local server (e.g., port 3000)
@@ -213,7 +213,7 @@ ngrok http 3000
               "Test signature verification with example payload",
               "Check server logs for errors or exceptions",
               "Verify endpoint responds within 5 seconds",
-              "Test with &apos;Send Test Webhook&apos; in dashboard",
+              "Test with 'Send Test Webhook' in dashboard",
               "Review webhook delivery logs for error messages",
               "Confirm firewall allows incoming HTTPS traffic",
               "Validate webhook secret matches environment variable"
@@ -233,7 +233,7 @@ ngrok http 3000
           </p>
           <div className="overflow-x-auto">
             <pre className="rounded-lg bg-slate-900 p-6 text-[13px] text-slate-100">
-              {`curl -X POST https://your-domain.com/api/webhooks/ranklite \\
+{`curl -X POST https://your-domain.com/api/webhooks/ranklite \\
   -H "Content-Type: application/json" \\
   -H "X-Ranklite-Signature: sha256=test_signature" \\
   -d '{
@@ -258,7 +258,7 @@ ngrok http 3000
             <div>
               <h3 className="mb-2 text-[18px] font-semibold text-amber-900">Still Having Issues?</h3>
               <p className="mb-4 text-[15px] leading-relaxed text-amber-800">
-                If you&apos;ve tried these solutions and still experiencing problems, contact our support team with:
+                If you've tried these solutions and still experiencing problems, contact our support team with:
               </p>
               <ul className="ml-6 space-y-2 text-[14px] text-amber-800">
                 <li>• Your webhook endpoint URL</li>

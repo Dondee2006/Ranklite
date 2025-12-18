@@ -47,7 +47,6 @@ export async function PATCH(request: Request) {
     .update({
       name: body.name,
       url: body.url,
-      niche: body.niche,
       language: body.language,
       country: body.country,
       description: body.description,

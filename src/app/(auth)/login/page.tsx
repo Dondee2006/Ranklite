@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
-import { GoogleSignIn } from "@/components/auth/google-sign-in";
 
 function RankliteLogo() {
   return (
@@ -41,43 +40,6 @@ export default function LoginPage() {
 
     const { data: authUser } = await supabase.auth.getUser();
     const userId = authUser.user?.id;
-    const userEmail = authUser.user?.email;
-    const ALLOWED_EMAILS = ["dondorian7@gmail.com", "dondonnel08@gmail.com"];
-
-    // Special bypass for the main user to resolve redirection issues
-    if (userEmail && ALLOWED_EMAILS.includes(userEmail)) {
-      const { data: sites } = await supabase
-        .from("sites")
-        .select("id")
-        .eq("user_id", userId || "")
-        .limit(1);
-
-      if (sites?.length) {
-        router.push("/dashboard");
-      } else {
-        router.push("/onboarding");
-      }
-      router.refresh();
-      return;
-    }
-
-    const { data: userPlan, error: planError } = await supabase
-      .from("user_plans")
-      .select("status")
-      .eq("user_id", userId || "")
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (planError) {
-      console.error("Plan check error:", planError);
-      // In case of error, let them try to enter if it's a database glitch
-      // or redirect to checkout as a fallback. For now, let's be strict if there's no bypass.
-    }
-
-    if (!userPlan) {
-      window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
-      return;
-    }
 
     const { data: sites } = await supabase
       .from("sites")
@@ -105,71 +67,58 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <div className="space-y-6">
-            <GoogleSignIn text="Sign in with Google" />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-100"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-4 text-gray-400 font-medium">Or continue with email</span>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                placeholder="you@example.com"
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Sign in
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="text-green-600 font-semibold hover:underline">
-                  Sign up
-                </Link>
-              </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                placeholder="••••••••"
+              />
             </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Sign in
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-green-600 font-semibold hover:underline">
+                Sign up
+              </Link>
+            </p>
           </div>
         </div>
       </div>

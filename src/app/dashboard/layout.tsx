@@ -64,7 +64,6 @@ const NAV_SECTIONS = [
     label: "CONFIGURATION",
     items: [
       { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
-      { id: "article-settings", label: "Article Settings", href: "/dashboard/articles-settings", icon: FileText },
       { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
       { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
     ],
@@ -93,17 +92,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email || "");
-
+        
         // Fetch website data
-        const { data: sites } = await supabase
+        const { data: siteData } = await supabase
           .from("sites")
-          .select("id, name, website_url")
+          .select("name, website_url")
           .eq("user_id", user.id)
-          .order("id", { ascending: true })
-          .limit(1);
-
-        const siteData = sites?.[0];
-
+          .single();
+        
         if (siteData) {
           setWebsiteName(siteData.name || "Website");
           setWebsiteUrl(siteData.website_url || "");
@@ -138,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
           <div className="flex items-center gap-2">
             {websiteUrl && !faviconError ? (
-              <img
+              <img 
                 src={`https://www.google.com/s2/favicons?domain=${websiteUrl}&sz=128`}
                 alt={websiteName}
                 className="h-7 w-7 rounded-md"
@@ -207,7 +203,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {mobileMenuOpen && (
-        <div
+        <div 
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />

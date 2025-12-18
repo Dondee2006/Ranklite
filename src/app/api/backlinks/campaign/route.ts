@@ -62,11 +62,11 @@ export async function PATCH(request: Request) {
 
     const { data, error } = await supabaseAdmin
       .from("backlink_campaigns")
-      .upsert({
-        user_id: user.id,
+      .update({
         ...updates,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' })
+      })
+      .eq("user_id", user.id)
       .select()
       .single();
 

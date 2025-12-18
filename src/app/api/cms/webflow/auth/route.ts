@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
-import { WebflowService } from '@/lib/cms/webflow';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { WebflowService } from "@/lib/cms/webflow";
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     const siteUrl = selectedSite.customDomains?.[0]?.url || selectedSite.previewUrl;
 
-    const { data: existingIntegration } = await supabaseAdmin
+    const { data: existingIntegration } = await supabase
       .from("cms_integrations")
       .select("id")
       .eq("user_id", user.id)
@@ -61,12 +60,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingIntegration) {
-      const { error: updateError } = await supabaseAdmin
+      const { error: updateError } = await supabase
         .from("cms_integrations")
         .update({
           credentials: { access_token },
           site_url: siteUrl,
-          status: "active",
+          status: "connected",
           config: {
             site_id: selectedSite.id,
             site_name: selectedSite.displayName,
@@ -84,14 +83,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: integration, error: insertError } = await supabaseAdmin
+    const { data: integration, error: insertError } = await supabase
       .from("cms_integrations")
       .insert({
         user_id: user.id,
         platform: "webflow",
         credentials: { access_token },
         site_url: siteUrl,
-        status: "active",
+        status: "connected",
         config: {
           site_id: selectedSite.id,
           site_name: selectedSite.displayName,

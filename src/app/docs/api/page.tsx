@@ -133,7 +133,7 @@ export default function ApiDocsPage() {
             <div>
               <h2 className="mb-2 font-display text-[24px] font-semibold text-foreground">Example Request</h2>
               <p className="text-[15px] text-muted-foreground">
-                Here&apos;s a basic example of generating an article using the API.
+                Here's a basic example of generating an article using the API.
               </p>
             </div>
           </div>

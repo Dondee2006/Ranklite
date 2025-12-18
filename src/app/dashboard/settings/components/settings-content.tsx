@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
 type SettingsTab = "business" | "audience" | "gsc";
 
@@ -22,7 +21,6 @@ export function SettingsContent() {
   const [saving, setSaving] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [businessName, setBusinessName] = useState("");
-  const [niche, setNiche] = useState("");
   const [language, setLanguage] = useState("English");
   const [country, setCountry] = useState("United States");
   const [description, setDescription] = useState("");
@@ -36,6 +34,7 @@ export function SettingsContent() {
   const [gscConnected, setGscConnected] = useState(false);
   const [gscLoading, setGscLoading] = useState(false);
   const [gscError, setGscError] = useState<string | null>(null);
+  const [gscSuccess, setGscSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadSettings() {
@@ -45,7 +44,6 @@ export function SettingsContent() {
         if (data.settings) {
           setWebsiteUrl(data.settings.url || "");
           setBusinessName(data.settings.name || "");
-          setNiche(data.settings.niche || "");
           setLanguage(data.settings.language || "English");
           setCountry(data.settings.country || "United States");
           setDescription(data.settings.description || "");
@@ -79,7 +77,8 @@ export function SettingsContent() {
 
     if (success === "true") {
       setGscConnected(true);
-      toast.success("Successfully connected to Google Search Console!");
+      setGscSuccess("Successfully connected to Google Search Console!");
+      setTimeout(() => setGscSuccess(null), 5000);
     }
 
     if (error) {
@@ -93,7 +92,8 @@ export function SettingsContent() {
         db_error: "Failed to save credentials. Please try again",
         unknown: "An unexpected error occurred",
       };
-      toast.error(errorMessages[error] || errorMessages.unknown);
+      setGscError(errorMessages[error] || errorMessages.unknown);
+      setTimeout(() => setGscError(null), 5000);
     }
   }, [searchParams]);
 
@@ -105,7 +105,7 @@ export function SettingsContent() {
       const data = await response.json();
       
       if (data.error) {
-        toast.error(data.error);
+        setGscError(data.error);
         setGscLoading(false);
         return;
       }
@@ -127,7 +127,6 @@ export function SettingsContent() {
         body: JSON.stringify({
           name: businessName,
           url: websiteUrl,
-          niche,
           language,
           country,
           description,
@@ -135,17 +134,8 @@ export function SettingsContent() {
           competitors: competitors.map((c) => c.name),
         }),
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        toast.success("Settings saved successfully!");
-      } else {
-        toast.error(data.error || "Failed to save settings");
-      }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      toast.error("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -259,27 +249,6 @@ export function SettingsContent() {
                   onChange={(e) => setBusinessName(e.target.value)}
                   className="w-full bg-white border-gray-200 h-11"
                   placeholder="Your business name"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-sm font-medium text-gray-700">Niche / Industry</label>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Your business niche or industry (e.g., "SEO marketing", "digital marketing", "content strategy"). This is used to generate relevant keywords and content.
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <Input
-                  type="text"
-                  value={niche}
-                  onChange={(e) => setNiche(e.target.value)}
-                  className="w-full bg-white border-gray-200 h-11"
-                  placeholder="e.g., SEO marketing, digital marketing, content strategy"
                 />
               </div>
 
@@ -495,7 +464,19 @@ export function SettingsContent() {
               </p>
             </div>
 
-            {/* Removed local success/error banners */}
+            {gscSuccess && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <p className="text-sm text-green-700">{gscSuccess}</p>
+              </div>
+            )}
+
+            {gscError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+                <p className="text-sm text-red-700">{gscError}</p>
+              </div>
+            )}
 
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center">

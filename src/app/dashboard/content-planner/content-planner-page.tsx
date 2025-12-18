@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
     Sparkles,
@@ -21,21 +20,15 @@ import {
     Search,
     ArrowUpDown,
     Copy,
-    Link as LucideLink,
+    Link,
     ExternalLink,
-    Image as LucideImage,
+    Image,
     Download,
-    Crown,
-    Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import NextLink from "next/link";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -88,10 +81,6 @@ interface Article {
     featured_image?: string;
     backlinks_status?: string;
     backlinks_count?: number;
-    cluster_name?: string;
-    is_pillar?: boolean;
-    volume?: number;
-    difficulty?: number;
 }
 
 interface AutopilotSettings {
@@ -150,13 +139,6 @@ function getInitials(title: string) {
     return title.slice(0, 2).toUpperCase();
 }
 
-function formatDateLocal(date: Date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-}
-
 function formatRelativeDate(dateStr: string) {
     const date = new Date(dateStr);
     const now = new Date();
@@ -187,6 +169,9 @@ function getStatusColor(status: string) {
 }
 
 export default function ContentPlannerPage() {
+    const today = new Date();
+    const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+    const [currentYear, setCurrentYear] = useState(today.getFullYear());
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
@@ -207,7 +192,7 @@ export default function ContentPlannerPage() {
     const [saving, setSaving] = useState(false);
     const [generatingArticle, setGeneratingArticle] = useState<string | null>(null);
     const [autopilotSettings, setAutopilotSettings] = useState<AutopilotSettings>({
-        enabled: true,
+        enabled: false,
         publish_time_start: 7,
         publish_time_end: 9,
         timezone: "UTC",
@@ -242,6 +227,9 @@ export default function ContentPlannerPage() {
         // Only auto-run on the first post-onboarding visit
         if (searchParams.get("welcome") !== "true") return;
 
+        const now = new Date();
+        const isCurrentMonth = currentMonth === now.getMonth() && currentYear === now.getFullYear();
+        if (!isCurrentMonth) return;
         if (loading) return;
         if (generating) return;
         if (autoGenerateLock.current) return;
@@ -267,7 +255,7 @@ export default function ContentPlannerPage() {
                 console.error("Failed to auto-generate initial articles:", error);
             }
         })();
-    }, [articles, generating, loading, searchParams]);
+    }, [articles, currentMonth, currentYear, generating, loading, searchParams]);
 
     const handleCloseWelcome = () => {
         setShowWelcomeModal(false);
@@ -277,8 +265,7 @@ export default function ContentPlannerPage() {
     const loadArticles = useCallback(async () => {
         setLoading(true);
         try {
-            // Fetch all articles to display in chronological order
-            const response = await fetch('/api/articles');
+            const response = await fetch(`/api/articles?month=${currentMonth}&year=${currentYear}`);
             const data = await response.json();
             setArticles(data.articles || []);
         } catch (error) {
@@ -286,7 +273,7 @@ export default function ContentPlannerPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentMonth, currentYear]);
 
     const loadAutopilotSettings = useCallback(async () => {
         try {
@@ -317,17 +304,6 @@ export default function ContentPlannerPage() {
         loadAutopilotSettings();
     }, [loadArticles, loadAutopilotSettings]);
 
-    // Parse YouTube HTML comments in content
-    const parseYouTubeShortcodes = (content: string): string => {
-        if (!content) return content;
-        // Parse HTML comments: <!-- YOUTUBE:id -->
-        return content.replace(/<!--\s*YOUTUBE:([a-zA-Z0-9_-]+)\s*-->/g, (match, videoId) => {
-            return `<div class="video-container" style="margin: 2rem 0; aspect-ratio: 16/9; border-radius: 0.75rem; overflow: hidden; max-width: 100%;">
-                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-            </div>`;
-        });
-    };
-
     useEffect(() => {
         if (!autopilotSettings.enabled) {
             autopilotRunLock.current = false;
@@ -342,37 +318,15 @@ export default function ContentPlannerPage() {
     async function generateMonthlyCalendar() {
         setGenerating(true);
         try {
-            const now = new Date();
             const startResponse = await fetch("/api/content-calendar/generate-bulk/start", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    month: now.getMonth(),
-                    year: now.getFullYear(),
+                    month: currentMonth,
+                    year: currentYear,
                 }),
             });
-
-            const data = await startResponse.json();
-
-            if (!startResponse.ok || !data.jobId) {
-                console.error("Generation failed:", data.error || "No job ID returned");
-                const errorMsg = data.error || "Failed to start generation. Please try again.";
-
-                if (startResponse.status === 403) {
-                    toast.error(errorMsg, {
-                        duration: 5000,
-                        id: 'monthly-limit-error'
-                    });
-                } else {
-                    toast.error(errorMsg);
-                }
-
-                setGenerating(false);
-                return;
-            }
-            toast.info("Generating 30 articles. This may take a moment...");
-
-            const { jobId } = data;
+            const { jobId } = await startResponse.json();
 
             const pollInterval = setInterval(async () => {
                 const statusResponse = await fetch(`/api/content-calendar/generate-bulk/status/${jobId}`);
@@ -381,18 +335,15 @@ export default function ContentPlannerPage() {
                 if (status.status === "completed") {
                     clearInterval(pollInterval);
                     await loadArticles();
-                    toast.success("Articles generated successfully!");
                     setGenerating(false);
                 } else if (status.status === "failed") {
                     clearInterval(pollInterval);
                     console.error("Generation failed:", status.error);
-                    toast.error(`Generation failed: ${status.error}`);
                     setGenerating(false);
                 }
             }, 3000);
         } catch (error) {
             console.error("Failed to start generation:", error);
-            toast.error("Failed to start generation. Please check the console for details.");
             setGenerating(false);
         }
     }
@@ -406,23 +357,15 @@ export default function ContentPlannerPage() {
                 body: JSON.stringify({ articleId }),
             });
             const data = await response.json();
-            if (response.ok) {
-                if (data.article) {
-                    setArticles(prev => prev.map(a => a.id === articleId ? data.article : a));
-                    if (selectedArticle?.id === articleId) {
-                        setSelectedArticle(data.article);
-                    }
-                    toast.success("Article content generated!");
+            if (data.article) {
+                setArticles(prev => prev.map(a => a.id === articleId ? data.article : a));
+                if (selectedArticle?.id === articleId) {
+                    setSelectedArticle(data.article);
                 }
-            } else {
-                const errorMsg = data.error || data.message || "Failed to generate article content";
-                toast.error(`Error: ${errorMsg}`);
             }
         } catch (error) {
             console.error("Failed to generate article:", error);
-            toast.error("A network error occurred. Please check your connection and try again.");
-        }
-        finally {
+        } finally {
             setGeneratingArticle(null);
         }
     }
@@ -448,7 +391,6 @@ export default function ContentPlannerPage() {
             });
             if (response.ok) {
                 setShowAddModal(false);
-                toast.success("Article scheduled successfully!");
                 loadArticles();
             }
         } catch (error) {
@@ -464,7 +406,6 @@ export default function ContentPlannerPage() {
                 method: "DELETE",
             });
             if (response.ok) {
-                toast.success("Article deleted successfully");
                 loadArticles();
                 setShowArticleDetail(false);
                 setSelectedArticle(null);
@@ -482,7 +423,6 @@ export default function ContentPlannerPage() {
                 body: JSON.stringify(autopilotSettings),
             });
             if (response.ok) {
-                toast.success("Autopilot settings updated");
                 setShowAutopilotModal(false);
             }
         } catch (error) {
@@ -491,7 +431,7 @@ export default function ContentPlannerPage() {
     }
 
     const handleAddArticle = (date: Date) => {
-        const dateStr = formatDateLocal(date);
+        const dateStr = date.toISOString().split("T")[0];
         setSelectedDate(dateStr);
         setNewArticle({
             title: "",
@@ -503,10 +443,24 @@ export default function ContentPlannerPage() {
             cta_placement: "end",
         });
         setShowAddModal(true);
-    }
+    };
 
-    const clearFilters = () => {
-        setSearchQuery("");
+    const prevMonth = () => {
+        if (currentMonth === 0) {
+            setCurrentMonth(11);
+            setCurrentYear(currentYear - 1);
+        } else {
+            setCurrentMonth(currentMonth - 1);
+        }
+    };
+
+    const nextMonth = () => {
+        if (currentMonth === 11) {
+            setCurrentMonth(0);
+            setCurrentYear(currentYear + 1);
+        } else {
+            setCurrentMonth(currentMonth + 1);
+        }
     };
 
     const copyToClipboard = (text: string, id: string) => {
@@ -531,244 +485,113 @@ export default function ContentPlannerPage() {
         <div className="min-h-screen bg-[#F8FAFC]">
             <header className="sticky top-0 z-30 border-b border-gray-200 bg-white px-8 py-5">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">Content Planner</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Manage your SEO content calendar</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Button
-                            onClick={generateMonthlyCalendar}
-                            disabled={generating}
-                            type="button"
-                            className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                        >
-                            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                            Generate 30 Articles
-                        </Button>
-                        <Button
-                            onClick={() => setShowAutopilotModal(true)}
-                            variant="outline"
-                            className="gap-2"
-                        >
-                            <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-emerald-500")} />
-                            Autopilot {autopilotSettings.enabled ? "ON" : "OFF"}
-                        </Button>
-                    </div>
+                            <div>
+                                <h1 className="text-2xl font-semibold text-gray-900">Content Planner</h1>
+                                <p className="text-sm text-gray-500 mt-0.5">Manage your SEO content calendar</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    onClick={generateMonthlyCalendar}
+                                    disabled={generating}
+                                    className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                                >
+                                    {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Generate 30 Articles
+                                </Button>
+                                <Button
+                                    onClick={() => setShowAutopilotModal(true)}
+                                    variant="outline"
+                                    className="gap-2"
+                                >
+                                    <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-emerald-500")} />
+                                    Autopilot {autopilotSettings.enabled ? "ON" : "OFF"}
+                                </Button>
+                            </div>
                 </div>
             </header>
 
             <div className="p-8">
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
-                    <div className="space-y-12">
-                        {/* Month Sections */}
-                        {(() => {
-                            const now = new Date();
-                            now.setHours(0, 0, 0, 0); // Normalize 'now' to start of day
-                            const currentMonthIdx = now.getMonth();
-                            const currentYearIdx = now.getFullYear();
+                    <div className="flex items-center gap-3 mb-6">
+                        <button
+                            onClick={prevMonth}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                            {MONTHS[currentMonth]} {currentYear}
+                        </h2>
+                        <button
+                            onClick={nextMonth}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
 
-                            // Generate a list of months to show: from current month to 3 months ahead, 
-                            // plus any months actually containing articles.
-                            const monthsToShow: { month: number; year: number }[] = [];
-                            const articleMonths = new Set(articles.map(a => {
-                                const d = new Date(a.scheduled_date);
-                                return `${d.getMonth()}-${d.getFullYear()}`;
-                            }));
+                    <div className="grid grid-cols-7 gap-2">
+                        {DAYS.map(day => (
+                            <div key={day} className="text-xs font-medium text-gray-500 text-center py-2">
+                                {day}
+                            </div>
+                        ))}
+                        {Array.from({ length: 35 }, (_, i) => {
+                            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                            const dayOfMonth = i - (firstDay === 0 ? 6 : firstDay - 1) + 1;
+                            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                            const isValidDay = dayOfMonth > 0 && dayOfMonth <= daysInMonth;
+                            const date = isValidDay ? new Date(currentYear, currentMonth, dayOfMonth) : null;
+                            const dateStr = date?.toISOString().split("T")[0];
+                            const dayArticles = isValidDay ? articles.filter(a => a.scheduled_date === dateStr) : [];
 
-                            for (let i = 0; i < 4; i++) {
-                                const d = new Date(currentYearIdx, currentMonthIdx + i, 1);
-                                monthsToShow.push({ month: d.getMonth(), year: d.getFullYear() });
-                                articleMonths.delete(`${d.getMonth()}-${d.getFullYear()}`);
-                            }
-
-                            // Add remaining months that have articles
-                            Array.from(articleMonths).forEach(key => {
-                                const [m, y] = key.split('-').map(Number);
-                                monthsToShow.push({ month: m, year: y });
-                            });
-
-                            // Sort months chronologically
-                            monthsToShow.sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
-
-                            return monthsToShow.map(({ month, year }) => {
-                                const firstDayOfMonth = new Date(year, month, 1).getDay();
-                                const startingPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-                                const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                                // Create all days for the month, including padding for the grid
-                                const totalCells = Math.ceil((startingPadding + daysInMonth) / 7) * 7;
-                                const days = Array.from({ length: totalCells }, (_, i) => {
-                                    const dayOfMonth = i - startingPadding + 1;
-                                    const isValidDay = dayOfMonth > 0 && dayOfMonth <= daysInMonth;
-                                    const date = isValidDay ? new Date(year, month, dayOfMonth) : null;
-                                    return { date, dayOfMonth, isValidDay };
-                                });
-
-                                // Break into weeks (chunks of 7)
-                                const weeks = [];
-                                for (let i = 0; i < days.length; i += 7) {
-                                    weeks.push(days.slice(i, i + 7));
-                                }
-
-                                // Filter weeks: Keep if it has an article OR if it's not entirely in the past
-                                const visibleWeeks = weeks.filter(week => {
-                                    const hasArticle = week.some(d => {
-                                        if (!d.isValidDay || !d.date) return false;
-                                        const dateStr = formatDateLocal(d.date);
-                                        return articles.some(a => a.scheduled_date === dateStr);
-                                    });
-                                    if (hasArticle) return true;
-
-                                    // Check if any day in the week is today or in the future
-                                    const hasFutureDay = week.some(d => {
-                                        if (!d.isValidDay || !d.date) return false;
-                                        const cellDate = new Date(d.date);
-                                        cellDate.setHours(0, 0, 0, 0);
-                                        return cellDate >= now;
-                                    });
-                                    return hasFutureDay;
-                                });
-
-                                if (visibleWeeks.length === 0) return null;
-
-                                return (
-                                    <div key={`${month}-${year}`} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-8">
-                                        <h2 className="text-xl font-bold text-gray-900 mb-8 font-display">
-                                            {MONTHS[month]} {year}
-                                        </h2>
-
-                                        <div className="grid grid-cols-7 gap-3">
-                                            {DAYS.map(day => (
-                                                <div key={day} className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right px-2 pb-4">
-                                                    {day}
-                                                </div>
-                                            ))}
-                                            {visibleWeeks.flat().map((d, i) => {
-                                                const dateStr = d.date ? formatDateLocal(d.date) : null;
-                                                const dayArticles = d.isValidDay ? articles.filter(a => a.scheduled_date === dateStr) : [];
-                                                const today = new Date();
-                                                today.setHours(0, 0, 0, 0);
-                                                const isPastOrToday = d.date ? d.date <= today : false;
-
-                                                return (
-                                                    <div
-                                                        key={i}
-                                                        className={cn(
-                                                            "min-h-[160px] rounded-xl border p-4 transition-all duration-200 group relative",
-                                                            d.isValidDay
-                                                                ? dayArticles.length > 0
-                                                                    ? "bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg cursor-default"
-                                                                    : "bg-white border-gray-50 cursor-default"
-                                                                : "bg-gray-50/10 border-transparent"
-                                                        )}
-                                                        onClick={() => {
-                                                            // Disabled: User wants interaction only via buttons
-                                                            // if (!d.isValidDay || !d.date || dayArticles.length === 0) return;
-                                                            // setSelectedArticle(dayArticles[0]);
-                                                            // setShowArticleDetail(true);
-                                                        }}
-                                                    >
-                                                        {d.isValidDay && d.date && (
-                                                            <div className="flex flex-col h-full" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                                                <div className="flex items-center justify-between mb-4">
-                                                                    <div className="flex items-baseline gap-1.5">
-                                                                        <span className="text-[15px] font-bold text-gray-900 leading-none">{d.dayOfMonth}</span>
-                                                                        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider leading-none">
-                                                                            {d.date.toLocaleDateString('en-US', { weekday: 'short' })}
-                                                                        </span>
-                                                                    </div>
-                                                                    {dayArticles.length > 0 && dayArticles[0].is_pillar && (
-                                                                        <Crown className="h-4 w-4 text-amber-500" />
-                                                                    )}
-                                                                </div>
-
-                                                                {dayArticles.length > 0 ? (
-                                                                    <div className="flex-1 flex flex-col min-w-0">
-                                                                        <div className="flex items-center gap-2 mb-2">
-                                                                            <div className={cn(
-                                                                                "h-1.5 w-1.5 rounded-full shrink-0",
-                                                                                dayArticles[0].status === 'published' ? "bg-emerald-500" :
-                                                                                    dayArticles[0].status === 'generated' ? "bg-purple-500" : "bg-blue-500"
-                                                                            )} />
-                                                                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-normal truncate">
-                                                                                {getArticleTypeLabel(dayArticles[0].article_type)}: {dayArticles[0].search_intent.charAt(0).toUpperCase() + dayArticles[0].search_intent.slice(1)}
-                                                                            </span>
-                                                                        </div>
-
-                                                                        <h3 className="text-[12px] font-semibold text-gray-900 leading-[1.4] mb-3 line-clamp-2 min-h-[2.8em] tracking-tight">
-                                                                            {dayArticles[0].title}
-                                                                        </h3>
-
-                                                                        <div className="flex items-center gap-4 mt-auto pb-1">
-                                                                            <div className="flex flex-col">
-                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">Volume</span>
-                                                                                <span className="text-[11px] font-bold text-gray-700 leading-none tracking-tight">{dayArticles[0].volume || 0}</span>
-                                                                            </div>
-                                                                            <div className="flex flex-col">
-                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">Difficulty</span>
-                                                                                <span className="text-[11px] font-bold text-gray-700 leading-none tracking-tight">{dayArticles[0].difficulty || 0}</span>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {isPastOrToday ? (
-                                                                            (dayArticles[0].status === 'generated' || dayArticles[0].status === 'published') ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        router.push(`/dashboard/content/${dayArticles[0].id}`);
-                                                                                    }}
-                                                                                >
-                                                                                    Visit Article
-                                                                                </Button>
-                                                                            ) : dayArticles[0].status === 'planned' ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    disabled={generatingArticle === dayArticles[0].id}
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        generateArticleContent(dayArticles[0].id);
-                                                                                    }}
-                                                                                >
-                                                                                    {generatingArticle === dayArticles[0].id ? (
-                                                                                        <>
-                                                                                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                                                                            Generating...
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        "Create and Publish"
-                                                                                    )}
-                                                                                </Button>
-                                                                            ) : dayArticles[0].status === 'generating' ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    disabled
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 transition-all tracking-normal"
-                                                                                >
-                                                                                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                                                                    Generating...
-                                                                                </Button>
-                                                                            ) : null
-                                                                        ) : null}
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="flex-1" />
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            });
-                        })()}
+                            return (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "min-h-[80px] rounded-lg border p-2",
+                                        isValidDay ? "bg-white border-gray-200 hover:border-emerald-300 cursor-pointer" : "bg-gray-50 border-transparent"
+                                    )}
+                                      onClick={() => {
+                                          if (!isValidDay || !date) return;
+                                          if (dayArticles.length > 0) {
+                                              setSelectedArticle(dayArticles[0]);
+                                              setShowArticleDetail(true);
+                                          } else {
+                                              handleAddArticle(date);
+                                          }
+                                      }}
+                                  >
+                                      {isValidDay && (
+                                          <>
+                                              <div className="flex items-center justify-between mb-1">
+                                                  <div className="text-sm font-medium text-gray-900">{dayOfMonth}</div>
+                                                  {dayArticles.length > 0 && (
+                                                      <div className={cn(
+                                                          "text-xs px-1.5 py-0.5 rounded-full font-medium",
+                                                          dayArticles[0].status === "published" ? "bg-emerald-100 text-emerald-700" :
+                                                          dayArticles[0].status === "generated" ? "bg-purple-100 text-purple-700" :
+                                                          "bg-blue-100 text-blue-700"
+                                                      )}>
+                                                          {dayArticles[0].status === "published" ? "✓" : dayArticles[0].status === "generated" ? "AI" : "P"}
+                                                      </div>
+                                                  )}
+                                              </div>
+                                              {dayArticles.length > 0 && (
+                                                  <div className="space-y-1">
+                                                      <div className="text-xs text-gray-700 font-medium truncate">
+                                                          {dayArticles[0].title}
+                                                      </div>
+                                                      <div className="text-xs text-gray-500 truncate">
+                                                          {dayArticles[0].keyword || "—"}
+                                                      </div>
+                                                  </div>
+                                              )}
+                                          </>
+                                      )}
+                                  </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -1116,7 +939,7 @@ export default function ContentPlannerPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="rounded-xl border border-slate-200 p-4">
                                             <div className="flex items-center gap-2 mb-3">
-                                                <LucideLink className="h-4 w-4 text-blue-500" />
+                                                <Link className="h-4 w-4 text-blue-500" />
                                                 <p className="text-sm font-medium text-slate-700">Internal Links ({(selectedArticle.internal_links as { title: string; url: string }[])?.length || 0})</p>
                                             </div>
                                             <div className="space-y-2">
@@ -1140,7 +963,7 @@ export default function ContentPlannerPage() {
 
                                     <div className="rounded-xl border border-slate-200 p-4">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <LucideImage className="h-4 w-4 text-amber-500" />
+                                            <Image className="h-4 w-4 text-amber-500" />
                                             <p className="text-sm font-medium text-slate-700">Images ({(selectedArticle.images as object[])?.length || 0})</p>
                                         </div>
                                         <div className="grid grid-cols-4 gap-2">
@@ -1154,53 +977,25 @@ export default function ContentPlannerPage() {
                                         <div className="flex items-center justify-between mb-3">
                                             <p className="text-sm font-medium text-slate-700">Article Content Preview</p>
                                             <div className="flex items-center gap-2">
-                                                <NextLink href={`/dashboard/content/${selectedArticle.id}`}>
-                                                    <button className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
-                                                        <Pencil className="h-3 w-3" />
-                                                        Open Full Editor
-                                                    </button>
-                                                </NextLink>
                                                 <button
-                                                    onClick={() => copyToClipboard(selectedArticle.markdown_content || selectedArticle.content, "markdown")}
+                                                    onClick={() => copyToClipboard(selectedArticle.markdown_content, "markdown")}
                                                     className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
                                                 >
                                                     {copiedId === "markdown" ? "Copied!" : "Copy Markdown"}
                                                 </button>
                                                 <button
-                                                    onClick={() => copyToClipboard(selectedArticle.html_content || selectedArticle.content, "html")}
+                                                    onClick={() => copyToClipboard(selectedArticle.html_content, "html")}
                                                     className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
                                                 >
                                                     {copiedId === "html" ? "Copied!" : "Copy HTML"}
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="max-h-80 overflow-y-auto rounded-lg bg-white border border-slate-100 p-6 shadow-inner">
-                                            <div className="article-preview-rendered prose prose-sm max-w-none" style={{ maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word', overflow: 'hidden' }}>
-                                                {selectedArticle.html_content ? (
-                                                    <div dangerouslySetInnerHTML={{ __html: parseYouTubeShortcodes(selectedArticle.html_content) }} />
-                                                ) : selectedArticle.content ? (
-                                                    <div className="whitespace-pre-wrap font-sans text-sm text-slate-600" style={{ maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                                                        {selectedArticle.content}
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-slate-400 italic">No content available.</p>
-                                                )}
-                                            </div>
+                                        <div className="max-h-60 overflow-y-auto rounded-lg bg-slate-50 p-4">
+                                            <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono">
+                                                {selectedArticle.content?.slice(0, 2000)}...
+                                            </pre>
                                         </div>
-                                        <style jsx global>{`
-                                            .article-preview-rendered { max-width: 100%; overflow-x: hidden; }
-                                            .article-preview-rendered * { max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; }
-                                            .article-preview-rendered h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
-                                            .article-preview-rendered h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #0f172a; }
-                                            .article-preview-rendered h3 { font-size: 1.125rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #0f172a; }
-                                            .article-preview-rendered p { font-size: 0.875rem; line-height: 1.6; color: #475569; margin-bottom: 1rem; }
-                                            .article-preview-rendered ul, .article-preview-rendered ol { margin-bottom: 1rem; padding-left: 1.25rem; font-size: 0.875rem; color: #475569; }
-                                            .article-preview-rendered li { margin-bottom: 0.25rem; }
-                                            .article-preview-rendered img { border-radius: 0.5rem; margin: 1rem 0; max-width: 100%; height: auto; }
-                                            .article-preview-rendered a { color: #2563eb; text-decoration: underline; word-break: break-all; }
-                                            .article-preview-rendered iframe { max-width: 100%; }
-                                            .article-preview-rendered .video-container { max-width: 100%; }
-                                        `}</style>
                                     </div>
 
                                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
@@ -1473,7 +1268,7 @@ export default function ContentPlannerPage() {
                                     <Sparkles className="h-8 w-8 text-emerald-600" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">Your 1-month Content Strategy is ready!</h3>
-                                <p className="text-sm text-slate-500">We&apos;ve generated high-impact article ideas for you.</p>
+                                <p className="text-sm text-slate-500">We've generated high-impact article ideas for you.</p>
                             </div>
                             <div className="space-y-4 mb-8">
                                 <div className="flex items-center gap-3">
@@ -1490,7 +1285,7 @@ export default function ContentPlannerPage() {
                                 </div>
                             </div>
                             <Button onClick={handleCloseWelcome} className="w-full h-12 text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-                                Let&apos;s Go!
+                                Let's Go!
                             </Button>
                         </div>
                     )}
@@ -1498,26 +1293,4 @@ export default function ContentPlannerPage() {
             )}
         </div>
     );
-}
-
-function getClusterColorClass(clusterName: string | null | undefined): string {
-    if (!clusterName) return "bg-slate-200";
-
-    const colors = [
-        "bg-blue-500",
-        "bg-purple-500",
-        "bg-emerald-500",
-        "bg-amber-500",
-        "bg-rose-500",
-        "bg-indigo-500",
-        "bg-teal-500",
-    ];
-
-    // Hash function to pick a stable color for a cluster name
-    let hash = 0;
-    for (let i = 0; i < clusterName.length; i++) {
-        hash = clusterName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return colors[Math.abs(hash) % colors.length];
 }
