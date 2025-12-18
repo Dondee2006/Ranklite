@@ -1,6 +1,6 @@
-import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { requesty } from "@/lib/ai";
+import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 const ARTICLE_TYPES = [
@@ -29,39 +29,17 @@ function selectArticleType(): string {
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("Authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  const supabase = await createClient();
   const { jobId, month, year } = await request.json();
 
-  // Fetch job and site separately to avoid join issues with RLS or complex schemas
-  const { data: job, error: jobError } = await supabase
+  const { data: job } = await supabase
     .from("generation_jobs")
-    .select("*")
+    .select("*, sites(id, domain, name)")
     .eq("id", jobId)
     .single();
 
-  if (jobError || !job) {
-    console.error("Job not found:", jobError);
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
-  }
-
-  const { data: site, error: siteError } = await supabase
-    .from("sites")
-    .select("id, domain, name")
-    .eq("id", job.site_id)
-    .single();
-
-  if (siteError || !site) {
-    console.error("Site info missing:", siteError);
-    return NextResponse.json({ error: "Site info not found" }, { status: 400 });
-  }
-
-  if (job.status !== "pending") {
-    console.log("Job already processed or in progress:", job.status);
-    return NextResponse.json({ success: true, message: "Job already processed" });
+  if (!job || job.status !== "pending") {
+    return NextResponse.json({ error: "Invalid job" }, { status: 400 });
   }
 
   await supabase
@@ -70,6 +48,7 @@ export async function POST(request: Request) {
     .eq("id", jobId);
 
   try {
+    const site = job.sites;
     const startDate = new Date(year, month, 1);
     const today = new Date();
     const startDay = month === today.getMonth() && year === today.getFullYear()
@@ -78,7 +57,6 @@ export async function POST(request: Request) {
     startDate.setDate(startDay);
     const startDateStr = formatDate(startDate);
 
-    // Initial clean up of old planned articles for this period
     await supabase
       .from("articles")
       .delete()
@@ -98,7 +76,6 @@ export async function POST(request: Request) {
     const currentDate = new Date(startDate);
     let progress = 0;
 
-    // Generate in batches to avoid extreme long-running requests if possible
     for (let batch = 0; batch < 6; batch++) {
       const batchArticles = [];
 
@@ -129,7 +106,7 @@ export async function POST(request: Request) {
         };
 
         try {
-          const content = await generateArticleWithRetry({
+          const content = await generateArticleContent({
             title: articleData.title,
             keyword: articleData.keyword,
             secondaryKeywords: articleData.secondary_keywords,
@@ -139,19 +116,16 @@ export async function POST(request: Request) {
             searchIntent: articleData.search_intent,
           });
 
-          if (content) {
-            articleData.content = content.content;
-            articleData.html_content = content.htmlContent;
-            articleData.markdown_content = content.markdownContent;
-            articleData.meta_description = content.metaDescription;
-            articleData.outline = content.outline;
-            articleData.status = "generated";
-            articleData.seo_score = content.seoScore || 85;
-            articleData.readability_score = content.readabilityScore || 75;
-          }
+          articleData.content = content.content;
+          articleData.html_content = content.htmlContent;
+          articleData.markdown_content = content.markdownContent;
+          articleData.meta_description = content.metaDescription;
+          articleData.outline = content.outline;
+          articleData.status = "generated";
+          articleData.seo_score = content.seoScore || 85;
+          articleData.readability_score = content.readabilityScore || 75;
         } catch (error) {
           console.error(`Failed to generate content for article ${progress + 1}:`, error);
-          // Keep as planned status if content generation fails
         }
 
         batchArticles.push(articleData);
@@ -161,10 +135,7 @@ export async function POST(request: Request) {
       }
 
       if (batchArticles.length > 0) {
-        const { error: insertError } = await supabase.from("articles").insert(batchArticles);
-        if (insertError) {
-          console.error("Batch insert error:", insertError);
-        }
+        await supabase.from("articles").insert(batchArticles);
 
         await supabase
           .from("generation_jobs")
@@ -188,7 +159,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Bulk generation process error:", error);
     await supabase
       .from("generation_jobs")
       .update({
@@ -199,18 +169,6 @@ export async function POST(request: Request) {
       .eq("id", jobId);
 
     return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-async function generateArticleWithRetry(params: any, retries = 2): Promise<any> {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await generateArticleContent(params);
-    } catch (error) {
-      if (i === retries) throw error;
-      console.log(`Retrying generation (${i + 1}/${retries})...`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
   }
 }
 
@@ -254,25 +212,19 @@ Return a JSON object with:
 }`;
 
   const { text } = await generateText({
-    model: requesty("openai/gpt-4o"),
-    system: "You are an expert SEO content writer. You MUST return ONLY valid JSON. No markdown backticks, no text before or after the JSON.",
+    model: openai("gpt-4o"),
+    system: "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
     prompt,
-    temperature: 0.7,
-    maxOutputTokens: 4096,
+    temperature: 0.8,
+    maxTokens: 4096,
   });
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    console.error("AI Response was not JSON:", text);
     throw new Error("AI did not return a JSON object");
   }
 
-  try {
-    return JSON.parse(jsonMatch[0]);
-  } catch (e) {
-    console.error("JSON parse error:", e, "Raw match:", jsonMatch[0]);
-    throw new Error("Failed to parse AI JSON response");
-  }
+  return JSON.parse(jsonMatch[0]);
 }
 
 function generateKeywordsForNiche(niche: string, count: number) {

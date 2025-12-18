@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { requesty } from "@/lib/ai";
+import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 const ARTICLE_TYPES = [
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
+    return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
 }
 
 async function generateArticleContent(params: {
@@ -194,20 +194,20 @@ Return a JSON object with:
 }`;
 
   const { text } = await generateText({
-    model: requesty("openai/gpt-4o"),
-    system:
-      "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
-    prompt,
-    temperature: 0.8,
-    maxOutputTokens: 4096,
-  });
+      model: openai("gpt-4o"),
+      system:
+        "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
+      prompt,
+      temperature: 0.8,
+      maxTokens: 4096,
+    });
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("AI did not return a JSON object");
-  }
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("AI did not return a JSON object");
+    }
 
-  return JSON.parse(jsonMatch[0]);
+    return JSON.parse(jsonMatch[0]);
 }
 
 function generateKeywordsForNiche(niche: string, count: number) {
