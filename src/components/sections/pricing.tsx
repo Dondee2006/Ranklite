@@ -146,16 +146,16 @@ export default function Pricing() {
                 ))}
               </ul>
 
-                  {/* CTA Button */}
-                  <Link
-                    href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
-                  >
-                  <>
-                    {plan.cta}
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                </Link>
+                {/* CTA Button */}
+                <a
+                  href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
+                >
+                  {plan.cta}
+                  <ArrowRight className="h-5 w-5" />
+                </a>
               <p className="mt-4 text-center text-[13px] text-[#718096]">
                 * A one-time <strong>$1.00 USD</strong> activation fee applies to start the trial.
               </p>

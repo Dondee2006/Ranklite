@@ -160,17 +160,19 @@ export default function HeroSection() {
                 Ranklite creates a 30-day AI content plan, auto-publishes blog posts, builds high-quality backlinks to each post, and validates everything — so your site ranks without manual SEO work.
               </p>
 
-                  <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
-                    <Link
-                      href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                      className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
-                    >
-                  <span className="relative z-10">Start Generating Backlinks</span>
-                  <svg className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#16A34A] to-[#15803D] opacity-0 transition-opacity group-hover:opacity-100" />
-                </Link>
+                <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
+                  <a
+                    href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
+                  >
+                    <span className="relative z-10">Start Generating Backlinks</span>
+                    <svg className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#16A34A] to-[#15803D] opacity-0 transition-opacity group-hover:opacity-100" />
+                  </a>
                 
                 <Link
                   href="#demo"

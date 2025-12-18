@@ -49,7 +49,7 @@ export default function HowItWorks() {
             <p className="text-[16px] leading-relaxed text-muted-foreground">
               Leave SEO to us — we generate high-performing content daily to help you outrank competitors effortlessly.
             </p>
-            <Link
+            <a
               href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
               target="_blank"
               rel="noopener noreferrer"
@@ -57,7 +57,7 @@ export default function HowItWorks() {
             >
               Start Generating Backlinks
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -87,15 +87,15 @@ export default function HowItWorks() {
         </div>
 
         <div className="mt-10 flex justify-center lg:hidden">
-<Link
+<a
               href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20"
             >
               Start Generating Backlinks
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </a>
         </div>
       </div>
     </section>
