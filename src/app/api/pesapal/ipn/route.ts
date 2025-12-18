@@ -73,18 +73,18 @@ export async function POST(request: NextRequest) {
                         const trialEnd = new Date();
                         trialEnd.setDate(trialEnd.getDate() + 3); // 3 Days Trial
 
-                        // 3. Update Supabase
-                        const { error } = await supabaseAdmin
-                            .from('subscriptions')
-                            .upsert({
-                                user_id: userId,
-                                plan: 'free_trial',
-                                status: 'active',
-                                trial_start: trialStart.toISOString(),
-                                trial_end: trialEnd.toISOString(),
-                                pesapal_tracking_id: orderTrackingId,
-                                // valid_until: trialEnd.toISOString() // if needed
-                            }, { onConflict: 'user_id' });
+                          // 3. Update Supabase
+                          const { error } = await supabaseAdmin
+                              .from('user_plans')
+                              .upsert({
+                                  user_id: userId,
+                                  plan_id: 'free_trial',
+                                  status: 'active',
+                                  current_period_start: trialStart.toISOString(),
+                                  current_period_end: trialEnd.toISOString(),
+                                  // valid_until: trialEnd.toISOString() // if needed
+                              }, { onConflict: 'user_id' });
+
 
                         if (error) {
                             console.error('[Pesapal IPN] Database Update Error:', error);

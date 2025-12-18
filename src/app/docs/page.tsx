@@ -135,7 +135,7 @@ export default function DocsPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 font-display text-[32px] font-bold text-foreground">Need Help?</h2>
             <p className="mb-8 text-[17px] leading-relaxed text-muted-foreground">
-              Can't find what you're looking for? Our support team is here to help you get the most out of Ranklite.
+              Can&apos;t find what you&apos;re looking for? Our support team is here to help you get the most out of Ranklite.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <a

@@ -86,12 +86,12 @@ export default function ToolsPage() {
           <p className="mx-auto mb-8 max-w-2xl text-[17px] leading-relaxed text-white/90">
             Upgrade to Ranklite Pro for unlimited AI-generated content, automated publishing, and advanced SEO analysis.
           </p>
-          <a
+          <Link
             href="/#pricing"
             className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-[16px] font-semibold text-[#22C55E] shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
             View Pricing
-          </a>
+          </Link>
         </div>
 
         <div className="mt-20">

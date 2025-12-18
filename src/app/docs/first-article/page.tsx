@@ -26,7 +26,8 @@ export default function FirstArticlePage() {
               Creating Your First Article
             </h1>
             <p className="text-[20px] leading-relaxed text-muted-foreground">
-              Learn how to generate high-quality, SEO-optimized content with Ranklite's AI-powered article generator. This comprehensive guide covers everything from choosing topics to publishing your content.
+                Learn how to generate high-quality, SEO-optimized content with Ranklite&apos;s AI-powered article generator. This comprehensive guide covers everything from choosing topics to publishing your content.
+
             </p>
           </div>
 
@@ -55,19 +56,20 @@ export default function FirstArticlePage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                  From your dashboard, click <strong className="text-foreground">"Create New Article"</strong>. You have several options for topic selection:
+                    From your dashboard, click <strong className="text-foreground">&quot;Create New Article&quot;</strong>. You have several options for topic selection:
+
                 </p>
                 <div className="rounded-xl border border-border bg-white p-6">
                   <h3 className="mb-4 text-[20px] font-semibold text-foreground">Topic Input Methods</h3>
                   <ul className="space-y-3">
                     <li>
-                      <strong className="text-foreground">Keyword:</strong> Enter a target keyword (e.g., "best coffee makers")
+                      <strong className="text-foreground">Keyword:</strong> Enter a target keyword (e.g., &quot;best coffee makers&quot;)
                     </li>
                     <li>
-                      <strong className="text-foreground">Question:</strong> Pose a question your audience asks (e.g., "How to brew the perfect espresso?")
+                      <strong className="text-foreground">Question:</strong> Pose a question your audience asks (e.g., &quot;How to brew the perfect espresso?&quot;)
                     </li>
                     <li>
-                      <strong className="text-foreground">Topic:</strong> Describe a general topic (e.g., "home coffee brewing techniques")
+                      <strong className="text-foreground">Topic:</strong> Describe a general topic (e.g., &quot;home coffee brewing techniques&quot;)
                     </li>
                     <li>
                       <strong className="text-foreground">GSC Integration:</strong> Import low-performing keywords from Google Search Console to create improvement content
@@ -107,7 +109,8 @@ export default function FirstArticlePage() {
                 <div>
                   <h3 className="mb-3 text-[20px] font-semibold text-foreground">Target Audience</h3>
                   <p>
-                    Specify who you're writing for. This helps the AI adjust complexity, terminology, and examples to match your readers' knowledge level.
+                      Specify who you&apos;re writing for. This helps the AI adjust complexity, terminology, and examples to match your readers&apos; knowledge level.
+
                   </p>
                 </div>
               </div>
@@ -120,7 +123,8 @@ export default function FirstArticlePage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                  Click <strong className="text-foreground">"Generate Article"</strong> and watch the AI create your content in real-time. Generation typically takes 30-60 seconds.
+                    Click <strong className="text-foreground">&quot;Generate Article&quot;</strong> and watch the AI create your content in real-time. Generation typically takes 30-60 seconds.
+
                 </p>
                 <div className="rounded-xl bg-[#F0FDF4] p-6">
                   <div className="mb-3 flex items-center gap-2">
@@ -182,13 +186,14 @@ export default function FirstArticlePage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                  Once you're satisfied with your article, you have several publishing options:
+                    Once you&apos;re satisfied with your article, you have several publishing options:
+
                 </p>
                 <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-white p-6">
                     <h3 className="mb-2 text-[18px] font-semibold text-foreground">Direct Publishing</h3>
                     <p>
-                      If you've connected your CMS, click "Publish Now" to send the article directly to your website as a published post.
+                      If you&apos;ve connected your CMS, click &quot;Publish Now&quot; to send the article directly to your website as a published post.
                     </p>
                   </div>
                   <div className="rounded-xl border border-border bg-white p-6">
