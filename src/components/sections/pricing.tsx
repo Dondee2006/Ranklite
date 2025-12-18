@@ -146,11 +146,11 @@ export default function Pricing() {
                 ))}
               </ul>
 
-                {/* CTA Button */}
-                <Link
-                  href="https://whop.com/checkout/ranklite"
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
-                >
+                  {/* CTA Button */}
+                  <Link
+                    href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
+                  >
                   <>
                     {plan.cta}
                     <ArrowRight className="h-5 w-5" />
@@ -215,11 +215,11 @@ export default function Pricing() {
         </div>
 
         {/* MVP Note */}
-        <div className="mx-auto mt-12 max-w-[600px] text-center">
-          <p className="text-[13px] text-[#A0AEC0]">
-            🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Pesapal.
-          </p>
-        </div>
+          <div className="mx-auto mt-12 max-w-[600px] text-center">
+            <p className="text-[13px] text-[#A0AEC0]">
+              🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Whop.
+            </p>
+          </div>
       </div>
     </section>
   );
