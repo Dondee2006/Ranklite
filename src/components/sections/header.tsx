@@ -65,11 +65,10 @@ export default function Header() {
               >
                 Sign in
               </Link>
-              <Link
-                href="/signup"
-                onClick={handleAuthClick}
-                className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-5 py-2.5 text-[15px] font-semibold text-white shadow-lg shadow-green-500/25 transition-all hover:shadow-green-500/40"
-              >
+                <Link
+                  href="https://whop.com/checkout/ranklite"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-5 py-2.5 text-[15px] font-semibold text-white shadow-lg shadow-green-500/25 transition-all hover:shadow-green-500/40"
+                >
                 <span className="relative z-10">Start Free Trial</span>
                 <svg className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
