@@ -24,21 +24,21 @@ export default function FeaturesAutopilotPublishing() {
             . Your content goes live automatically — no manual work required.
           </p>
         </div>
-<a
-            className="group inline-flex items-center gap-2 rounded-full bg-[#4ADE80] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#22C55E] sm:px-4 sm:text-sm"
-            href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span>Start for Free</span>
-            <Image
-              alt="btn arrow"
-              width={20}
-              height={20}
-              className="size-[14px] sm:size-5"
-              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/svgs/white-arrow_dd1ae13e-3.svg"
-            />
-          </a>
+        <a
+          className="group inline-flex items-center gap-2 rounded-full bg-[#4ADE80] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#22C55E] sm:px-4 sm:text-sm"
+          href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span>Start for Free</span>
+          <Image
+            alt="btn arrow"
+            width={20}
+            height={20}
+            className="size-[14px] sm:size-5"
+            src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/07727327-e87f-431e-812f-96990e586515-outrank-so/assets/svgs/white-arrow_dd1ae13e-3.svg"
+          />
+        </a>
       </div>
       <div className="flex-shrink-0">
         <Image
