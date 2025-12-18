@@ -45,20 +45,20 @@ export default function BoostVisibility() {
               </span>
             </h2>
             <p className="mt-5 max-w-[550px] text-[16px] leading-relaxed text-muted-foreground lg:text-[17px]">
-              Join Ranklite&apos;s automated backlink generator and build high-quality links that increase your rankings, domain trust, and organic growth — without cold outreach or manual submissions.
+              Join Ranklite&apos;s automated backlink generator and build high-quality links that increase your rankings, domain trust, and organic traffic — without cold outreach or manual submissions.
             </p>
             <p className="mt-4 flex items-center gap-2 text-[15px] font-medium text-foreground">
               <Link2 className="h-4 w-4 text-[#22C55E]" />
               Publish content → Ranklite generates backlinks → You grow.
             </p>
           </div>
-          <a
-            href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-            className="group flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30"
-          >
-            Generate Backlinks Instantly →
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </a>
+<a
+              href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+              className="group flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30"
+            >
+              Generate Backlinks Instantly →
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </a>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3 lg:gap-8">

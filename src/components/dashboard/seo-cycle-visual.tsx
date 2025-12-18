@@ -60,7 +60,7 @@ const CYCLE_STAGES = [
     id: 6,
     name: "COMPLETE",
     description: "Ranking Ready",
-    tooltip: "Content is fully optimized with verified backlinks. Articles are ranking and driving organic growth to your website.",
+    tooltip: "Content is fully optimized with verified backlinks. Articles are ranking and driving organic traffic to your website.",
     icon: TrendingUp,
     color: "#10B981",
     bgColor: "bg-[#D1FAE5]",
@@ -127,8 +127,8 @@ export function SEOCycleVisual() {
         const result = await response.json();
         setData(result);
         setError(null);
-
-        const stepIndex = AGENT_STEPS.findIndex(step =>
+        
+        const stepIndex = AGENT_STEPS.findIndex(step => 
           step.text.toLowerCase().includes(result.agent.currentStep?.toLowerCase() || "")
         );
         setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
@@ -253,7 +253,7 @@ export function SEOCycleVisual() {
             <div className="space-y-3">
               {AGENT_STEPS.map((step, index) => {
                 const status = index < currentStepIndex ? "complete" : index === currentStepIndex ? "in-progress" : "pending";
-
+                
                 return (
                   <motion.div
                     key={step.id}

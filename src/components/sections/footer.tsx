@@ -52,7 +52,7 @@ export default function Footer() {
               <RankliteLogo />
             </Link>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              AI-powered content that ranks. Build your organic growth on autopilot.
+              AI-powered content that ranks. Grow your organic traffic on autopilot.
             </p>
             <div className="flex items-center gap-3">
               {[

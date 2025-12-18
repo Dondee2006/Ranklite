@@ -18,20 +18,47 @@ type Plan = {
 
 const PLANS: Plan[] = [
   {
-    id: "performance",
-    name: "Performance",
-    price: 59,
-    growthMode: "Authority Growth",
+    id: "starter",
+    name: "Starter",
+    price: 49,
+    growthMode: "Safe Growth",
     features: [
       "AI content generation",
+      "Automated publishing",
+      "Gradual backlink building",
+      "Built-in SEO safety controls",
+    ],
+    color: "green",
+    isActive: false,
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    price: 99,
+    growthMode: "Balanced Growth",
+    features: [
+      "Full 30-day AI content plan",
       "Daily blog publishing",
       "Automated backlink generator",
       "QA validation & indexing checks",
       "Natural, penalty-safe growth",
-      "Advanced SEO autopilot",
+    ],
+    color: "blue",
+    isActive: true,
+  },
+  {
+    id: "authority",
+    name: "Authority",
+    price: 199,
+    growthMode: "Authority Growth",
+    features: [
+      "Accelerated content publishing",
+      "Higher backlink capacity",
+      "Priority QA validation",
+      "Optimized for established sites",
     ],
     color: "purple",
-    isActive: true,
+    isActive: false,
   },
 ];
 
@@ -95,13 +122,19 @@ export default function BillingPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
-            Subscription Plan
+            Upgrade your plan
           </h1>
           <p className="text-sm text-[#6B7280]">
-            Full access to Ranklite SEO Autopilot
+            Hands-off SEO growth, safely automated
           </p>
         </div>
 
+        {/* Demo Notice */}
+        <div className="mb-6 p-3 rounded-lg bg-[#FEF3C7] border border-[#F59E0B]/20">
+          <p className="text-xs text-[#92400E] font-medium">
+            Demo billing — MVP mode
+          </p>
+        </div>
 
         {/* Plans Table */}
         <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden">
@@ -235,6 +268,9 @@ export default function BillingPage() {
                 Confirm Upgrade
               </h3>
             </div>
+            <p className="text-sm text-[#6B7280] mb-6">
+              This is a demo upgrade for MVP testing.
+            </p>
             <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E5E5] mb-6">
               <div className="text-xs text-[#6B7280] mb-1">Upgrading to</div>
               <div className="text-base font-semibold text-[#1A1A1A]">
