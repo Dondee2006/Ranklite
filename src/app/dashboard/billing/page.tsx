@@ -18,47 +18,20 @@ type Plan = {
 
 const PLANS: Plan[] = [
   {
-    id: "starter",
-    name: "Starter",
-    price: 49,
-    growthMode: "Safe Growth",
+    id: "performance",
+    name: "Performance",
+    price: 59,
+    growthMode: "Authority Growth",
     features: [
       "AI content generation",
-      "Automated publishing",
-      "Gradual backlink building",
-      "Built-in SEO safety controls",
-    ],
-    color: "green",
-    isActive: false,
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    price: 99,
-    growthMode: "Balanced Growth",
-    features: [
-      "Full 30-day AI content plan",
       "Daily blog publishing",
       "Automated backlink generator",
       "QA validation & indexing checks",
       "Natural, penalty-safe growth",
-    ],
-    color: "blue",
-    isActive: true,
-  },
-  {
-    id: "authority",
-    name: "Authority",
-    price: 199,
-    growthMode: "Authority Growth",
-    features: [
-      "Accelerated content publishing",
-      "Higher backlink capacity",
-      "Priority QA validation",
-      "Optimized for established sites",
+      "Advanced SEO autopilot",
     ],
     color: "purple",
-    isActive: false,
+    isActive: true,
   },
 ];
 
@@ -122,10 +95,10 @@ export default function BillingPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
-            Upgrade your plan
+            Subscription Plan
           </h1>
           <p className="text-sm text-[#6B7280]">
-            Hands-off SEO growth, safely automated
+            Full access to Ranklite SEO Autopilot
           </p>
         </div>
 
