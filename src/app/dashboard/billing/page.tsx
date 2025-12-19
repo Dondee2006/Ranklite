@@ -102,12 +102,6 @@ export default function BillingPage() {
           </p>
         </div>
 
-        {/* Demo Notice */}
-        <div className="mb-6 p-3 rounded-lg bg-[#FEF3C7] border border-[#F59E0B]/20">
-          <p className="text-xs text-[#92400E] font-medium">
-            Demo billing — MVP mode
-          </p>
-        </div>
 
         {/* Plans Table */}
         <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden">
@@ -241,9 +235,6 @@ export default function BillingPage() {
                 Confirm Upgrade
               </h3>
             </div>
-            <p className="text-sm text-[#6B7280] mb-6">
-              This is a demo upgrade for MVP testing.
-            </p>
             <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E5E5] mb-6">
               <div className="text-xs text-[#6B7280] mb-1">Upgrading to</div>
               <div className="text-base font-semibold text-[#1A1A1A]">
