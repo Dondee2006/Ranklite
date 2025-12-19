@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { UpgradeCTA } from "@/components/dashboard/upgrade-cta";
+import { WelcomeBanner } from "@/components/dashboard/upgrade-cta";
 
 interface Activity {
   id: string;
@@ -68,9 +68,9 @@ export default function DashboardOverviewPage() {
 
       <div className="p-4 sm:p-8">
         <div className="mb-6">
-          <UpgradeCTA />
+          <WelcomeBanner />
         </div>
-        
+
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
@@ -149,8 +149,8 @@ export default function DashboardOverviewPage() {
                                 activity.type === "Content"
                                   ? `/dashboard/content`
                                   : activity.type === "Backlink"
-                                  ? `/dashboard/backlinks`
-                                  : `/dashboard/content-planner`
+                                    ? `/dashboard/backlinks`
+                                    : `/dashboard/content-planner`
                               }
                               className="inline-flex items-center gap-1 text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]"
                             >
