@@ -34,7 +34,7 @@ export default function AboutPage() {
                 expertise or a large content team.
               </p>
               <p>
-                Today, thousands of businesses use Ranklite to grow their organic traffic and reach more customers through
+                Today, thousands of businesses use Ranklite to build their organic growth and reach more customers through
                 search engines.
               </p>
             </div>
@@ -83,8 +83,8 @@ export default function AboutPage() {
         <div className="rounded-2xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] p-12 text-center shadow-xl">
           <h2 className="mb-4 font-display text-[32px] font-bold text-white">Join Us on Our Journey</h2>
           <p className="mx-auto mb-8 max-w-2xl text-[17px] leading-relaxed text-white/90">
-            We&apos;re just getting started. Join thousands of content creators and businesses who are already growing their
-            organic traffic with Ranklite.
+            We&apos;re just getting started. Join thousands of content creators and businesses who are already building their
+            organic growth with Ranklite.
           </p>
           <Link
             href="/#pricing"
