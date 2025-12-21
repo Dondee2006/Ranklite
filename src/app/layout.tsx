@@ -42,6 +42,15 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: [
+      {
+        url: "/icon.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
