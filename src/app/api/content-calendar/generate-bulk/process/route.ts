@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { requesty } from "@/lib/ai";
 import { generateText } from "ai";
@@ -29,7 +29,11 @@ function selectArticleType(): string {
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { jobId, month, year } = await request.json();
 
   const { data: job } = await supabase

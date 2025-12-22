@@ -1,9 +1,12 @@
 import { createRequesty } from "@requesty/ai-sdk";
+import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
-export const requesty = createRequesty({
-  apiKey: process.env.REQUESTY_API_KEY!,
-});
+const requestyApiKey = process.env.REQUESTY_API_KEY;
+
+export const requesty = requestyApiKey 
+  ? createRequesty({ apiKey: requestyApiKey })
+  : (model: string) => openai(model.replace("openai/", ""));
 
 // Use openai/gpt-4o as default through Requesty gateway (provider prefix required)
 const modelName = process.env.REQUESTY_MODEL_NAME || "openai/gpt-4o";

@@ -70,7 +70,10 @@ export async function POST(request: Request) {
 
     fetch(processUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.CRON_SECRET}`
+      },
       body: JSON.stringify({ jobId: job.id, month, year }),
     }).catch(err => console.error("Background process error:", err));
 
