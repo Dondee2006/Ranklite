@@ -36,15 +36,41 @@ export async function POST(request: Request) {
 
   const { jobId, month, year } = await request.json();
 
-  const { data: job } = await supabase
+  const { data: job, error: jobError } = await supabase
     .from("generation_jobs")
-    .select("*, sites(id, domain, name)")
+    .select("*, sites!inner(id, domain, name)")
     .eq("id", jobId)
     .single();
 
-  if (!job || job.status !== "pending") {
-    return NextResponse.json({ error: "Invalid job" }, { status: 400 });
+  if (jobError || !job) {
+    console.error("Job error or not found:", jobError);
+    return NextResponse.json({ error: "Job not found: " + (jobError?.message || "Unknown") }, { status: 404 });
   }
+
+  // Handle both single object and array (sometimes Supabase returns array for joins)
+  const site = Array.isArray(job.sites) ? job.sites[0] : job.sites;
+
+  if (!site) {
+    // Fallback: If join failed but we have site_id, fetch site manually
+    if (job.site_id) {
+      const { data: fallbackSite } = await supabase
+        .from("sites")
+        .select("id, domain, name")
+        .eq("id", job.site_id)
+        .single();
+      
+      if (fallbackSite) {
+        Object.assign(job, { sites: fallbackSite });
+      }
+    }
+  }
+
+  if (!job.sites || job.status !== "pending") {
+    console.error("Invalid job state or missing site info:", job);
+    return NextResponse.json({ error: "Invalid job or missing site information" }, { status: 400 });
+  }
+
+  const finalSite = Array.isArray(job.sites) ? job.sites[0] : job.sites;
 
   await supabase
     .from("generation_jobs")
@@ -52,7 +78,7 @@ export async function POST(request: Request) {
     .eq("id", jobId);
 
   try {
-    const site = job.sites;
+    const site = finalSite;
     const startDate = new Date(year, month, 1);
     const today = new Date();
     const startDay = month === today.getMonth() && year === today.getFullYear()

@@ -65,7 +65,8 @@ export async function POST(request: Request) {
     }
 
     // Trigger background processing
-    const processUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/content-calendar/generate-bulk/process`;
+    const origin = new URL(request.url).origin;
+    const processUrl = `${origin}/api/content-calendar/generate-bulk/process`;
     console.log("Triggering background process:", processUrl);
 
     fetch(processUrl, {
