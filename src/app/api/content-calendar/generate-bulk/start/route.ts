@@ -12,14 +12,29 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { month, year } = body;
 
-  const { data: site } = await supabase
+  let { data: site } = await supabase
     .from("sites")
-    .select("id")
+    .select("id, domain, name")
     .eq("user_id", user.id)
     .single();
 
+  // Auto-create a site if the user doesn't have one
   if (!site) {
-    return NextResponse.json({ error: "No site found" }, { status: 404 });
+    const { data: newSite, error: siteError } = await supabase
+      .from("sites")
+      .insert({
+        user_id: user.id,
+        name: "My Website",
+        domain: "example.com",
+      })
+      .select("id, domain, name")
+      .single();
+
+    if (siteError) {
+      return NextResponse.json({ error: "Failed to create site: " + siteError.message }, { status: 500 });
+    }
+
+    site = newSite;
   }
 
   const { data: job, error } = await supabase
