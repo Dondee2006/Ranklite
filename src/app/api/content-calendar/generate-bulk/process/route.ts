@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { openai } from "@ai-sdk/openai";
+import { requesty } from "@/lib/ai";
 import { generateText } from "ai";
 
 const ARTICLE_TYPES = [
@@ -212,11 +212,11 @@ Return a JSON object with:
 }`;
 
   const { text } = await generateText({
-    model: openai("gpt-4o"),
+    model: requesty("openai/gpt-4o"),
     system: "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
     prompt,
     temperature: 0.8,
-    maxTokens: 4096,
+    maxOutputTokens: 4096,
   });
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);

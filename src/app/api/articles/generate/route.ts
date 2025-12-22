@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { checkPostGenerationLimit, incrementPostUsage } from "@/lib/usage-limits";
-import { openai } from "@ai-sdk/openai";
+import { requesty } from "@/lib/ai";
 import { generateText } from "ai";
 
 export async function POST(request: Request) {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const limitCheck = await checkPostGenerationLimit(user.id);
   if (!limitCheck.allowed) {
     return NextResponse.json(
-      { 
+      {
         error: limitCheck.message,
         usage: limitCheck.usage,
         limits: limitCheck.limits,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       status: "draft",
       categories: [article.category || "Uncategorized"],
       tags: article.tags || [],
-      featured_media: images[0]?.url || null,
+      featured_media: (images as any[])[0]?.url || null,
     },
     shopify: {
       title: article.title,
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       internal_links: internalLinks,
       external_links: externalLinks,
       images,
-      featured_image: images[0]?.url || null,
+      featured_image: (images as any[])[0]?.url || null,
       cms_exports: cmsExports,
       word_count: content.split(/\s+/).length,
       status: "generated",
@@ -267,7 +267,7 @@ async function generateArticleContent(
 async function generateSectionContent(sectionTitle: string, keyword: string, secondaryKeywords: string[], wordCount: number): Promise<string> {
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: requesty("openai/gpt-4o"),
       prompt: `Write a detailed, engaging section for an SEO article with the following specifications:
 
 Section Title: ${sectionTitle}
@@ -285,7 +285,7 @@ Requirements:
 - Do NOT include the section title in the output
 
 Write the section content now:`,
-      maxTokens: Math.ceil(wordCount * 2),
+      maxOutputTokens: Math.ceil(wordCount * 2),
     });
 
     return text.trim();
@@ -426,7 +426,7 @@ function generateMarkdown(content: string, title: string, images: object[], inte
 async function generateMetaDescription(keyword: string, title: string): Promise<string> {
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: requesty("openai/gpt-4o"),
       prompt: `Write a compelling SEO meta description for an article about "${title}".
 
 Target Keyword: ${keyword}
@@ -440,7 +440,7 @@ Requirements:
 - Do NOT include quotes or special formatting
 
 Write only the meta description:`,
-      maxTokens: 100,
+      maxOutputTokens: 100,
     });
 
     return text.trim().slice(0, 160);
