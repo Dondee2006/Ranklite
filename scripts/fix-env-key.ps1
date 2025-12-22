@@ -44,7 +44,7 @@ if ($foundKey) {
     Write-Host ""
     Write-Host "Please verify your API key is correct by:"
     Write-Host "1. Logging into your Requesty dashboard"
-    Write-Host "2. Checking that the API key matches what's in .env.local"
+    Write-Host "2. Checking that the API key matches what''s in .env.local"
     Write-Host "3. Ensuring the key is active and has the correct permissions"
 } else {
     Write-Host "⚠ REQUESTY_API_KEY not found in .env.local"
