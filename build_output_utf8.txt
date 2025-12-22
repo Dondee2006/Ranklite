@@ -1,0 +1,183 @@
+﻿
+> nextjs-new@0.1.0 build
+> next build
+
+node.exe :  ΓÜá Warning: Next.js inferred your workspace root, 
+but it may not be correct.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( ΓÜá Warning: N.. 
+   .not be correct.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ We detected multiple lockfiles and selected the directory of 
+C:\Users\DELL\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your 
+Next.js config, or consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-co
+nfig-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\DELL\Desktop\Ranklite\package-lock.json
+
+   Γû▓ Next.js 15.5.9
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big 
+strings (129kiB) impacts deserialization performance (consider 
+using Buffer instead and decode when needed)
+ Γ£ô Compiled successfully in 41s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/123) ...
+   Generating static pages (30/123) 
+   Generating static pages (61/123) 
+   Generating static pages (92/123) 
+ Γ£ô Generating static pages (123/123)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                Size  First Load JS
+Γöî Γùï /                                                   13.1 kB         183 kB
+Γö£ Γùï /_not-found                                           328 B         102 kB
+Γö£ Γùï /about                                              2.15 kB         167 kB
+Γö£ Γùï /affiliate                                           2.1 kB         167 kB
+Γö£ ╞Æ /api/article-settings                                 328 B         102 kB
+Γö£ ╞Æ /api/articles                                         328 B         102 kB
+Γö£ ╞Æ /api/articles/[id]                                    328 B         102 kB
+Γö£ ╞Æ /api/articles/generate                                328 B         102 kB
+Γö£ ╞Æ /api/articles/publish                                 328 B         102 kB
+Γö£ ╞Æ /api/autopilot                                        328 B         102 kB
+Γö£ ╞Æ /api/autopilot/pause                                  328 B         102 kB
+Γö£ ╞Æ /api/autopilot/run                                    328 B         102 kB
+Γö£ ╞Æ /api/autopilot/start                                  328 B         102 kB
+Γö£ ╞Æ /api/backlinks                                        328 B         102 kB
+Γö£ ╞Æ /api/backlinks/agent                                  328 B         102 kB
+Γö£ ╞Æ /api/backlinks/campaign                               328 B         102 kB
+Γö£ ╞Æ /api/backlinks/generate                               328 B         102 kB
+Γö£ ╞Æ /api/backlinks/platforms                              328 B         102 kB
+Γö£ ╞Æ /api/backlinks/qa-report                              328 B         102 kB
+Γö£ ╞Æ /api/backlinks/status                                 328 B         102 kB
+Γö£ ╞Æ /api/backlinks/tasks                                  328 B         102 kB
+Γö£ ╞Æ /api/backlinks/tasks/[id]                             328 B         102 kB
+Γö£ ╞Æ /api/backlinks/verify                                 328 B         102 kB
+Γö£ ╞Æ /api/backlinks/worker                                 328 B         102 kB
+Γö£ ╞Æ /api/billing/change-plan                              328 B         102 kB
+Γö£ ╞Æ /api/billing/current-plan                             328 B         102 kB
+Γö£ ╞Æ /api/billing/plans                                    328 B         102 kB
+Γö£ ╞Æ /api/billing/user-plan                                328 B         102 kB
+Γö£ ╞Æ /api/cms/cron/daily-sync                              328 B         102 kB
+Γö£ ╞Æ /api/cms/cron/scheduled-publish                       328 B         102 kB
+Γö£ ╞Æ /api/cms/framer/auth                                  328 B         102 kB
+Γö£ ╞Æ /api/cms/integrations                                 328 B         102 kB
+Γö£ ╞Æ /api/cms/integrations/[id]                            328 B         102 kB
+Γö£ ╞Æ /api/cms/notion/auth                                  328 B         102 kB
+Γö£ ╞Æ /api/cms/publish                                      328 B         102 kB
+Γö£ ╞Æ /api/cms/shopify/auth                                 328 B         102 kB
+Γö£ ╞Æ /api/cms/sync                                         328 B         102 kB
+Γö£ ╞Æ /api/cms/webflow/auth                                 328 B         102 kB
+Γö£ ╞Æ /api/cms/webhooks/notion                              328 B         102 kB
+Γö£ ╞Æ /api/cms/webhooks/shopify                             328 B         102 kB
+Γö£ ╞Æ /api/cms/webhooks/webflow                             328 B         102 kB
+Γö£ ╞Æ /api/cms/webhooks/wix                                 328 B         102 kB
+Γö£ ╞Æ /api/cms/webhooks/wordpress                           328 B         102 kB
+Γö£ ╞Æ /api/cms/wix/auth                                     328 B         102 kB
+Γö£ ╞Æ /api/cms/wordpress/auth                               328 B         102 kB
+Γö£ ╞Æ /api/content-calendar                                 328 B         102 kB
+Γö£ ╞Æ /api/content-calendar/generate                        328 B         102 kB
+Γö£ ╞Æ /api/content-calendar/generate-bulk                   328 B         102 kB
+Γö£ ╞Æ /api/content-calendar/generate-bulk/process           328 B         102 kB
+Γö£ ╞Æ /api/content-calendar/generate-bulk/start             328 B         102 kB
+Γö£ ╞Æ /api/content-calendar/generate-bulk/status/[jobId]    328 B         102 kB
+Γö£ ╞Æ /api/content/posts                                    328 B         102 kB
+Γö£ ╞Æ /api/dashboard/activities                             328 B         102 kB
+Γö£ ╞Æ /api/downgrade-plan                                   328 B         102 kB
+Γö£ ╞Æ /api/gsc/auth                                         328 B         102 kB
+Γö£ ╞Æ /api/gsc/callback                                     328 B         102 kB
+Γö£ ╞Æ /api/gsc/cron/daily-sync                              328 B         102 kB
+Γö£ ╞Æ /api/gsc/data                                         328 B         102 kB
+Γö£ ╞Æ /api/gsc/disconnect                                   328 B         102 kB
+Γö£ ╞Æ /api/gsc/generate-content                             328 B         102 kB
+Γö£ ╞Æ /api/gsc/sync                                         328 B         102 kB
+Γö£ ╞Æ /api/integrations                                     328 B         102 kB
+Γö£ ╞Æ /api/integrations/[id]                                328 B         102 kB
+Γö£ ╞Æ /api/linking/fetch-page-details                       328 B         102 kB
+Γö£ ╞Æ /api/linking/generate-internal-links                  328 B         102 kB
+Γö£ ╞Æ /api/linking/get-detected-links                       328 B         102 kB
+Γö£ ╞Æ /api/linking/get-link-suggestions                     328 B         102 kB
+Γö£ ╞Æ /api/linking/scan-sitemap                             328 B         102 kB
+Γö£ ╞Æ /api/onboarding                                       328 B         102 kB
+Γö£ ╞Æ /api/onboarding/complete                              328 B         102 kB
+Γö£ ╞Æ /api/onboarding/seo-cycle                             328 B         102 kB
+Γö£ ╞Æ /api/pesapal/create-order                             328 B         102 kB
+Γö£ ╞Æ /api/pesapal/ipn                                      328 B         102 kB
+Γö£ ╞Æ /api/plans                                            328 B         102 kB
+Γö£ ╞Æ /api/publish-today                                    328 B         102 kB
+Γö£ ╞Æ /api/qa-validation                                    328 B         102 kB
+Γö£ ╞Æ /api/scrape-website                                   328 B         102 kB
+Γö£ ╞Æ /api/seo-cycle                                        328 B         102 kB
+Γö£ ╞Æ /api/settings                                         328 B         102 kB
+Γö£ ╞Æ /api/sites                                            328 B         102 kB
+Γö£ ╞Æ /api/upgrade-plan                                     328 B         102 kB
+Γö£ ╞Æ /api/user-plan                                        328 B         102 kB
+Γö£ ╞Æ /api/workflow/status                                  328 B         102 kB
+Γö£ ╞Æ /auth/callback                                        328 B         102 kB
+Γö£ Γùï /blog                                               2.15 kB         167 kB
+Γö£ Γùï /checkout                                           6.95 kB         121 kB
+Γö£ ╞Æ /checkout/success                                     462 B         103 kB
+Γö£ Γùï /cookies                                             2.1 kB         167 kB
+Γö£ Γùï /dashboard                                            328 B         102 kB
+Γö£ Γùï /dashboard/articles-settings                        5.47 kB         154 kB
+Γö£ Γùï /dashboard/audit-logs                                 608 B         103 kB
+Γö£ Γùï /dashboard/backlink-generator                       7.45 kB         121 kB
+Γö£ Γùï /dashboard/backlink-generator/manual-review         4.01 kB         123 kB
+Γö£ Γùï /dashboard/backlink-qa-report                       4.77 kB         115 kB
+Γö£ Γùï /dashboard/backlinks                                2.35 kB         116 kB
+Γö£ Γùï /dashboard/billing                                  3.36 kB         114 kB
+Γö£ Γùï /dashboard/content                                  1.96 kB         116 kB
+Γö£ Γùï /dashboard/content-history                          2.26 kB         112 kB
+Γö£ Γùï /dashboard/content-planner                          11.8 kB         122 kB
+Γö£ Γùï /dashboard/feature-flags                              431 B         103 kB
+Γö£ Γùï /dashboard/integrations                             10.4 kB         141 kB
+Γö£ Γùï /dashboard/linking-configuration                    7.69 kB         198 kB
+Γö£ Γùï /dashboard/overview                                 3.21 kB         176 kB
+Γö£ Γùï /dashboard/performance                                821 B         103 kB
+Γö£ Γùï /dashboard/qa-validation                            2.71 kB         116 kB
+Γö£ Γùï /dashboard/reports                                    610 B         103 kB
+Γö£ Γùï /dashboard/seo-cycle                                41.3 kB         169 kB
+Γö£ Γùï /dashboard/settings                                  5.4 kB         133 kB
+Γö£ Γùï /docs                                               2.15 kB         167 kB
+Γö£ Γùï /docs/account-setup                                 2.15 kB         167 kB
+Γö£ Γùï /docs/api                                           2.15 kB         167 kB
+Γö£ Γùï /docs/dashboard-overview                            2.15 kB         167 kB
+Γö£ Γùï /docs/first-article                                 2.15 kB         167 kB
+Γö£ Γùï /docs/quick-start                                   2.15 kB         167 kB
+Γö£ Γùï /docs/webhooks                                      2.15 kB         167 kB
+Γö£ Γùï /docs/webhooks/events                               2.15 kB         167 kB
+Γö£ Γùï /docs/webhooks/security                             2.15 kB         167 kB
+Γö£ Γùï /docs/webhooks/setup                                2.15 kB         167 kB
+Γö£ Γùï /docs/webhooks/troubleshooting                      2.15 kB         167 kB
+Γö£ Γùï /docs/wordpress                                     2.15 kB         167 kB
+Γö£ Γùï /integrations                                        2.1 kB         172 kB
+Γö£ Γùï /login                                              1.88 kB         167 kB
+Γö£ Γùï /onboarding                                         13.5 kB         213 kB
+Γö£ Γùï /privacy                                             2.1 kB         167 kB
+Γö£ Γùï /signup                                             2.12 kB         167 kB
+Γö£ Γùï /terms                                               2.1 kB         167 kB
+Γöö Γùï /tools                                              2.15 kB         167 kB
++ First Load JS shared by all                            102 kB
+  Γö£ chunks/1255-9494d7e861e97d68.js                     45.9 kB
+  Γö£ chunks/4bd1b696-f785427dddbba9fb.js                 54.2 kB
+  Γöö other shared chunks (total)                         2.01 kB
+
+
+╞Æ Middleware                                            85.8 kB
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

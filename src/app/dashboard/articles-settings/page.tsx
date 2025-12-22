@@ -43,7 +43,7 @@ export default function ArticlesSettingsPage() {
   const [ctaText, setCtaText] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [aiImages, setAiImages] = useState(true);
-  
+
   // Blog settings
   const [sitemapUrl, setSitemapUrl] = useState("");
   const [mainBlogAddress, setMainBlogAddress] = useState("");
@@ -64,7 +64,7 @@ export default function ArticlesSettingsPage() {
 
   async function fetchBlogInfo() {
     if (!siteUrl || fetchingBlogInfo) return;
-    
+
     setFetchingBlogInfo(true);
     try {
       const response = await fetch("/api/scrape-website", {
@@ -72,9 +72,9 @@ export default function ArticlesSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: siteUrl }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.data) {
         if (data.data.sitemapUrl && !sitemapUrl) {
           setSitemapUrl(data.data.sitemapUrl);
@@ -212,7 +212,7 @@ export default function ArticlesSettingsPage() {
                         <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        Your website's sitemap URL
+                        Your website&apos;s sitemap URL
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -287,7 +287,7 @@ export default function ArticlesSettingsPage() {
             </div>
 
             <div className="mt-8">
-              <Button 
+              <Button
                 onClick={saveSettings}
                 disabled={saving}
                 className="w-full bg-[#22C55E] hover:bg-[#16A34A] h-12 text-base"
@@ -467,7 +467,7 @@ export default function ArticlesSettingsPage() {
             </div>
 
             <div className="mt-8">
-              <Button 
+              <Button
                 onClick={saveSettings}
                 disabled={saving}
                 className="w-full bg-[#22C55E] hover:bg-[#16A34A] h-12 text-base"

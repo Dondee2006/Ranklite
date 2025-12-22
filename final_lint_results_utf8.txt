@@ -1,0 +1,266 @@
+﻿
+> nextjs-new@0.1.0 lint
+> eslint
+
+
+C:\Users\DELL\Desktop\Ranklite\scripts\register-ipn.ts
+  69:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\scripts\test-requesty-debug.ts
+  33:2  error  Parsing error: ';' expected
+
+C:\Users\DELL\Desktop\Ranklite\scripts\test-requesty-final.ts
+  16:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\scripts\test-requesty-robust.ts
+  46:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\scripts\test-requesty-v1.ts
+  41:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\articles\generate\route.ts
+   85:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\articles\route.ts
+  91:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\autopilot\pause\route.ts
+  4:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\backlinks\generate\route.ts
+  249:46  warning  'currentDistribution' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\backlinks\qa-report\route.ts
+  123:17  warning  'href' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\billing\current-plan\route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\integrations\route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\publish\route.ts
+  104:13  warning  'siteId' is assigned a value but never used                                                            @typescript-eslint/no-unused-vars
+  130:7   warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\webhooks\shopify\route.ts
+  8:11  warning  'hmac' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\webhooks\webflow\route.ts
+  7:34  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\webhooks\wix\route.ts
+  7:36  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\cms\wix\auth\route.ts
+  95:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\content-calendar\generate-bulk\process\route.ts
+   17:7   warning  'BATCH_SIZE' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  117:13  error    'dateStr' is never reassigned. Use 'const' instead  prefer-const
+  136:26  error    Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  220:19  error    Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  235:49  error    Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  235:76  error    Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+  255:13  error    Unexpected any. Specify a different type            @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\content-calendar\generate-bulk\route.ts
+   99:24  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  165:13  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  251:9   warning  'words' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\content-calendar\generate-bulk\start\route.ts
+  17:30  error    'siteQueryError' is never reassigned. Use 'const' instead  prefer-const
+  17:30  warning  'siteQueryError' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\content-calendar\generate\route.ts
+  177:9  warning  'words' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\gsc\data\route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\gsc\disconnect\route.ts
+  5:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\gsc\sync\route.ts
+  5:28  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\linking\generate-internal-links\route.ts
+   3:35  warning  'batchPages' is defined but never used    @typescript-eslint/no-unused-vars
+  91:62  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\linking\get-detected-links\route.ts
+  62:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\linking\get-link-suggestions\route.ts
+  62:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\onboarding\route.ts
+  158:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\onboarding\seo-cycle\route.ts
+  25:7  warning  'integrations' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\pesapal\create-order\route.ts
+  50:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\pesapal\ipn\route.ts
+  34:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\plans\route.ts
+  4:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\seo-cycle\route.ts
+  20:27  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\api\user-plan\route.ts
+  5:27  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\checkout\page.tsx
+  58:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\articles-settings\page.tsx
+   4:17  warning  'ChevronRight' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  63:6   warning  React Hook useEffect has a missing dependency: 'fetchBlogInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\backlink-generator\page.tsx
+   10:3   warning  'ArrowUpRight' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   98:10  warning  'formatDate' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  103:10  warning  'getTimeUntilNextScan' is defined but never used                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  154:7   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\backlinks\page.tsx
+  19:7  warning  'STATUS_COLORS' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\content-history\page.tsx
+  175:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\content-planner\content-planner-page.tsx
+     6:5   warning  'Plus' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    11:5   warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    16:5   warning  'Clock' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    21:5   warning  'ArrowUpDown' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    97:10  warning  'getArticleTypeLabel' is defined but never used                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   113:10  warning  'getStatusIndicator' is defined but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   134:10  warning  'getInitials' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   142:10  warning  'formatRelativeDate' is defined but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   258:8   warning  React Hook useEffect has a missing dependency: 'generateMonthlyCalendar'. Either include it or remove the dependency array                                                                                                                                                               react-hooks/exhaustive-deps
+   488:11  warning  'stats' is assigned a value but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   978:45  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                              jsx-a11y/alt-text
+   983:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  1283:73  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  1300:36  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\content-planner\page.tsx
+  6:10  warning  'WorkflowGuide' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\integrations\page.tsx
+  122:48  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:15  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\layout.tsx
+   21:3   warning  'Globe' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  137:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\linking-configuration\page.tsx
+   67:6   warning  React Hook useEffect has a missing dependency: 'detectLinksFromUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  194:57  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                        react/no-unescaped-entities
+  353:53  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                        react/no-unescaped-entities
+  353:66  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                        react/no-unescaped-entities
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\overview\page.tsx
+  5:10  warning  'Eye' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\reports\page.tsx
+  3:10  warning  'Download' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\dashboard\settings\components\settings-content.tsx
+   37:10  warning  'saveSuccess' is assigned a value but never used                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   38:10  warning  'saveError' is assigned a value but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  434:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  470:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\app\docs\account-setup\page.tsx
+  3:21  warning  'Settings' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\docs\dashboard-overview\page.tsx
+  3:21  warning  'LayoutDashboard' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\docs\webhooks\security\page.tsx
+  3:24  warning  'Shield' is defined but never used  @typescript-eslint/no-unused-vars
+  3:32  warning  'Lock' is defined but never used    @typescript-eslint/no-unused-vars
+  3:38  warning  'Key' is defined but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\app\docs\webhooks\setup\page.tsx
+   3:24   warning  'Webhook' is defined but never used                              @typescript-eslint/no-unused-vars
+   3:33   warning  'Copy' is defined but never used                                 @typescript-eslint/no-unused-vars
+  65:99   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  65:111  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\DELL\Desktop\Ranklite\src\app\docs\wordpress\page.tsx
+  103:27  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  103:39  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  103:50  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  103:59  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  116:62  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  116:74  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  139:27  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  139:44  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\DELL\Desktop\Ranklite\src\app\layout.tsx
+  3:10  warning  'VisualEditsMessenger' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\dashboard\seo-cycle-visual.tsx
+  203:19  warning  'Icon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\dashboard\workflow-guide.tsx
+   5:26  warning  'Circle' is defined but never used            @typescript-eslint/no-unused-vars
+  79:10  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\onboarding\onboarding-wizard.tsx
+  530:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  554:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  834:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\ai-in-seo.tsx
+  1:8   warning  'Image' is defined but never used     @typescript-eslint/no-unused-vars
+  2:10  warning  'Sparkles' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\boost-visibility.tsx
+   3:8  warning  'Link' is defined but never used                      @typescript-eslint/no-unused-vars
+  20:9  warning  'handleAuthClick' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\cta-section.tsx
+  20:9  warning  'handleAuthClick' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\example-article-content.tsx
+  2:10  warning  'FileText' is defined but never used  @typescript-eslint/no-unused-vars
+  2:27  warning  'Play' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\footer.tsx
+  2:10  warning  'Send' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\hero.tsx
+  176:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\DELL\Desktop\Ranklite\src\components\sections\how-it-works.tsx
+  1:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\lib\backlink-engine\task-queue.ts
+  4:40  warning  'incrementBacklinkUsage' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\lib\backlink-engine\velocity-engine.ts
+   91:11  warning  'domain' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  198:18  warning  'dripDays' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\DELL\Desktop\Ranklite\src\lib\gsc\autopilot.ts
+  111:50  warning  'goal' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 126 problems (41 errors, 85 warnings)
+  1 error and 1 warning potentially fixable with the `--fix` option.
+

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 
     const nextRunDate = new Date();
     nextRunDate.setDate(nextRunDate.getDate() + 1);
-    
+
     await supabase.from("seo_cycles").insert({
       user_id: user.id,
       site_id: site.id,
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function seedThirtyDayPlan(supabase: any, site: any, body: any) {
+async function seedThirtyDayPlan(supabase: any, site: { id: string; user_id: string; name?: string }, body: any) {
   const today = new Date();
   const dates: string[] = [];
   for (let i = 0; i < 30; i++) {

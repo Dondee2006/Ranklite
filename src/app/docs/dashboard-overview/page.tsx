@@ -37,7 +37,7 @@ export default function DashboardOverviewPage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                  When you first log in, you'll see your main dashboard with key metrics and quick actions. The dashboard is designed to give you immediate insights into your content performance and provide fast access to essential features.
+                  When you first log in, you&apos;ll see your main dashboard with key metrics and quick actions. The dashboard is designed to give you immediate insights into your content performance and provide fast access to essential features.
                 </p>
               </div>
             </section>
