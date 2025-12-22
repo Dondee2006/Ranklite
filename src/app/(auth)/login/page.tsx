@@ -41,6 +41,17 @@ export default function LoginPage() {
     const { data: authUser } = await supabase.auth.getUser();
     const userId = authUser.user?.id;
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_paid")
+      .eq("id", userId || "")
+      .single();
+
+    if (!profile?.is_paid) {
+      window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
+      return;
+    }
+
     const { data: sites } = await supabase
       .from("sites")
       .select("id")

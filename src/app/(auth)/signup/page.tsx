@@ -40,8 +40,8 @@ export default function SignupPage() {
     }
 
     if (data.user && data.session) {
-      router.push("/onboarding");
-      router.refresh();
+      // Redirect to Whop Checkout for 1 USD activation
+      window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
     } else if (data.user && !data.session) {
       setSuccess(true);
       setLoading(false);
@@ -58,7 +58,7 @@ export default function SignupPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
             <p className="text-gray-600 mb-6">
-              We&apos;ve sent a confirmation link to <strong>{email}</strong>. 
+              We&apos;ve sent a confirmation link to <strong>{email}</strong>.
               Please check your inbox and click the link to activate your account.
             </p>
             <Link

@@ -58,10 +58,22 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!user && (request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  if (user && (request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding"))) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_paid")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.is_paid) {
+      return NextResponse.redirect("https://whop.com/checkout/plan_VU6iG0GPMen3j");
+    }
   }
 
   const isAuthPage =
