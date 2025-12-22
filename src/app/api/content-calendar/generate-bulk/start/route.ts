@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   let { data: site } = await supabase
     .from("sites")
-    .select("id, domain, name")
+    .select("id")
     .eq("user_id", user.id)
     .single();
 
@@ -25,9 +25,9 @@ export async function POST(request: Request) {
       .insert({
         user_id: user.id,
         name: "My Website",
-        domain: "example.com",
+        url: "https://example.com",
       })
-      .select("id, domain, name")
+      .select("id")
       .single();
 
     if (siteError) {
