@@ -42,15 +42,14 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
-    icon: [
-      {
-        url: "/icon.png",
-        sizes: "16x16",
-        type: "image/png",
-      },
-    ],
-  },
+    icons: {
+      icon: [
+        {
+          url: "/icon.svg",
+          type: "image/svg+xml",
+        },
+      ],
+    },
 };
 
 export default function RootLayout({
