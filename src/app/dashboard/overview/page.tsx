@@ -70,7 +70,7 @@ export default function DashboardOverviewPage() {
         <div className="mb-6">
           <UpgradeCTA />
         </div>
-        
+
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
@@ -147,10 +147,10 @@ export default function DashboardOverviewPage() {
                             <Link
                               href={
                                 activity.type === "Content"
-                                  ? `/dashboard/content`
+                                  ? `/dashboard/content/${activity.id}`
                                   : activity.type === "Backlink"
-                                  ? `/dashboard/backlinks`
-                                  : `/dashboard/content-planner`
+                                    ? `/dashboard/backlinks`
+                                    : `/dashboard/content-planner`
                               }
                               className="inline-flex items-center gap-1 text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]"
                             >

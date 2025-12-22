@@ -26,11 +26,14 @@ export async function GET(request: Request) {
   const month = parseInt(searchParams.get("month") || String(new Date().getMonth()));
   const year = parseInt(searchParams.get("year") || String(new Date().getFullYear()));
 
-  const { data: site } = await supabase
+  const { data: sites } = await supabase
     .from("sites")
     .select("id")
     .eq("user_id", user.id)
-    .single();
+    .order("id", { ascending: true })
+    .limit(1);
+
+  const site = sites?.[0];
 
   if (!site) {
     return NextResponse.json({ calendar: null, articles: [] });
@@ -97,8 +100,8 @@ export async function POST(request: Request) {
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
-  const startDay = month === today.getMonth() && year === today.getFullYear() 
-    ? today.getDate() 
+  const startDay = month === today.getMonth() && year === today.getFullYear()
+    ? today.getDate()
     : 1;
 
   const plannedArticles = [];

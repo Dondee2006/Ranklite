@@ -14,11 +14,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: site } = await supabase
+    const { data: sites } = await supabase
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .order("id", { ascending: true })
+      .limit(1);
+
+    const site = sites?.[0];
 
     if (!site) {
       return NextResponse.json({ articles: [] });
@@ -60,13 +63,16 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    
+
     // Get user's site
-    const { data: site } = await supabase
+    const { data: sites } = await supabase
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .order("id", { ascending: true })
+      .limit(1);
+
+    const site = sites?.[0];
 
     if (!site) {
       return NextResponse.json({ error: "No site found" }, { status: 404 });

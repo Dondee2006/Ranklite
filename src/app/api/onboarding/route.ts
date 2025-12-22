@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const { data: starterPlan } = await supabase
       .from("plans")
       .select("id")
-      .eq("name", "Starter")
+      .eq("name", "Pro Tier")
       .single();
 
     if (starterPlan) {
