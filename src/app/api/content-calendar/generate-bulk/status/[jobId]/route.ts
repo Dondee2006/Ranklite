@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
+  const { jobId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,7 +16,7 @@ export async function GET(
   const { data: job, error } = await supabase
     .from("generation_jobs")
     .select("*")
-    .eq("id", params.jobId)
+    .eq("id", jobId)
     .eq("user_id", user.id)
     .single();
 

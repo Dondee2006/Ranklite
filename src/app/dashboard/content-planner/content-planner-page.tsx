@@ -504,6 +504,7 @@ export default function ContentPlannerPage() {
                         <Button
                             onClick={generateMonthlyCalendar}
                             disabled={generating}
+                            type="button"
                             className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
                         >
                             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}

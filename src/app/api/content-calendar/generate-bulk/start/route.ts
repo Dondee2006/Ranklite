@@ -64,19 +64,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Trigger background processing
-    const origin = new URL(request.url).origin;
+    // Trigger background processing - use local URL to avoid production redirects
+    let origin = new URL(request.url).origin;
+    // In some proxy environments, origin might be wrong. Prefer localhost for background tasks if in dev.
+    if (process.env.NODE_ENV === "development" && !origin.includes("localhost")) {
+      origin = "http://localhost:3000";
+    }
+    
     const processUrl = `${origin}/api/content-calendar/generate-bulk/process`;
     console.log("Triggering background process:", processUrl);
 
-    fetch(processUrl, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.CRON_SECRET}`
-      },
-      body: JSON.stringify({ jobId: job.id, month, year }),
-    }).catch(err => console.error("Background process error:", err));
+    // Using a more robust background trigger
+    (async () => {
+      try {
+        await fetch(processUrl, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.CRON_SECRET}`
+          },
+          body: JSON.stringify({ jobId: job.id, month, year }),
+        });
+      } catch (err) {
+        console.error("Background process spawn error:", err);
+      }
+    })();
 
     return NextResponse.json({ success: true, jobId: job.id });
   } catch (error) {
