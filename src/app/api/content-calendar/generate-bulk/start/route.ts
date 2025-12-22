@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const { month, year } = body;
 
     // Try to get existing site
-    let { data: site, error: siteQueryError } = await supabase
+    const { data: site, error: siteQueryError } = await supabase
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     if (process.env.NODE_ENV === "development" && !origin.includes("localhost")) {
       origin = "http://localhost:3000";
     }
-    
+
     const processUrl = `${origin}/api/content-calendar/generate-bulk/process`;
     console.log("Triggering background process:", processUrl);
 
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       try {
         await fetch(processUrl, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${process.env.CRON_SECRET}`
           },

@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       let dateToUse = "";
 
       while (foundDatesCount <= currentProgress) {
-        let dateStr = formatDate(currentDate);
+        const dateStr = formatDate(currentDate);
         if (!usedDates.has(dateStr)) {
           if (foundDatesCount === currentProgress) {
             dateToUse = dateStr;
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       const searchIntent = determineSearchIntent(articleType);
       const title = generateTitle(keyword, articleType);
 
-      const articleData: any = {
+      const articleData: Record<string, unknown> = {
         site_id: site.id,
         title,
         slug: generateSlug(title),
@@ -153,13 +153,13 @@ export async function POST(request: Request) {
 
       try {
         const content = await generateArticleWithRetry({
-          title: articleData.title,
-          keyword: articleData.keyword,
-          secondaryKeywords: articleData.secondary_keywords,
-          articleType: articleData.article_type,
-          wordCount: articleData.word_count,
+          title: articleData.title as string,
+          keyword: articleData.keyword as string,
+          secondaryKeywords: articleData.secondary_keywords as string[],
+          articleType: articleData.article_type as string,
+          wordCount: articleData.word_count as number,
           siteName: site.name,
-          searchIntent: articleData.search_intent,
+          searchIntent: articleData.search_intent as string,
         });
 
         if (content) {
@@ -221,22 +221,31 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, progress: job.progress + 1 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Bulk generation process error:", error);
     await supabase
       .from("generation_jobs")
       .update({
         status: "failed",
-        error: error.message,
+        error: errorMessage,
         updated_at: new Date().toISOString(),
       })
       .eq("id", jobId);
 
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
-async function generateArticleWithRetry(params: any, retries = 2): Promise<any> {
+async function generateArticleWithRetry(params: {
+  title: string;
+  keyword: string;
+  secondaryKeywords: string[];
+  articleType: string;
+  wordCount: number;
+  siteName: string;
+  searchIntent: string;
+}, retries = 2): Promise<Record<string, unknown> | null> {
   for (let i = 0; i <= retries; i++) {
     try {
       return await generateArticleContent(params);
@@ -246,6 +255,7 @@ async function generateArticleWithRetry(params: any, retries = 2): Promise<any> 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
+  return null;
 }
 
 async function generateArticleContent(params: {
@@ -256,7 +266,7 @@ async function generateArticleContent(params: {
   wordCount: number;
   siteName: string;
   searchIntent: string;
-}): Promise<any> {
+}): Promise<Record<string, unknown> | null> {
   const prompt = `Write a comprehensive, SEO-optimized article with the following specifications:
 
 Title: ${params.title}

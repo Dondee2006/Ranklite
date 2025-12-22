@@ -1401,7 +1401,7 @@ export default function ContentPlannerPage() {
                                     <Sparkles className="h-8 w-8 text-emerald-600" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">Your 1-month Content Strategy is ready!</h3>
-                                <p className="text-sm text-slate-500">We've generated high-impact article ideas for you.</p>
+                                <p className="text-sm text-slate-500">We&apos;ve generated high-impact article ideas for you.</p>
                             </div>
                             <div className="space-y-4 mb-8">
                                 <div className="flex items-center gap-3">
@@ -1418,7 +1418,7 @@ export default function ContentPlannerPage() {
                                 </div>
                             </div>
                             <Button onClick={handleCloseWelcome} className="w-full h-12 text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-                                Let's Go!
+                                Let&apos;s Go!
                             </Button>
                         </div>
                     )}

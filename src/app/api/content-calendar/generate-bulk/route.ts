@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       articleType
     );
 
-    const articleData: any = {
+    const articleData: Record<string, unknown> = {
       site_id: site.id,
       title,
       slug: generateSlug(title),
@@ -170,7 +170,7 @@ async function generateArticleContent(params: {
   wordCount: number;
   siteName: string;
   searchIntent: string;
-}): Promise<any> {
+}): Promise<Record<string, unknown> | null> {
   const prompt = `Write a comprehensive, SEO-optimized article with the following specifications:
 
 Title: ${params.title}

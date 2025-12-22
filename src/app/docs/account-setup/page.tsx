@@ -64,13 +64,13 @@ export default function AccountSetupPage() {
                 <p>
                   Set up your website details in <strong className="text-foreground">Settings → Sites</strong>:
                 </p>
-                
+
                 <div className="rounded-xl border border-border bg-white p-6">
                   <h3 className="mb-3 text-[20px] font-semibold text-foreground">Basic Information</h3>
                   <ul className="space-y-2">
                     <li><strong className="text-foreground">Website URL:</strong> Your site&apos;s primary domain</li>
                     <li><strong className="text-foreground">Site Name:</strong> Display name for this website</li>
-                    <li><strong className="text-foreground">Description:</strong> Brief overview of your site's purpose</li>
+                    <li><strong className="text-foreground">Description:</strong> Brief overview of your site&apos;s purpose</li>
                     <li><strong className="text-foreground">Language:</strong> Primary content language</li>
                   </ul>
                 </div>
