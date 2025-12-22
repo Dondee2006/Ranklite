@@ -34,6 +34,8 @@ export function SettingsContent() {
   const [gscConnected, setGscConnected] = useState(false);
   const [gscLoading, setGscLoading] = useState(false);
   const [gscError, setGscError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [gscSuccess, setGscSuccess] = useState<string | null>(null);
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export function SettingsContent() {
     try {
       const response = await fetch("/api/gsc/auth");
       const data = await response.json();
-      
+
       if (data.error) {
         setGscError(data.error);
         setGscLoading(false);
@@ -120,8 +122,10 @@ export function SettingsContent() {
 
   const saveSettings = async () => {
     setSaving(true);
+    setSaveSuccess(null);
+    setSaveError(null);
     try {
-      await fetch("/api/settings", {
+      const response = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -134,8 +138,20 @@ export function SettingsContent() {
           competitors: competitors.map((c) => c.name),
         }),
       });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSaveSuccess("Settings saved successfully!");
+        setTimeout(() => setSaveSuccess(null), 3000);
+      } else {
+        setSaveError(data.error || "Failed to save settings");
+        setTimeout(() => setSaveError(null), 5000);
+      }
     } catch (error) {
       console.error("Failed to save settings:", error);
+      setSaveError("Failed to save settings. Please try again.");
+      setTimeout(() => setSaveError(null), 5000);
     } finally {
       setSaving(false);
     }
@@ -481,7 +497,7 @@ export function SettingsContent() {
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center">
                 <p className="text-gray-500 mb-4">
-                  {gscConnected 
+                  {gscConnected
                     ? "Your Google Search Console is connected and tracking performance data"
                     : "Connect your Google Search Console account to get insights about your search performance"
                   }
@@ -492,7 +508,7 @@ export function SettingsContent() {
                     Connected
                   </div>
                 ) : (
-                  <button 
+                  <button
                     onClick={connectGSC}
                     disabled={gscLoading}
                     className="px-6 py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-2"
