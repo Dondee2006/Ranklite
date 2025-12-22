@@ -36,7 +36,7 @@ export default function QuickStartPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-md shadow-green-500/20">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
-                  <h2 className="m-0 font-display text-[24px] font-semibold text-foreground">What You&apos;ll Learn</h2>
+                <h2 className="m-0 font-display text-[24px] font-semibold text-foreground">What You&apos;ll Learn</h2>
 
               </div>
               <ul className="space-y-3">
@@ -66,7 +66,7 @@ export default function QuickStartPage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                    Visit <Link href="/" className="font-semibold text-[#22C55E] hover:underline">ranklite.com</Link> and click the &quot;Start Free Trial&quot; button. You&apos;ll be prompted to enter:
+                  Visit <Link href="/" className="font-semibold text-[#22C55E] hover:underline">ranklite.com</Link> and click the &quot;Start Free Trial&quot; button. You&apos;ll be prompted to enter:
 
                 </p>
                 <ul className="ml-6 space-y-2">
@@ -75,7 +75,7 @@ export default function QuickStartPage() {
                   <li>Your name</li>
                 </ul>
                 <p>
-                    A small <strong>$1 activation fee</strong> applies for the 3-day free trial. You&apos;ll receive a confirmation email with a link to verify your account.
+                  A small <strong>$1 activation fee</strong> applies for the 3-day free trial. You&apos;ll receive a confirmation email with a link to verify your account.
 
                 </p>
               </div>
@@ -88,18 +88,18 @@ export default function QuickStartPage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                    Once you&apos;ve logged in, you&apos;ll be taken through our onboarding wizard:
+                  Once you&apos;ve logged in, you&apos;ll be taken through our onboarding wizard:
 
                 </p>
                 <ol className="ml-6 space-y-2">
-                    <li><strong className="text-foreground">Enter your website URL:</strong> Add your site&apos;s domain (e.g., example.com)</li>
+                  <li><strong className="text-foreground">Enter your website URL:</strong> Add your site&apos;s domain (e.g., example.com)</li>
 
                   <li><strong className="text-foreground">Select your niche:</strong> Choose the category that best describes your content</li>
-                  <li><strong className="text-foreground">Define your target audience:</strong> Help our AI understand who you're writing for</li>
+                  <li><strong className="text-foreground">Define your target audience:</strong> Help our AI understand who you&apos;re writing for</li>
                   <li><strong className="text-foreground">Set your content goals:</strong> Specify how many articles you want to publish per week</li>
                 </ol>
                 <p>
-                  This information helps Ranklite generate content that's perfectly tailored to your site and audience.
+                  This information helps Ranklite generate content that&apos;s perfectly tailored to your site and audience.
                 </p>
               </div>
             </section>
@@ -111,13 +111,13 @@ export default function QuickStartPage() {
               </h2>
               <div className="space-y-4 text-[17px] leading-relaxed text-muted-foreground">
                 <p>
-                  From your dashboard, click the "Create New Article" button:
+                  From your dashboard, click the &quot;Create New Article&quot; button:
                 </p>
                 <ul className="ml-6 space-y-2">
                   <li><strong className="text-foreground">Enter a topic or keyword:</strong> What do you want to write about?</li>
                   <li><strong className="text-foreground">Choose article length:</strong> Short (800-1200 words), Medium (1500-2000 words), or Long (2500+ words)</li>
                   <li><strong className="text-foreground">Set your tone:</strong> Professional, casual, friendly, or authoritative</li>
-                  <li><strong className="text-foreground">Click "Generate":</strong> Our AI will create SEO-optimized content in under 60 seconds</li>
+                  <li><strong className="text-foreground">Click &quot;Generate&quot;:</strong> Our AI will create SEO-optimized content in under 60 seconds</li>
                 </ul>
                 <p>
                   You can review, edit, and customize the generated content before publishing.

@@ -17,7 +17,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">1. Acceptance of Terms</h2>
             <p className="mb-4 text-[16px] leading-relaxed text-muted-foreground">
-              By accessing and using Ranklite ("Service"), you accept and agree to be bound by the terms and provision
+              By accessing and using Ranklite (&quot;Service&quot;), you accept and agree to be bound by the terms and provision
               of this agreement. If you do not agree to these Terms of Service, please do not use our Service.
             </p>
           </section>
@@ -117,7 +117,7 @@ export default function TermsPage() {
             <h2 className="mb-4 font-display text-[28px] font-bold text-foreground">9. Disclaimers</h2>
             <div className="space-y-4 text-[16px] leading-relaxed text-muted-foreground">
               <p>
-                THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR
+                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR
                 IMPLIED. WE DO NOT GUARANTEE THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.
               </p>
               <p>

@@ -91,9 +91,9 @@ export default function IntegrationsPage() {
   const [connectOpen, setConnectOpen] = useState(false);
   const [disconnectTarget, setDisconnectTarget] = useState<Integration | null>(null);
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
-  const [form, setForm] = useState({ 
-    siteUrl: "", 
-    accessToken: "", 
+  const [form, setForm] = useState({
+    siteUrl: "",
+    accessToken: "",
     shop: "",
     appId: "",
     appSecret: "",
@@ -119,7 +119,7 @@ export default function IntegrationsPage() {
 
       setIntegrations((prev) =>
         prev.map((integration) => {
-          const cms = cmsIntegrations.find((c: any) => c.platform === integration.id);
+          const cms = cmsIntegrations.find((c: { platform: string }) => c.platform === integration.id);
           if (cms) {
             return {
               ...integration,
@@ -142,9 +142,9 @@ export default function IntegrationsPage() {
       return;
     }
     setSelectedIntegration(integration);
-    setForm({ 
-      siteUrl: "", 
-      accessToken: "", 
+    setForm({
+      siteUrl: "",
+      accessToken: "",
       shop: "",
       appId: "",
       appSecret: "",
@@ -159,9 +159,9 @@ export default function IntegrationsPage() {
     if (!selectedIntegration) return;
 
     const platform = selectedIntegration.id;
-    
+
     let endpoint = "";
-    let body: any = {};
+    let body: Record<string, string> = {};
 
     switch (platform) {
       case "wordpress":
@@ -519,11 +519,11 @@ export default function IntegrationsPage() {
                   type="password"
                   placeholder={
                     currentPlatform === "wordpress" ? "Enter your WordPress application password" :
-                    currentPlatform === "webflow" ? "Enter your Webflow API token" :
-                    currentPlatform === "shopify" ? "Enter your Shopify access token" :
-                    currentPlatform === "notion" ? "Enter your Notion integration token" :
-                    currentPlatform === "framer" ? "Enter your Framer API token" :
-                    "Enter your API token"
+                      currentPlatform === "webflow" ? "Enter your Webflow API token" :
+                        currentPlatform === "shopify" ? "Enter your Shopify access token" :
+                          currentPlatform === "notion" ? "Enter your Notion integration token" :
+                            currentPlatform === "framer" ? "Enter your Framer API token" :
+                              "Enter your API token"
                   }
                   value={form.accessToken}
                   onChange={(e) => setForm((prev) => ({ ...prev, accessToken: e.target.value }))}

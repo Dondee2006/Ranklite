@@ -61,7 +61,7 @@ export default function WordPressDocsPage() {
         </div>
 
         <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
-          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">What You'll Get</h2>
+          <h2 className="mb-6 font-display text-[28px] font-semibold text-foreground">What You&apos;ll Get</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {features.map((feature, index) => (
               <div key={index} className="flex items-start gap-3">
@@ -99,8 +99,8 @@ export default function WordPressDocsPage() {
               <h3 className="mb-3 text-[18px] font-semibold text-foreground">Method 1: WordPress Repository</h3>
               <ol className="list-decimal space-y-2 pl-6 text-[15px] text-muted-foreground">
                 <li>Go to Plugins &gt; Add New in your WordPress dashboard</li>
-                <li>Search for "Ranklite"</li>
-                <li>Click "Install Now" and then "Activate"</li>
+                <li>Search for &quot;Ranklite&quot;</li>
+                <li>Click &quot;Install Now&quot; and then &quot;Activate&quot;</li>
               </ol>
             </div>
             <div>
@@ -113,7 +113,7 @@ export default function WordPressDocsPage() {
                   </a>
                 </li>
                 <li>Go to Plugins &gt; Add New &gt; Upload Plugin</li>
-                <li>Choose the downloaded ZIP file and click "Install Now"</li>
+                <li>Choose the downloaded ZIP file and click &quot;Install Now&quot;</li>
                 <li>Activate the plugin</li>
               </ol>
             </div>
@@ -136,7 +136,7 @@ export default function WordPressDocsPage() {
                   </Link>
                 </li>
                 <li>Navigate to Settings &gt; API Keys</li>
-                <li>Click "Generate New Key" and copy it</li>
+                <li>Click &quot;Generate New Key&quot; and copy it</li>
                 <li>Paste the key in Settings &gt; Ranklite in your WordPress dashboard</li>
               </ol>
             </div>
@@ -168,7 +168,7 @@ export default function WordPressDocsPage() {
             <div className="rounded-lg border border-border p-4">
               <h3 className="mb-2 text-[16px] font-semibold text-foreground">Plugin not connecting?</h3>
               <p className="text-[14px] text-muted-foreground">
-                Make sure your API key is correct and that your WordPress site can make outbound HTTPS connections. Check with your hosting provider if you're behind a firewall.
+                Make sure your API key is correct and that your WordPress site can make outbound HTTPS connections. Check with your hosting provider if you&apos;re behind a firewall.
               </p>
             </div>
             <div className="rounded-lg border border-border p-4">
@@ -192,7 +192,7 @@ export default function WordPressDocsPage() {
             <div>
               <h3 className="mb-2 text-[18px] font-semibold text-blue-900">Need Help?</h3>
               <p className="mb-4 text-[15px] leading-relaxed text-blue-800">
-                If you're experiencing issues with the WordPress integration, our support team is here to help.
+                If you&apos;re experiencing issues with the WordPress integration, our support team is here to help.
               </p>
               <a
                 href="mailto:support@ranklite.com"

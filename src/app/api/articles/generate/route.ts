@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       status: "draft",
       categories: [article.category || "Uncategorized"],
       tags: article.tags || [],
-      featured_media: images[0]?.url || null,
+      featured_media: (images as unknown as { url: string }[])[0]?.url || null,
     },
     shopify: {
       title: article.title,
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       internal_links: internalLinks,
       external_links: externalLinks,
       images,
-      featured_image: images[0]?.url || null,
+      featured_image: (images as unknown as { url: string }[])[0]?.url || null,
       cms_exports: cmsExports,
       word_count: content.split(/\s+/).length,
       status: "generated",
