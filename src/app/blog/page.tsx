@@ -2,65 +2,15 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Calendar, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { notion } from "@/lib/cms/notion";
 
-const blogPosts = [
-  {
-    id: "ai-content-seo-2025",
-    title: "The Future of AI-Generated Content in SEO",
-    excerpt: "Discover how AI is transforming content creation and what it means for your SEO strategy in 2025.",
-    date: "December 10, 2025",
-    category: "AI & SEO",
-    readTime: "5 min read",
-    image: "bg-gradient-to-br from-[#22C55E] to-[#16A34A]",
-  },
-  {
-    id: "rank-first-page-google",
-    title: "How to Rank on the First Page of Google in 2025",
-    excerpt: "A comprehensive guide to ranking your content on Google's first page with proven strategies.",
-    date: "December 8, 2025",
-    category: "SEO Strategy",
-    readTime: "8 min read",
-    image: "bg-gradient-to-br from-[#3B82F6] to-[#2563EB]",
-  },
-  {
-    id: "content-automation-guide",
-    title: "Complete Guide to Content Automation",
-    excerpt: "Learn how to automate your content creation workflow without sacrificing quality.",
-    date: "December 5, 2025",
-    category: "Automation",
-    readTime: "6 min read",
-    image: "bg-gradient-to-br from-[#8B5CF6] to-[#7C3AED]",
-  },
-  {
-    id: "keyword-research-2025",
-    title: "Modern Keyword Research: Beyond Search Volume",
-    excerpt: "Discover advanced keyword research techniques that go beyond traditional metrics.",
-    date: "December 3, 2025",
-    category: "Keyword Research",
-    readTime: "7 min read",
-    image: "bg-gradient-to-br from-[#F59E0B] to-[#D97706]",
-  },
-  {
-    id: "internal-linking-strategy",
-    title: "Internal Linking Strategy That Actually Works",
-    excerpt: "Master the art of internal linking to boost your SEO performance and user engagement.",
-    date: "November 30, 2025",
-    category: "SEO Strategy",
-    readTime: "6 min read",
-    image: "bg-gradient-to-br from-[#EC4899] to-[#DB2777]",
-  },
-  {
-    id: "content-calendar-planning",
-    title: "How to Build a Content Calendar That Converts",
-    excerpt: "Plan your content strategy effectively with our proven content calendar framework.",
-    date: "November 28, 2025",
-    category: "Content Strategy",
-    readTime: "5 min read",
-    image: "bg-gradient-to-br from-[#06B6D4] to-[#0891B2]",
-  },
-];
+// Revalidate every hour
+export const revalidate = 3600;
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const blogPosts = await notion.getBlogPosts();
+  const categories = ["All", ...Array.from(new Set(blogPosts.map((post) => post.category).filter(Boolean)))];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -78,14 +28,13 @@ export default function BlogPage() {
         </div>
 
         <div className="mb-12 flex flex-wrap items-center justify-center gap-3">
-          {["All", "AI & SEO", "SEO Strategy", "Automation", "Keyword Research", "Content Strategy"].map((category) => (
+          {categories.map((category) => (
             <button
               key={category}
-              className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${
-                category === "All"
+              className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${category === "All"
                   ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
                   : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -93,42 +42,57 @@ export default function BlogPage() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {blogPosts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/blog/${post.id}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all hover:shadow-lg"
-            >
-              <div className={`h-48 ${post.image} flex items-center justify-center`}>
-                <div className="text-center text-white">
-                  <div className="text-[14px] font-semibold opacity-90">{post.category}</div>
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col p-6">
-                <div className="mb-3 flex items-center gap-4 text-[13px] text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {post.date}
+          {blogPosts.length > 0 ? (
+            blogPosts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all hover:shadow-lg"
+              >
+                <div className={`h-48 bg-muted flex items-center justify-center overflow-hidden relative`}>
+                  {post.coverImage ? (
+                    <img
+                      src={post.coverImage}
+                      alt={post.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#22C55E] to-[#16A34A] opacity-20" />
+                  )}
+                  <div className="absolute top-4 right-4 rounded-full bg-white/90 px-3 py-1 text-[12px] font-semibold text-foreground backdrop-blur-sm shadow-sm opacity-90">
+                    {post.category}
                   </div>
-                  <div>{post.readTime}</div>
                 </div>
-                <h3 className="mb-3 font-display text-[20px] font-semibold leading-snug text-foreground transition-colors group-hover:text-[#22C55E]">
-                  {post.title}
-                </h3>
-                <p className="mb-4 flex-1 text-[15px] leading-relaxed text-muted-foreground">{post.excerpt}</p>
-                <div className="flex items-center gap-2 text-[14px] font-semibold text-[#22C55E]">
-                  Read more
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="mb-3 flex items-center gap-4 text-[13px] text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(post.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <div>{post.readTime}</div>
+                  </div>
+                  <h3 className="mb-3 font-display text-[20px] font-semibold leading-snug text-foreground transition-colors group-hover:text-[#22C55E]">
+                    {post.title}
+                  </h3>
+                  <p className="mb-4 flex-1 text-[15px] leading-relaxed text-muted-foreground multiline-ellipsis line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  <div className="flex items-center gap-2 text-[14px] font-semibold text-[#22C55E]">
+                    Read more
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-16 text-center">
-          <button className="rounded-xl border border-border bg-white px-8 py-3 text-[15px] font-semibold text-foreground shadow-sm transition-all hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]">
-            Load More Articles
-          </button>
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center text-muted-foreground">
+              No blog posts found. Check your Notion connection.
+            </div>
+          )}
         </div>
       </main>
       <Footer />

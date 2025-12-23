@@ -1,121 +1,136 @@
-export interface NotionPage {
-  id: string;
-  created_time: string;
-  last_edited_time: string;
-  properties: Record<string, unknown>;
-  url: string;
-}
+import { Client } from '@notionhq/client';
 
-export interface NotionDatabase {
+export interface BlogPost {
   id: string;
-  title: Array<{ plain_text: string }>;
-  properties: Record<string, unknown>;
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  status: 'Published' | 'Draft';
+  category: string;
+  coverImage?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  readTime?: string;
 }
 
 export interface NotionConfig {
   accessToken: string;
+  databaseId: string;
 }
 
 export class NotionClient {
-  private config: NotionConfig;
-  private apiVersion = '2022-06-28';
+  private client: Client;
+  private databaseId: string;
 
   constructor(config: NotionConfig) {
-    this.config = config;
+    this.client = new Client({ auth: config.accessToken });
+    this.databaseId = config.databaseId;
   }
 
-  private async request(endpoint: string, options: RequestInit = {}) {
-    const url = `https://api.notion.com/v1${endpoint}`;
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${this.config.accessToken}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': this.apiVersion,
-        ...options.headers,
-      },
-    });
+  async getBlogPosts(preview = false): Promise<BlogPost[]> {
+    try {
+      const response = await this.client.databases.query({
+        database_id: this.databaseId,
+        filter: preview
+          ? undefined
+          : {
+            property: 'Status',
+            select: {
+              equals: 'Published',
+            },
+          },
+        sorts: [
+          {
+            property: 'Published Date',
+            direction: 'descending',
+          },
+        ],
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Notion API error: ${response.status} ${errorText}`);
+      return response.results.map((page: any) => this.transformPageToPost(page));
+    } catch (error) {
+      console.error('Error fetching blog posts from Notion:', error);
+      return [];
     }
-
-    return response.json();
   }
 
-  async searchDatabases(query = '') {
-    const response = await this.request('/search', {
-      method: 'POST',
-      body: JSON.stringify({
-        query,
-        filter: { property: 'object', value: 'database' },
-      }),
-    });
-    return response.results as NotionDatabase[];
-  }
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    try {
+      const response = await this.client.databases.query({
+        database_id: this.databaseId,
+        filter: {
+          property: 'Slug',
+          rich_text: {
+            equals: slug,
+          },
+        },
+      });
 
-  async queryDatabase(databaseId: string, filter?: unknown) {
-    const response = await this.request(`/databases/${databaseId}/query`, {
-      method: 'POST',
-      body: JSON.stringify({ filter }),
-    });
-    return response.results as NotionPage[];
-  }
+      if (response.results.length === 0) {
+        return null;
+      }
 
-  async getPage(pageId: string) {
-    return this.request(`/pages/${pageId}`) as Promise<NotionPage>;
+      return this.transformPageToPost(response.results[0] as any);
+    } catch (error) {
+      console.error(`Error fetching blog post with slug ${slug}:`, error);
+      return null;
+    }
   }
 
   async getPageBlocks(pageId: string) {
-    const response = await this.request(`/blocks/${pageId}/children`);
-    return response.results;
-  }
-
-  async createPage(data: {
-    parent: { database_id: string } | { page_id: string };
-    properties: Record<string, unknown>;
-    children?: unknown[];
-  }) {
-    return this.request('/pages', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }) as Promise<NotionPage>;
-  }
-
-  async updatePage(pageId: string, data: {
-    properties?: Record<string, unknown>;
-  }) {
-    return this.request(`/pages/${pageId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }) as Promise<NotionPage>;
-  }
-
-  async appendBlocks(pageId: string, blocks: unknown[]) {
-    return this.request(`/blocks/${pageId}/children`, {
-      method: 'PATCH',
-      body: JSON.stringify({ children: blocks }),
-    });
-  }
-
-  async validateConnection() {
     try {
-      await this.searchDatabases();
-      return { valid: true };
+      const response = await this.client.blocks.children.list({
+        block_id: pageId,
+      });
+      return response.results;
     } catch (error) {
-      return { valid: false, error: String(error) };
+      console.error(`Error fetching blocks for page ${pageId}:`, error);
+      return [];
     }
   }
 
-  textToBlocks(content: string) {
-    const paragraphs = content.split('\n\n');
-    return paragraphs.map(text => ({
-      object: 'block',
-      type: 'paragraph',
-      paragraph: {
-        rich_text: [{ type: 'text', text: { content: text } }],
-      },
-    }));
+  private transformPageToPost(page: any): BlogPost {
+    const properties = page.properties;
+
+    const title = properties.Title?.title[0]?.plain_text || 'Untitled';
+    const slug = properties.Slug?.rich_text[0]?.plain_text || '';
+    const excerpt = properties.Excerpt?.rich_text[0]?.plain_text || '';
+    const date = properties['Published Date']?.date?.start || new Date().toISOString();
+    const status = properties.Status?.select?.name || 'Draft';
+    const category = properties.Category?.select?.name || 'General';
+    const seoTitle = properties['SEO Title']?.rich_text[0]?.plain_text || '';
+    const seoDescription = properties['Meta Description']?.rich_text[0]?.plain_text || '';
+
+    // Handle cover image
+    let coverImage = undefined;
+    if (properties['Cover Image']?.files?.length > 0) {
+      const file = properties['Cover Image'].files[0];
+      coverImage = file.type === 'file' ? file.file.url : file.external.url;
+    }
+
+    // Estimate read time (very rough approximation)
+    const wordCount = 1000; // Placeholder, would need to fetch content to be accurate
+    const readTime = `${Math.ceil(wordCount / 200)} min read`;
+
+    return {
+      id: page.id,
+      slug,
+      title,
+      excerpt,
+      date,
+      status,
+      category,
+      coverImage,
+      seoTitle,
+      seoDescription,
+      readTime,
+    };
   }
 }
+
+// Singleton instance for easy import
+export const notion = new NotionClient({
+  accessToken: process.env.NOTION_TOKEN || '',
+  databaseId: process.env.NOTION_DATABASE_ID || '',
+});
