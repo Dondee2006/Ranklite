@@ -46,8 +46,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface Article {
     id: string;
