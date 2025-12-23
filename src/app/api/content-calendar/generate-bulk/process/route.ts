@@ -120,6 +120,7 @@ export async function POST(request: Request) {
 
       articlesToInsert.push({
         site_id: site.id,
+        user_id: job.user_id,
         title,
         slug: generateSlug(title),
         keyword: keywordItem,
