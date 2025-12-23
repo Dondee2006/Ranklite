@@ -357,15 +357,22 @@ export default function ContentPlannerPage() {
                 body: JSON.stringify({ articleId }),
             });
             const data = await response.json();
-            if (data.article) {
-                setArticles(prev => prev.map(a => a.id === articleId ? data.article : a));
-                if (selectedArticle?.id === articleId) {
-                    setSelectedArticle(data.article);
+            if (response.ok) {
+                if (data.article) {
+                    setArticles(prev => prev.map(a => a.id === articleId ? data.article : a));
+                    if (selectedArticle?.id === articleId) {
+                        setSelectedArticle(data.article);
+                    }
                 }
+            } else {
+                const errorMsg = data.error || data.message || "Failed to generate article content";
+                alert(`Error: ${errorMsg}`);
             }
         } catch (error) {
             console.error("Failed to generate article:", error);
-        } finally {
+            alert("A network error occurred. Please check your connection and try again.");
+        }
+        finally {
             setGeneratingArticle(null);
         }
     }

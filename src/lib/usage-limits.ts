@@ -66,10 +66,10 @@ export async function getUserPlanAndUsage(userId: string): Promise<{
 
   return {
     plan: {
-      posts_per_month: userPlan.plans.posts_per_month,
-      backlinks_per_post: userPlan.plans.backlinks_per_post,
-      qa_validation: userPlan.plans.qa_validation,
-      integrations_limit: userPlan.plans.integrations_limit,
+      posts_per_month: userPlan.plans.posts_per_month || (userPlan.plan_id === 'pro' ? 30 : 10),
+      backlinks_per_post: userPlan.plans.backlinks_per_post || 20,
+      qa_validation: userPlan.plans.qa_validation ?? true,
+      integrations_limit: userPlan.plans.integrations_limit || (userPlan.plan_id === 'pro' ? -1 : 3),
     },
     usage: usageData,
     status: userPlan.status,
@@ -229,28 +229,16 @@ export async function incrementPostUsage(userId: string): Promise<void> {
   const supabase = await createServerClient();
   const { usage } = await getUserPlanAndUsage(userId);
 
-  if (!usage) {
-    const periodStart = new Date();
-    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const periodStart = usage?.period_start || new Date().toISOString();
+  const periodEnd = usage?.period_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    await supabase.from("usage_tracking").insert({
-      user_id: userId,
-      period_start: periodStart.toISOString(),
-      period_end: periodEnd.toISOString(),
-      posts_generated: 1,
-      backlinks_generated: 0,
-    });
-  } else {
-    await supabase
-      .from("usage_tracking")
-      .update({
-        posts_generated: usage.posts_generated + 1,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", userId)
-      .gte("period_start", usage.period_start)
-      .lte("period_end", usage.period_end);
-  }
+  await supabase.from("usage_tracking").upsert({
+    user_id: userId,
+    period_start: periodStart,
+    period_end: periodEnd,
+    posts_generated: (usage?.posts_generated || 0) + 1,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id,period_start,period_end' });
 }
 
 export async function incrementBacklinkUsage(
@@ -260,28 +248,16 @@ export async function incrementBacklinkUsage(
   const supabase = await createServerClient();
   const { usage } = await getUserPlanAndUsage(userId);
 
-  if (!usage) {
-    const periodStart = new Date();
-    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const periodStart = usage?.period_start || new Date().toISOString();
+  const periodEnd = usage?.period_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    await supabase.from("usage_tracking").insert({
-      user_id: userId,
-      period_start: periodStart.toISOString(),
-      period_end: periodEnd.toISOString(),
-      posts_generated: 0,
-      backlinks_generated: count,
-    });
-  } else {
-    await supabase
-      .from("usage_tracking")
-      .update({
-        backlinks_generated: usage.backlinks_generated + count,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", userId)
-      .gte("period_start", usage.period_start)
-      .lte("period_end", usage.period_end);
-  }
+  await supabase.from("usage_tracking").upsert({
+    user_id: userId,
+    period_start: periodStart,
+    period_end: periodEnd,
+    backlinks_generated: (usage?.backlinks_generated || 0) + count,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id,period_start,period_end' });
 }
 
 export async function shouldNotifyUsage(userId: string): Promise<{
