@@ -71,6 +71,8 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
 
     // Editable states
     const [isSaving, setIsSaving] = useState(false);
+    const [editableTitle, setEditableTitle] = useState("");
+    const [editableContent, setEditableContent] = useState("");
     const [editableSlug, setEditableSlug] = useState("");
     const [editableMetaDesc, setEditableMetaDesc] = useState("");
     const [editableStatus, setEditableStatus] = useState("");
@@ -90,6 +92,8 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 setArticle(data.article);
 
                 // Initialize editable states
+                setEditableTitle(data.article.title || "");
+                setEditableContent(data.article.html_content || data.article.content || "");
                 setEditableSlug(data.article.slug || "");
                 setEditableMetaDesc(data.article.meta_description || "");
                 setEditableStatus(data.article.status || "planned");
@@ -102,20 +106,55 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
         loadArticle();
     }, [id]);
 
-    const handleSaveMetadata = async (field: 'slug' | 'meta_description' | 'status', value: string) => {
+    const handleSaveMetadata = async (field: 'slug' | 'meta_description' | 'status' | 'content' | 'title', value: string) => {
         setIsSaving(true);
         try {
+            // If saving content, we save both html_content and content for compatibility
+            const updatePayload = field === 'content'
+                ? { html_content: value, content: value }
+                : { [field]: value };
+
             const response = await fetch(`/api/articles/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ [field]: value }),
+                body: JSON.stringify(updatePayload),
             });
 
             if (!response.ok) throw new Error("Failed to update article");
 
             const data = await response.json();
             setArticle(data.article);
+
+            if (field === 'title') setEditableTitle(data.article.title);
+            if (field === 'content') setEditableContent(data.article.html_content || data.article.content);
+
             toast.success(`${field.replace('_', ' ')} updated successfully`);
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveAllContent = async () => {
+        setIsSaving(true);
+        try {
+            const response = await fetch(`/api/articles/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: editableTitle,
+                    html_content: editableContent,
+                    content: editableContent
+                }),
+            });
+
+            if (!response.ok) throw new Error("Failed to save changes");
+
+            const data = await response.json();
+            setArticle(data.article);
+            setIsEditingContent(false);
+            toast.success("Article saved successfully");
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -175,22 +214,48 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                     </Breadcrumb>
 
                     <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-9 px-4 text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
-                            onClick={() => setIsEditingContent(!isEditingContent)}
-                        >
-                            <Pencil className="h-3.5 w-3.5" />
-                            {isEditingContent ? "Preview Mode" : "Edit Article"}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-gray-900 border-gray-200"
-                        >
-                            <Download className="h-4 w-4" />
-                        </Button>
+                        {isEditingContent ? (
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 px-4 text-gray-600 border-gray-200 hover:bg-gray-50"
+                                    onClick={() => setIsEditingContent(false)}
+                                    disabled={isSaving}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white gap-2 transition-all"
+                                    onClick={handleSaveAllContent}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                                    Save Changes
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 px-4 text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
+                                    onClick={() => setIsEditingContent(true)}
+                                >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Edit Article
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-gray-900 border-gray-200"
+                                >
+                                    <Download className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -204,16 +269,38 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 >
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[800px]">
                         <div className="px-12 py-16 prose prose-slate max-w-none">
-                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-tight mb-8">
-                                {article.title}
-                            </h1>
-
-                            <div className="article-preview-content">
-                                <div
-                                    dangerouslySetInnerHTML={{ __html: article.html_content || article.content || "<p class='grow-0 text-gray-400 italic py-10'>AI is tailoring your content masterpieces...</p>" }}
-                                    className="article-body-premium"
-                                />
-                            </div>
+                            {isEditingContent ? (
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Article Title</label>
+                                        <Input
+                                            value={editableTitle}
+                                            onChange={(e) => setEditableTitle(e.target.value)}
+                                            className="text-4xl font-extrabold text-gray-900 tracking-tight leading-tight border-none p-0 focus-visible:ring-0 bg-transparent h-auto"
+                                            placeholder="Enter article title..."
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content (HTML/Markdown supported)</label>
+                                        <Textarea
+                                            value={editableContent}
+                                            onChange={(e) => setEditableContent(e.target.value)}
+                                            className="min-h-[600px] text-lg leading-relaxed text-gray-700 bg-gray-50/50 border-gray-100 focus-visible:ring-emerald-500/20 p-6 font-serif"
+                                            placeholder="Write your masterpiece here..."
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="article-preview-content">
+                                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-tight mb-8">
+                                        {article.title}
+                                    </h1>
+                                    <div
+                                        dangerouslySetInnerHTML={{ __html: article.html_content || article.content || "<p class='grow-0 text-gray-400 italic py-10'>AI is tailoring your content masterpieces...</p>" }}
+                                        className="article-body-premium"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -358,41 +445,42 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
             {/* Premium Typography System */}
             <style jsx global>{`
                 .article-body-premium {
-                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                    font-family: 'Newsreader', 'Charter', 'Georgia', serif;
                 }
-                .article-body-premium h1 { font-size: 2.75rem; font-weight: 900; color: #111827; margin-top: 2rem; margin-bottom: 2rem; line-height: 1.1; letter-spacing: -0.02em; }
-                .article-body-premium h2 { font-size: 1.875rem; font-weight: 800; color: #111827; margin-top: 3rem; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.01em; }
-                .article-body-premium h3 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.3; }
+                .article-body-premium h1 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 2.75rem; font-weight: 900; color: #111827; margin-top: 2.5rem; margin-bottom: 2rem; line-height: 1.1; letter-spacing: -0.02em; }
+                .article-body-premium h2 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 2.25rem; font-weight: 800; color: #111827; margin-top: 3.5rem; margin-bottom: 1.5rem; line-height: 1.2; letter-spacing: -0.01em; }
+                .article-body-premium h3 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 1.75rem; font-weight: 700; color: #111827; margin-top: 3rem; margin-bottom: 1.25rem; line-height: 1.3; }
                 .article-body-premium p { 
-                    font-size: 1.125rem; 
-                    line-height: 1.85; 
-                    color: #374151; 
-                    margin-bottom: 2rem; 
-                    font-weight: 400;
-                    letter-spacing: -0.005em;
-                }
-                .article-body-premium ul, .article-body-premium ol { margin-bottom: 2rem; padding-left: 1.25rem; }
-                .article-body-premium li { 
-                    margin-bottom: 0.75rem; 
-                    font-size: 1.125rem; 
+                    font-size: 1.375rem; 
                     line-height: 1.8; 
-                    color: #374151; 
+                    color: #1A1F2E; 
+                    margin-bottom: 2.25rem; 
+                    font-weight: 400;
+                    letter-spacing: -0.003em;
+                }
+                .article-body-premium ul, .article-body-premium ol { margin-bottom: 2.25rem; padding-left: 1.5rem; }
+                .article-body-premium li { 
+                    margin-bottom: 1rem; 
+                    font-size: 1.375rem; 
+                    line-height: 1.8; 
+                    color: #1A1F2E; 
                 }
                 .article-body-premium li::marker { color: #10B981; font-weight: bold; }
                 .article-body-premium strong { color: #111827; font-weight: 700; }
                 .article-body-premium blockquote { 
                     border-left: 4px solid #10B981; 
-                    padding-left: 2rem; 
+                    padding-left: 2.5rem; 
                     font-style: italic; 
-                    margin: 3.5rem 0; 
+                    margin: 4rem 0; 
                     color: #1F2937;
-                    font-size: 1.5rem;
-                    line-height: 1.6;
+                    font-size: 1.75rem;
+                    line-height: 1.4;
                     font-weight: 500;
-                    background: #F9FAFB;
-                    padding-top: 2rem;
-                    padding-bottom: 2rem;
-                    border-radius: 0 1rem 1rem 0;
+                    background: #F0FDF4;
+                    padding-top: 3rem;
+                    padding-bottom: 3rem;
+                    border-radius: 0 1.5rem 1.5rem 0;
+                    font-family: 'Newsreader', serif;
                 }
                 .article-body-premium a {
                     color: #059669;
@@ -405,9 +493,9 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                     color: #047857;
                 }
                 .article-body-premium img {
-                    border-radius: 1rem;
-                    box-shadow: 0 4px 20px -2px rgba(0,0,0,0.1);
-                    margin: 3rem 0;
+                    border-radius: 1.5rem;
+                    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+                    margin: 4rem 0;
                 }
             `}</style>
         </div>
