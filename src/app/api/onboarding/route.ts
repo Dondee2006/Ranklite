@@ -50,6 +50,20 @@ export async function POST(request: Request) {
 
     await supabase.from("article_settings").insert({
       site_id: site.id,
+      sitemap_url: body.sitemapUrl,
+      blog_address: body.blogAddress,
+      example_urls: body.articleUrls || [],
+      auto_publish: body.autoPublish ?? true,
+      article_style: body.articleStyle || "Informative",
+      internal_links: body.internalLinks || "3 links per article",
+      global_instructions: body.globalInstructions,
+      brand_color: body.brandColor || "#000000",
+      image_style: body.imageStyle || "brand-text",
+      title_based_image: body.titleBasedImage ?? false,
+      youtube_video: body.youtubeVideo ?? false,
+      call_to_action: body.callToAction ?? false,
+      include_infographics: body.includeInfographics ?? false,
+      include_emojis: body.includeEmojis ?? false,
     });
 
     await supabase.from("autopilot_settings").upsert({
