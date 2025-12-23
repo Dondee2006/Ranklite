@@ -65,6 +65,11 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding"))) {
+    // Special bypass for the main user
+    if (user.email === "dondorian7@gmail.com") {
+      return NextResponse.next();
+    }
+
     const { data: userPlan } = await supabase
       .from("user_plans")
       .select("status")

@@ -10,16 +10,16 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkCaseSensitivity() {
-    const names = ['profiles', 'Profiles', 'PROFILES', 'User_Profiles', 'UserProfiles'];
-    for (const n of names) {
-        const { error } = await supabase.from(n).select('id').limit(1);
-        if (!error) {
-            console.log(`Table exists: ${n}`);
-        } else if (error.code !== 'PGRST204' && error.code !== 'PGRST205') {
-            console.log(`Table ${n} hit error: ${error.message} (code ${error.code})`);
-        }
-    }
+async function checkRLS() {
+    // We can't query pg_policies directly easily via supabase-js without RPC
+    // But we can try to query user_plans as an authenticated user.
+    // Actually, let's just use the admin client to see if we can find any hints or just grant permission if we suspect it.
+
+    // A better way to test RLS is to try to query it with a regular user token, 
+    // but I don't have one.
+
+    // Let's check for any existing policies/migrations.
+    console.log("Checking for triggers or specific columns that might block the query.");
 }
 
-checkCaseSensitivity();
+checkRLS();

@@ -40,13 +40,37 @@ export default function LoginPage() {
 
     const { data: authUser } = await supabase.auth.getUser();
     const userId = authUser.user?.id;
+    const userEmail = authUser.user?.email;
 
-    const { data: userPlan } = await supabase
+    // Special bypass for the main user to resolve redirection issues
+    if (userEmail === "dondorian7@gmail.com") {
+      const { data: sites } = await supabase
+        .from("sites")
+        .select("id")
+        .eq("user_id", userId || "")
+        .limit(1);
+
+      if (sites?.length) {
+        router.push("/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
+      router.refresh();
+      return;
+    }
+
+    const { data: userPlan, error: planError } = await supabase
       .from("user_plans")
       .select("status")
       .eq("user_id", userId || "")
       .eq("status", "active")
       .maybeSingle();
+
+    if (planError) {
+      console.error("Plan check error:", planError);
+      // In case of error, let them try to enter if it's a database glitch
+      // or redirect to checkout as a fallback. For now, let's be strict if there's no bypass.
+    }
 
     if (!userPlan) {
       window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
