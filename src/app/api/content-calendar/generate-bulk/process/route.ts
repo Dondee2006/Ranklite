@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
   const { data: site, error: siteError } = await supabase
     .from("sites")
-    .select("id, domain, name")
+    .select("id, url, name")
     .eq("id", job.site_id)
     .single();
 
@@ -101,120 +101,57 @@ export async function POST(request: Request) {
 
     const usedDates = new Set<string>((existingArticles || []).map(a => a.scheduled_date));
     const keywordPool = generateKeywordsForNiche(site.name, 30);
+    const articlesToInsert = [];
+    const currentDate = new Date(startDate);
 
-    // We only process ONE article per hit now for maximum reliability
-    const currentProgress = job.progress;
     const totalToGenerate = job.total || 30;
 
-    if (currentProgress < totalToGenerate) {
-      const currentDate = new Date(startDate);
-      // Skip ahead by current progress to find the next available date
-      // We essentially want to find the (progress + 1)-th available date
-      let foundDatesCount = 0;
-      let dateToUse = "";
-
-      while (foundDatesCount <= currentProgress) {
-        const dateStr = formatDate(currentDate);
-        if (!usedDates.has(dateStr)) {
-          if (foundDatesCount === currentProgress) {
-            dateToUse = dateStr;
-          }
-          foundDatesCount++;
-        }
-        if (foundDatesCount <= currentProgress) {
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
+    while (articlesToInsert.length < totalToGenerate) {
+      const dateStr = formatDate(currentDate);
+      if (usedDates.has(dateStr)) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
       }
 
-      console.log(`Processing article ${currentProgress + 1}/${totalToGenerate} for date ${dateToUse}`);
-
-      const keyword = keywordPool[currentProgress % keywordPool.length];
+      const keywordItem: any = keywordPool[articlesToInsert.length % keywordPool.length];
       const articleType = selectArticleType();
       const searchIntent = determineSearchIntent(articleType);
-      const title = generateTitle(keyword, articleType);
+      const title = generateTitle(keywordItem, articleType);
 
-      const articleData: Record<string, unknown> = {
+      articlesToInsert.push({
         site_id: site.id,
         title,
         slug: generateSlug(title),
-        keyword,
-        secondary_keywords: generateSecondaryKeywords(keyword),
+        keyword: keywordItem,
+        secondary_keywords: generateSecondaryKeywords(keywordItem),
         search_intent: searchIntent,
         article_type: articleType,
-        word_count: 1500 + Math.floor(Math.random() * 1000),
-        cta_placement: ["beginning", "middle", "end"][Math.floor(Math.random() * 3)],
+        word_count: 3000 + Math.floor(Math.random() * 500),
+        cta_placement: ["beginning", "middle", "end", "both"][Math.floor(Math.random() * 4)],
         status: "planned",
-        scheduled_date: dateToUse,
-      };
+        scheduled_date: dateStr,
+      });
 
-      try {
-        const content = await generateArticleWithRetry({
-          title: articleData.title as string,
-          keyword: articleData.keyword as string,
-          secondaryKeywords: articleData.secondary_keywords as string[],
-          articleType: articleData.article_type as string,
-          wordCount: articleData.word_count as number,
-          siteName: site.name,
-          searchIntent: articleData.search_intent as string,
-        });
-
-        if (content) {
-          articleData.content = content.content;
-          articleData.html_content = content.htmlContent;
-          articleData.markdown_content = content.markdownContent;
-          articleData.meta_description = content.metaDescription;
-          articleData.outline = content.outline;
-          articleData.status = "generated";
-          articleData.seo_score = content.seoScore || 85;
-          articleData.readability_score = content.readabilityScore || 75;
-        }
-      } catch (error) {
-        console.error(`Failed to generate content for article ${currentProgress + 1}:`, error);
-        // Keep as planned status if content generation fails
-      }
-
-      await supabase.from("articles").insert(articleData);
-
-      const nextProgress = currentProgress + 1;
-      const isFinished = nextProgress >= totalToGenerate;
-
-      await supabase
-        .from("generation_jobs")
-        .update({
-          progress: nextProgress,
-          status: isFinished ? "completed" : "processing",
-          completed_at: isFinished ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", jobId);
-
-      // Trigger next batch if not finished
-      if (!isFinished) {
-        let origin = new URL(request.url).origin;
-        if (process.env.NODE_ENV === "development" && !origin.includes("localhost")) {
-          origin = "http://localhost:3000";
-        }
-        const processUrl = `${origin}/api/content-calendar/generate-bulk/process`;
-
-        console.log(`Triggering next batch hit: ${nextProgress + 1}`);
-
-        // Fire and forget (self-chain)
-        (async () => {
-          try {
-            await fetch(processUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.CRON_SECRET}`
-              },
-              body: JSON.stringify({ jobId, month, year }),
-            });
-          } catch (err) {
-            console.error("Self-chain trigger error:", err);
-          }
-        })();
-      }
+      usedDates.add(dateStr);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
+
+    if (articlesToInsert.length > 0) {
+      console.log(`Inserting ${articlesToInsert.length} planned articles...`);
+      await supabase.from("articles").insert(articlesToInsert);
+    }
+
+    await supabase
+      .from("generation_jobs")
+      .update({
+        progress: totalToGenerate,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", jobId);
+
+    return NextResponse.json({ success: true, count: articlesToInsert.length });
 
     return NextResponse.json({ success: true, progress: job.progress + 1 });
   } catch (error: unknown) {
@@ -317,15 +254,36 @@ Return a JSON object with:
 
 function generateKeywordsForNiche(niche: string, count: number) {
   const templates = [
-    `best ${niche}`, `${niche} guide`, `how to ${niche}`, `${niche} tips`,
-    `${niche} for beginners`, `advanced ${niche}`, `${niche} strategies`,
-    `${niche} tools`, `${niche} examples`, `${niche} best practices`,
-    `${niche} tutorial`, `${niche} review`, `${niche} comparison`,
-    `${niche} alternatives`, `${niche} mistakes`, `${niche} benefits`,
-    `${niche} vs`, `free ${niche}`, `${niche} checklist`, `${niche} templates`,
-    `${niche} case study`, `${niche} statistics`, `${niche} trends 2025`,
-    `${niche} software`, `${niche} services`, `top ${niche}`,
-    `${niche} pricing`, `${niche} features`, `${niche} solutions`, `${niche} workflow`,
+    `best ${niche} for small business`,
+    `${niche} guide for 2025`,
+    `how to automate ${niche} for growth`,
+    `${niche} strategies for high rankings`,
+    `${niche} for beginners: complete roadmap`,
+    `advanced ${niche} for experts`,
+    `${niche} tools to boost productivity`,
+    `${niche} examples from successful sites`,
+    `${niche} best practices for 10x growth`,
+    `${niche} tutorial for non-technical owners`,
+    `${niche} vs manual SEO: which is better?`,
+    `${niche} alternatives for better results`,
+    `common ${niche} mistakes to avoid`,
+    `${niche} benefits for organic traffic`,
+    `${niche} vs content marketing`,
+    `free ${niche} resources and tools`,
+    `${niche} checklist for perfect execution`,
+    `${niche} templates for faster results`,
+    `${niche} case study: $0 to $10k`,
+    `${niche} statistics you must know`,
+    `${niche} trends for the next generation`,
+    `${niche} software: what to look for`,
+    `${niche} services vs in-house teams`,
+    `top 15 ${niche} hacks for 2025`,
+    `${niche} pricing: is it worth the investment?`,
+    `${niche} features for maximal authority`,
+    `${niche} solutions for enterprise scale`,
+    `${niche} workflow for maximum efficiency`,
+    `${niche} for local business SEO`,
+    `${niche} secrets the pros use`,
   ];
   return templates.slice(0, Math.min(count, templates.length));
 }
@@ -356,14 +314,47 @@ function determineSearchIntent(articleType: string): string {
 
 function generateTitle(keyword: string, articleType: string): string {
   const templates: Record<string, string[]> = {
-    listicle: [`10 Best ${capitalizeFirst(keyword)} Tips for 2025`],
-    "how-to": [`How to ${capitalizeFirst(keyword)}: Step-by-Step Guide`],
-    guide: [`Ultimate Guide to ${capitalizeFirst(keyword)}`],
-    comparison: [`${capitalizeFirst(keyword)}: Complete Comparison Guide`],
-    review: [`${capitalizeFirst(keyword)} Review: Is It Worth It?`],
-    "q-and-a": [`${capitalizeFirst(keyword)}: Your Questions Answered`],
-    tutorial: [`${capitalizeFirst(keyword)} Tutorial for Beginners`],
-    "problem-solution": [`${capitalizeFirst(keyword)} Problems? Here's How to Fix Them`],
+    listicle: [
+      `15 Best ${capitalizeFirst(keyword)} Tips for Exponential Growth in 2025`,
+      `7 ${capitalizeFirst(keyword)} Strategies the Pros Don't Want You to Know`,
+      `The Ultimate ${capitalizeFirst(keyword)} Masterclass: 15 Proven Tactics`,
+      `12 Creative ${capitalizeFirst(keyword)} Ideas to Dominate Your Niche`,
+    ],
+    comparison: [
+      `${capitalizeFirst(keyword)} vs The Competition: An Unfiltered 2025 Comparison`,
+      `Is ${capitalizeFirst(keyword)} Still the Best? A Head-to-Head Deep Dive`,
+      `Comparing the Top-Rated ${capitalizeFirst(keyword)} Solutions of 2025`,
+    ],
+    "how-to": [
+      `The Definitive Guide on How to ${capitalizeFirst(keyword)} from Scratch`,
+      `Mastering ${capitalizeFirst(keyword)}: A Step-by-Step Roadmap to Success`,
+      `The Efficient Way to ${capitalizeFirst(keyword)} (Tested and Validated)`,
+    ],
+    guide: [
+      `The 2025 Ultimate Guide to ${capitalizeFirst(keyword)} Mastery`,
+      `Everything You Ever Wanted to Know About ${capitalizeFirst(keyword)}`,
+      `${capitalizeFirst(keyword)} Demystified: The Comprehensive Handbook`,
+    ],
+    review: [
+      `${capitalizeFirst(keyword)} Review: Is It the Game-Changer You Need?`,
+      `Testing ${capitalizeFirst(keyword)}: An Honest, In-Depth Performance Review`,
+      `${capitalizeFirst(keyword)}: The Good, The Bad, and The Verdict`,
+    ],
+    "q-and-a": [
+      `${capitalizeFirst(keyword)} Insider Secrets: Your Toughest Questions Answered`,
+      `The ${capitalizeFirst(keyword)} FAQ: Expert Insights for 2025`,
+      `Everything You Need to Ask About ${capitalizeFirst(keyword)} (Answered)`,
+    ],
+    tutorial: [
+      `${capitalizeFirst(keyword)} Masterclass: From Beginner to Pro in 30 Minutes`,
+      `A Complete, Practical Tutorial on ${capitalizeFirst(keyword)} Mastery`,
+      `Learn ${capitalizeFirst(keyword)} the Smart Way: A Detailed Step-by-Step`,
+    ],
+    "problem-solution": [
+      `Struggling with ${capitalizeFirst(keyword)}? Here's the Permanent Fix`,
+      `Solving the Most Frustrating ${capitalizeFirst(keyword)} Challenges`,
+      `${capitalizeFirst(keyword)} Not Working for You? Try This Proven Solution`,
+    ],
   };
 
   const options = templates[articleType] || templates.guide;
