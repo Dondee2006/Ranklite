@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 type SettingsTab = "business" | "audience" | "gsc";
 
@@ -34,7 +35,7 @@ export function SettingsContent() {
   const [gscConnected, setGscConnected] = useState(false);
   const [gscLoading, setGscLoading] = useState(false);
   const [gscError, setGscError] = useState<string | null>(null);
-  const [gscSuccess, setGscSuccess] = useState<string | null>(null);
+  const [gscLoading, setGscLoading] = useState(false);
 
   useEffect(() => {
     async function loadSettings() {
@@ -77,8 +78,7 @@ export function SettingsContent() {
 
     if (success === "true") {
       setGscConnected(true);
-      setGscSuccess("Successfully connected to Google Search Console!");
-      setTimeout(() => setGscSuccess(null), 5000);
+      toast.success("Successfully connected to Google Search Console!");
     }
 
     if (error) {
@@ -92,8 +92,7 @@ export function SettingsContent() {
         db_error: "Failed to save credentials. Please try again",
         unknown: "An unexpected error occurred",
       };
-      setGscError(errorMessages[error] || errorMessages.unknown);
-      setTimeout(() => setGscError(null), 5000);
+      toast.error(errorMessages[error] || errorMessages.unknown);
     }
   }, [searchParams]);
 
@@ -105,7 +104,7 @@ export function SettingsContent() {
       const data = await response.json();
       
       if (data.error) {
-        setGscError(data.error);
+        toast.error(data.error);
         setGscLoading(false);
         return;
       }
@@ -134,8 +133,17 @@ export function SettingsContent() {
           competitors: competitors.map((c) => c.name),
         }),
       });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success("Settings saved successfully!");
+      } else {
+        toast.error(data.error || "Failed to save settings");
+      }
     } catch (error) {
       console.error("Failed to save settings:", error);
+      toast.error("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -464,19 +472,7 @@ export function SettingsContent() {
               </p>
             </div>
 
-            {gscSuccess && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                <p className="text-sm text-green-700">{gscSuccess}</p>
-              </div>
-            )}
-
-            {gscError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
-                <p className="text-sm text-red-700">{gscError}</p>
-              </div>
-            )}
+            {/* Removed local success/error banners */}
 
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center">
