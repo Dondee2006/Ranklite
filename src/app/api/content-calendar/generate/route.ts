@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, domain, name")
+    .select("id, url, name")
     .eq("user_id", user.id)
     .single();
 
