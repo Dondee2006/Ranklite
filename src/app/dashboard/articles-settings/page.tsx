@@ -35,14 +35,17 @@ export default function ArticlesSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("articles");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [autoPublish, setAutoPublish] = useState(true);
   const [articleStyle, setArticleStyle] = useState("Informative");
-  const [internalLinks, setInternalLinks] = useState(true);
+  const [internalLinks, setInternalLinks] = useState("3 links per article");
   const [globalInstructions, setGlobalInstructions] = useState("");
+  const [brandColor, setBrandColor] = useState("#000000");
   const [selectedImageStyle, setSelectedImageStyle] = useState<ImageStyle>("brand-text");
-  const [ctaEnabled, setCtaEnabled] = useState(false);
-  const [ctaText, setCtaText] = useState("");
-  const [ctaUrl, setCtaUrl] = useState("");
-  const [aiImages, setAiImages] = useState(true);
+  const [titleBasedImage, setTitleBasedImage] = useState(false);
+  const [youtubeVideo, setYoutubeVideo] = useState(false);
+  const [callToAction, setCallToAction] = useState(false);
+  const [includeInfographics, setIncludeInfographics] = useState(false);
+  const [includeEmojis, setIncludeEmojis] = useState(false);
 
   // Blog settings
   const [sitemapUrl, setSitemapUrl] = useState("");
@@ -99,14 +102,17 @@ export default function ArticlesSettingsPage() {
         setSiteUrl(data.siteUrl);
       }
       if (data.settings) {
-        setArticleStyle(data.settings.style || "Informative");
-        setInternalLinks(data.settings.internal_links ?? true);
-        setGlobalInstructions(data.settings.custom_instructions || "");
+        setAutoPublish(data.settings.auto_publish ?? true);
+        setArticleStyle(data.settings.article_style || "Informative");
+        setInternalLinks(data.settings.internal_links || "3 links per article");
+        setGlobalInstructions(data.settings.global_instructions || "");
+        setBrandColor(data.settings.brand_color || "#000000");
         setSelectedImageStyle(data.settings.image_style || "brand-text");
-        setCtaEnabled(data.settings.cta_enabled ?? false);
-        setCtaText(data.settings.cta_text || "");
-        setCtaUrl(data.settings.cta_url || "");
-        setAiImages(data.settings.ai_images ?? true);
+        setTitleBasedImage(data.settings.title_based_image ?? false);
+        setYoutubeVideo(data.settings.youtube_video ?? false);
+        setCallToAction(data.settings.call_to_action ?? false);
+        setIncludeInfographics(data.settings.include_infographics ?? false);
+        setIncludeEmojis(data.settings.include_emojis ?? false);
         setSitemapUrl(data.settings.sitemap_url || "");
         setMainBlogAddress(data.settings.blog_address || "");
         setExampleUrls(data.settings.example_urls || ["", "", ""]);
@@ -128,17 +134,20 @@ export default function ArticlesSettingsPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          style: articleStyle,
-          internal_links: internalLinks,
-          custom_instructions: globalInstructions,
-          image_style: selectedImageStyle,
-          cta_enabled: ctaEnabled,
-          cta_text: ctaText,
-          cta_url: ctaUrl,
-          ai_images: aiImages,
-          sitemap_url: sitemapUrl,
-          blog_address: mainBlogAddress,
-          example_urls: exampleUrls.filter(u => u.trim()),
+          sitemapUrl,
+          blogAddress: mainBlogAddress,
+          articleExamples: exampleUrls.filter(u => u.trim()),
+          autoPublish,
+          articleStyle,
+          internalLinks,
+          globalInstructions,
+          brandColor,
+          imageStyle: selectedImageStyle,
+          titleBasedImage,
+          youtubeVideo,
+          callToAction,
+          includeInfographics,
+          includeEmojis,
         }),
       });
     } catch (error) {
@@ -312,6 +321,17 @@ export default function ArticlesSettingsPage() {
               <section>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Content & SEO</h2>
                 <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">Auto-publish</div>
+                      <div className="text-sm text-gray-500">Publish new articles automatically</div>
+                    </div>
+                    <Switch
+                      checked={autoPublish}
+                      onCheckedChange={setAutoPublish}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
@@ -346,19 +366,21 @@ export default function ArticlesSettingsPage() {
                             <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            Include internal links in articles
+                            Number of internal links per article
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <div className="flex items-center h-11 px-3 rounded-lg border border-gray-200 bg-white">
-                        <Switch
-                          checked={internalLinks}
-                          onCheckedChange={setInternalLinks}
-                        />
-                        <span className="ml-3 text-sm text-gray-600">
-                          {internalLinks ? "Enabled" : "Disabled"}
-                        </span>
-                      </div>
+                      <Select value={internalLinks} onValueChange={setInternalLinks}>
+                        <SelectTrigger className="h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1 link per article">1 link per article</SelectItem>
+                          <SelectItem value="2 links per article">2 links per article</SelectItem>
+                          <SelectItem value="3 links per article">3 links per article</SelectItem>
+                          <SelectItem value="5 links per article">5 links per article</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -385,83 +407,107 @@ export default function ArticlesSettingsPage() {
               </section>
 
               <section>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Images & Media</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Engagement</h2>
                 <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900">AI Generated Images</div>
-                      <div className="text-sm text-gray-500">Automatically generate images for articles</div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-8 w-8 rounded-lg border border-gray-200"
+                        style={{ backgroundColor: brandColor }}
+                      />
+                      <Input
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        className="h-11 w-32"
+                      />
                     </div>
-                    <Switch
-                      checked={aiImages}
-                      onCheckedChange={setAiImages}
-                    />
                   </div>
 
                   <div>
-                    <div className="text-sm font-medium text-gray-700 mb-3">Image Style</div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Image Style</label>
                     <div className="grid grid-cols-5 gap-3">
                       {IMAGE_STYLES.map((style) => (
                         <button
                           key={style.id}
                           onClick={() => setSelectedImageStyle(style.id)}
                           className={cn(
-                            "relative rounded-xl overflow-hidden border-2 transition-all p-3",
+                            "flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all",
                             selectedImageStyle === style.id
                               ? "border-[#22C55E] bg-[#F0FDF4]"
-                              : "border-gray-200 hover:border-gray-300"
+                              : "border-gray-200 hover:border-[#22C55E]/50"
                           )}
                         >
-                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-2" />
-                          {selectedImageStyle === style.id && (
-                            <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-[#22C55E] flex items-center justify-center">
-                              <Check className="h-3 w-3 text-white" />
-                            </div>
-                          )}
-                          <span className="text-xs font-medium text-gray-700">{style.label}</span>
+                          <div className="h-16 w-full rounded-lg bg-gray-100" />
+                          <span className="flex items-center gap-1 text-xs font-medium">
+                            {style.label} <HelpCircle className="h-3 w-3 text-gray-400" />
+                          </span>
                         </button>
                       ))}
                     </div>
                   </div>
-                </div>
-              </section>
 
-              <section>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Call to Action</h2>
-                <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-gray-900">Enable CTA</div>
-                      <div className="text-sm text-gray-500">Add a call-to-action section to articles</div>
+                      <div className="flex items-center gap-2 font-medium text-gray-900">
+                        Title-Based Featured Image
+                        <span className="rounded bg-[#22C55E] px-1.5 py-0.5 text-[10px] font-bold text-white">NEW</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Improved Featured Images that include article title and your brand color.
+                      </div>
                     </div>
                     <Switch
-                      checked={ctaEnabled}
-                      onCheckedChange={setCtaEnabled}
+                      checked={titleBasedImage}
+                      onCheckedChange={setTitleBasedImage}
                     />
                   </div>
 
-                  {ctaEnabled && (
-                    <>
+                  <div className="space-y-4 border-t border-gray-200 pt-4">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">CTA Text</label>
-                        <Input
-                          value={ctaText}
-                          onChange={(e) => setCtaText(e.target.value)}
-                          placeholder="e.g., Start your free trial today!"
-                          className="h-11"
-                        />
+                        <div className="font-medium text-gray-900">YouTube Video</div>
+                        <div className="text-sm text-gray-500">Automatically finds and adds relevant YouTube videos based on article content.</div>
                       </div>
+                      <Switch
+                        checked={youtubeVideo}
+                        onCheckedChange={setYoutubeVideo}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">CTA URL</label>
-                        <Input
-                          value={ctaUrl}
-                          onChange={(e) => setCtaUrl(e.target.value)}
-                          placeholder="https://yoursite.com/signup"
-                          className="h-11"
-                        />
+                        <div className="font-medium text-gray-900">Call-to-Action</div>
+                        <div className="text-sm text-gray-500">Automatically adds a call-to-action section with your website URL to drive engagement.</div>
                       </div>
-                    </>
-                  )}
+                      <Switch
+                        checked={callToAction}
+                        onCheckedChange={setCallToAction}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900">Include Infographics</div>
+                        <div className="text-sm text-gray-500">Automatically replaces images with data visualizations when articles contain statistics or comparisons.</div>
+                      </div>
+                      <Switch
+                        checked={includeInfographics}
+                        onCheckedChange={setIncludeInfographics}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900">Include Emojis</div>
+                        <div className="text-sm text-gray-500">Automatically adds relevant emojis to enhance engagement and visual appeal.</div>
+                      </div>
+                      <Switch
+                        checked={includeEmojis}
+                        onCheckedChange={setIncludeEmojis}
+                      />
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
