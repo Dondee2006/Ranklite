@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
   const { data: site, error: siteError } = await supabase
     .from("sites")
-    .select("id, url, name")
+    .select("id, url, name, niche, description")
     .eq("id", job.site_id)
     .single();
 
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       .gte("scheduled_date", startDateStr);
 
     const usedDates = new Set<string>((existingArticles || []).map(a => a.scheduled_date));
-    const keywordPool = generateKeywordsForNiche(site.name, 30);
+    const keywordPool = generateKeywordsForNiche(site.niche || site.description || site.name, 30);
     const articlesToInsert = [];
     const currentDate = new Date(startDate);
 

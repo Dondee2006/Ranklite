@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, url, name")
+    .select("id, url, name, niche, description")
     .eq("user_id", user.id)
     .single();
 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   const keywordPool = keywords?.length > 0
     ? keywords
-    : generateKeywordsForNiche(niche || site.name, TARGET_ARTICLE_COUNT);
+    : generateKeywordsForNiche(niche || site.niche || site.description || site.name, TARGET_ARTICLE_COUNT);
 
   const articles = [];
   const currentDate = new Date(startDate);
