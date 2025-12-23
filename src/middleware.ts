@@ -65,13 +65,14 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding"))) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_paid")
-      .eq("id", user.id)
-      .single();
+    const { data: userPlan } = await supabase
+      .from("user_plans")
+      .select("status")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
 
-    if (!profile?.is_paid) {
+    if (!userPlan) {
       return NextResponse.redirect("https://whop.com/checkout/plan_VU6iG0GPMen3j");
     }
   }

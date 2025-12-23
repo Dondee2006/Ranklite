@@ -41,13 +41,14 @@ export default function LoginPage() {
     const { data: authUser } = await supabase.auth.getUser();
     const userId = authUser.user?.id;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_paid")
-      .eq("id", userId || "")
-      .single();
+    const { data: userPlan } = await supabase
+      .from("user_plans")
+      .select("status")
+      .eq("user_id", userId || "")
+      .eq("status", "active")
+      .maybeSingle();
 
-    if (!profile?.is_paid) {
+    if (!userPlan) {
       window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
       return;
     }
