@@ -5,6 +5,10 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
     Loader2,
     ChevronLeft,
@@ -295,10 +299,15 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                 <h1 className="text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-10">
                                     {article.title}
                                 </h1>
-                                <div
-                                    dangerouslySetInnerHTML={{ __html: article.html_content || article.content || "<p class='grow-0 text-gray-400 italic py-10'>AI is tailoring your content masterpieces...</p>" }}
-                                    className="article-body-premium"
-                                />
+                                <div className="article-body-premium">
+                                    {article.content || article.html_content ? (
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {article.content || article.html_content || ""}
+                                        </ReactMarkdown>
+                                    ) : (
+                                        <p className="grow-0 text-gray-400 italic py-10">AI is tailoring your content masterpieces...</p>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -431,51 +440,91 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
             {/* Premium Typography System */}
             <style jsx global>{`
                 .article-body-premium {
-                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
                 }
-                .article-body-premium h1 { font-family: inherit; font-size: 2.25rem; font-weight: 800; color: #111827; margin-top: 2.5rem; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -0.02em; }
-                .article-body-premium h2 { font-family: inherit; font-size: 1.875rem; font-weight: 700; color: #111827; margin-top: 3rem; margin-bottom: 1.5rem; line-height: 1.3; }
-                .article-body-premium h3 { font-family: inherit; font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1.25rem; line-height: 1.4; }
+                .article-body-premium h1 { 
+                    font-family: inherit; 
+                    font-size: 2.5rem; 
+                    font-weight: 800; 
+                    color: #0f172a; 
+                    margin-top: 2.5rem; 
+                    margin-bottom: 2rem; 
+                    line-height: 1.2; 
+                    letter-spacing: -0.025em; 
+                }
+                .article-body-premium h2 { 
+                    font-family: inherit; 
+                    font-size: 1.75rem; 
+                    font-weight: 700; 
+                    color: #0f172a; 
+                    margin-top: 3rem; 
+                    margin-bottom: 1.25rem; 
+                    line-height: 1.3; 
+                    letter-spacing: -0.015em;
+                }
+                .article-body-premium h3 { 
+                    font-family: inherit; 
+                    font-size: 1.5rem; 
+                    font-weight: 700; 
+                    color: #0f172a; 
+                    margin-top: 2.5rem; 
+                    margin-bottom: 1rem; 
+                    line-height: 1.4; 
+                }
                 .article-body-premium p { 
                     font-size: 1.125rem; 
-                    line-height: 1.75; 
-                    color: #374151; 
+                    line-height: 1.8; 
+                    color: #334155; 
                     margin-bottom: 1.75rem; 
                     font-weight: 400;
                 }
-                .article-body-premium ul, .article-body-premium ol { margin-bottom: 1.75rem; padding-left: 1.5rem; }
+                .article-body-premium ul, .article-body-premium ol { 
+                    margin-bottom: 1.75rem; 
+                    padding-left: 1.5rem; 
+                }
                 .article-body-premium li { 
                     margin-bottom: 0.75rem; 
                     font-size: 1.125rem; 
                     line-height: 1.75; 
-                    color: #374151; 
+                    color: #334155; 
                 }
-                .article-body-premium li::marker { color: #9CA3AF; }
-                .article-body-premium strong { color: #111827; font-weight: 700; }
+                .article-body-premium li::marker { 
+                    color: #94a3b8; 
+                }
+                .article-body-premium strong { 
+                    color: #0f172a; 
+                    font-weight: 700; 
+                }
                 .article-body-premium blockquote { 
-                    border-left: 4px solid #E5E7EB; 
+                    border-left: 4px solid #e2e8f0; 
                     padding-left: 1.5rem; 
                     font-style: italic; 
                     margin: 2.5rem 0; 
-                    color: #4B5563;
+                    color: #475569;
                     font-size: 1.25rem;
                     line-height: 1.6;
                 }
                 .article-body-premium a {
-                    color: #111827;
+                    color: #2563eb;
                     text-decoration: underline;
                     text-underline-offset: 3px;
                     font-weight: 500;
-                    transition: color 0.2s;
+                    transition: color 0.15s;
                 }
                 .article-body-premium a:hover {
-                    color: #059669;
+                    color: #1d4ed8;
+                    text-decoration: underline;
                 }
                 .article-body-premium img {
-                    border-radius: 1rem;
-                    box-shadow: 0 4px 20px -5px rgba(0,0,0,0.1);
+                    border-radius: 0.75rem;
+                    box-shadow: 0 4px 20px -5px rgba(0,0,0,0.08);
                     margin: 3rem 0;
                     width: 100%;
+                }
+                .article-body-premium hr {
+                    border: 0;
+                    border-top: 1px solid #e2e8f0;
+                    margin: 3rem 0;
                 }
             `}</style>
         </div>
