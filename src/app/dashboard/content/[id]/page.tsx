@@ -5,9 +5,45 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, ChevronLeft, Calendar, Tag, Target, FileText, ExternalLink, Globe } from "lucide-react";
+import {
+    Loader2,
+    ChevronLeft,
+    Calendar,
+    Tag,
+    Target,
+    FileText,
+    ExternalLink,
+    Globe,
+    Pencil,
+    Save,
+    Download,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Link2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Article {
     id: string;
@@ -22,6 +58,8 @@ interface Article {
     status: string;
     scheduled_date: string;
     word_count: number;
+    featured_image?: string;
+    featured_image_url?: string;
 }
 
 export default function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,6 +68,15 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
     const [article, setArticle] = useState<Article | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Editable states
+    const [isSaving, setIsSaving] = useState(false);
+    const [editableSlug, setEditableSlug] = useState("");
+    const [editableMetaDesc, setEditableMetaDesc] = useState("");
+    const [editableStatus, setEditableStatus] = useState("");
+
+    // UI states
+    const [isEditingContent, setIsEditingContent] = useState(false);
 
     useEffect(() => {
         async function loadArticle() {
@@ -41,6 +88,11 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 }
                 const data = await response.json();
                 setArticle(data.article);
+
+                // Initialize editable states
+                setEditableSlug(data.article.slug || "");
+                setEditableMetaDesc(data.article.meta_description || "");
+                setEditableStatus(data.article.status || "planned");
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -50,10 +102,34 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
         loadArticle();
     }, [id]);
 
+    const handleSaveMetadata = async (field: 'slug' | 'meta_description' | 'status', value: string) => {
+        setIsSaving(true);
+        try {
+            const response = await fetch(`/api/articles/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ [field]: value }),
+            });
+
+            if (!response.ok) throw new Error("Failed to update article");
+
+            const data = await response.json();
+            setArticle(data.article);
+            toast.success(`${field.replace('_', ' ')} updated successfully`);
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center bg-[#FAFAFA]">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+                    <p className="text-sm font-medium text-gray-500 animate-pulse">Loading your premium content...</p>
+                </div>
             </div>
         );
     }
@@ -61,164 +137,279 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
     if (error || !article) {
         return (
             <div className="flex flex-col h-screen items-center justify-center bg-[#FAFAFA] px-4 text-center">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Article Not Found</h2>
-                <p className="text-gray-500 mb-6">{error || "The article you're looking for doesn't exist or you don't have access."}</p>
-                <div className="bg-gray-100 p-3 rounded text-xs font-mono mb-6">
-                    ID: {id}
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                    <AlertCircle className="h-8 w-8 text-red-500" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Article Not Found</h2>
+                <p className="text-gray-500 mb-8 max-w-md">{error || "The article you're looking for doesn't exist or you don't have access."}</p>
                 <Link href="/dashboard/content">
-                    <Button variant="outline">Back to Content</Button>
+                    <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700">Go back to Content History</Button>
                 </Link>
             </div>
         );
     }
 
+    const metaCharCount = editableMetaDesc.length;
+    const metaLimit = 160;
+    const isMetaOk = metaCharCount > 0 && metaCharCount <= metaLimit;
+
     return (
-        <div className="min-h-screen bg-[#FAFAFA] pb-20">
-            <header className="border-b border-[#E5E5E5] bg-white sticky top-0 z-10 transition-all duration-200">
-                <div className="px-8 py-4 flex items-center justify-between max-w-7xl mx-auto">
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href="/dashboard/content"
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-900"
-                        >
-                            <ChevronLeft className="h-5 w-5" />
-                        </Link>
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className={cn(
-                                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                                    article.status === 'published' ? "bg-emerald-100 text-emerald-700" :
-                                        article.status === 'generated' ? "bg-blue-100 text-blue-700" :
-                                            "bg-gray-100 text-gray-600"
-                                )}>
-                                    {article.status}
-                                </span>
-                                <span className="text-xs text-gray-400">•</span>
-                                <span className="text-xs text-gray-500 font-medium">
-                                    {article.word_count || 0} words
-                                </span>
-                            </div>
-                            <h1 className="text-xl font-bold text-gray-900 truncate max-w-[500px]">
-                                {article.title}
-                            </h1>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-[#FAFAFA] antialiased">
+            {/* Top Navigation / Breadcrumbs */}
+            <div className="bg-white border-b border-gray-200 px-8 py-3 sticky top-0 z-50">
+                <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink href="/dashboard/content" className="text-gray-500 hover:text-emerald-600 transition-colors">
+                                    Content History
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbPage className="font-semibold text-gray-900 truncate max-w-[300px]">
+                                    {article.title}
+                                </BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
 
                     <div className="flex items-center gap-3">
-                        {article.slug && (
-                            <Button variant="outline" size="sm" className="gap-2" asChild>
-                                <a href={`/${article.slug}`} target="_blank" rel="noopener noreferrer">
-                                    <Globe className="h-4 w-4" />
-                                    Preview
-                                </a>
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </header>
-
-            <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-1 lg:grid-cols-4 gap-8">
-                {/* Main Content */}
-                <div className="lg:col-span-3 space-y-8">
-                    <div className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm overflow-hidden">
-                        <div className="px-10 py-12 prose prose-slate prose-emerald border-b border-gray-100 max-w-none">
-                            <div
-                                dangerouslySetInnerHTML={{ __html: article.html_content || article.content || "<p class='text-gray-400 italic'>Content is being generated by the AI SEO Agent...</p>" }}
-                                className="article-body"
-                            />
-                        </div>
-
-                        {article.meta_description && (
-                            <div className="bg-gray-50/50 px-10 py-6">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    <Target className="h-3 w-3" />
-                                    Meta Description
-                                </h3>
-                                <p className="text-sm text-gray-600 italic">
-                                    {article.meta_description}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Sidebar Metadata */}
-                <div className="space-y-6">
-                    <div className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm p-6">
-                        <h3 className="text-sm font-bold text-gray-900 mb-6">Article Details</h3>
-
-                        <div className="space-y-5">
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 p-2 bg-emerald-50 rounded-lg">
-                                    <Tag className="h-4 w-4 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Primary Keyword</p>
-                                    <p className="text-sm font-semibold text-gray-900">{article.keyword || "Not set"}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 p-2 bg-blue-50 rounded-lg">
-                                    <FileText className="h-4 w-4 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Article Type</p>
-                                    <p className="text-sm font-semibold text-gray-900 capitalize">{article.article_type || "Standard"}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 p-2 bg-purple-50 rounded-lg">
-                                    <Target className="h-4 w-4 text-purple-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Search Intent</p>
-                                    <p className="text-sm font-semibold text-gray-900 capitalize">{article.search_intent || "Informational"}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 p-2 bg-amber-50 rounded-lg">
-                                    <Calendar className="h-4 w-4 text-amber-600" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Scheduled Date</p>
-                                    <p className="text-sm font-semibold text-gray-900">
-                                        {article.scheduled_date ? new Date(article.scheduled_date).toLocaleDateString() : "Draft"}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-[#111827] rounded-xl border border-[#374151] shadow-lg p-6 text-white overflow-hidden relative group">
-                        <div className="absolute -right-4 -top-4 bg-emerald-500/10 w-24 h-24 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-300"></div>
-                        <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 text-emerald-400" />
-                            Next Step: Publish
-                        </h4>
-                        <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                            Once you've reviewed the article, you can publish it to your connected CMS using the Publish button.
-                        </p>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white border-none shadow-md shadow-emerald-900/20">
-                            Publish to Site
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 px-4 text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
+                            onClick={() => setIsEditingContent(!isEditingContent)}
+                        >
+                            <Pencil className="h-3.5 w-3.5" />
+                            {isEditingContent ? "Preview Mode" : "Edit Article"}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-9 w-9 p-0 flex items-center justify-center text-gray-500 hover:text-gray-900 border-gray-200"
+                        >
+                            <Download className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
             </div>
 
+            <main className="max-w-[1600px] mx-auto px-8 py-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10">
+                {/* Left Column: Content */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-8"
+                >
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[800px]">
+                        <div className="px-12 py-16 prose prose-slate max-w-none">
+                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-tight mb-8">
+                                {article.title}
+                            </h1>
+
+                            <div className="article-preview-content">
+                                <div
+                                    dangerouslySetInnerHTML={{ __html: article.html_content || article.content || "<p class='grow-0 text-gray-400 italic py-10'>AI is tailoring your content masterpieces...</p>" }}
+                                    className="article-body-premium"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Right Column: Sidebar */}
+                <aside className="space-y-6">
+                    {/* Featured Image Section */}
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-1">
+                        <div className="aspect-video relative bg-gray-50 rounded-xl overflow-hidden group">
+                            {(article.featured_image || article.featured_image_url) ? (
+                                <img
+                                    src={article.featured_image || article.featured_image_url}
+                                    alt="Hero"
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2 p-4 text-center">
+                                    <Globe className="h-8 w-8 opacity-20" />
+                                    <p className="text-[10px] font-medium opacity-50 uppercase tracking-widest">No Featured Image</p>
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                                <p className="text-[10px] text-white/90 font-bold uppercase tracking-widest bg-emerald-600/80 px-2 py-1 rounded backdrop-blur-sm">
+                                    Hero Image
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Meta Section */}
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
+                        <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Target Keyword:</p>
+                            <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                {article.keyword || "Not optimized"}
+                            </p>
+                        </div>
+
+                        <div className="space-y-1.5 pt-4 border-t border-gray-100">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Article Type:</p>
+                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-none hover:bg-blue-50 font-bold capitalize">
+                                {article.article_type || "Standard"}
+                            </Badge>
+                        </div>
+
+                        {/* CMS Integration Mockups as per design */}
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Integrations:</p>
+                            <Button variant="outline" className="w-full justify-start gap-3 h-11 text-gray-600 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all font-medium border-gray-200">
+                                <div className="h-6 w-6 rounded bg-gray-100 flex items-center justify-center">
+                                    <Globe className="h-3 w-3 text-gray-400" />
+                                </div>
+                                Create First Integration
+                            </Button>
+                        </div>
+
+                        {/* Editable Status */}
+                        <div className="space-y-1.5 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status:</p>
+                                {isSaving ? <Loader2 className="h-3 w-3 animate-spin text-emerald-600" /> : <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />}
+                            </div>
+                            <div className="flex gap-2">
+                                <Select
+                                    value={editableStatus}
+                                    onValueChange={(val) => {
+                                        setEditableStatus(val);
+                                        handleSaveMetadata('status', val);
+                                    }}
+                                >
+                                    <SelectTrigger className="h-10 text-sm font-bold text-gray-900 border-gray-200 shadow-none focus:ring-emerald-500">
+                                        <SelectValue placeholder="Select Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="planned">Planned</SelectItem>
+                                        <SelectItem value="generated">Generated</SelectItem>
+                                        <SelectItem value="published">Published</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {/* Editable Slug */}
+                        <div className="space-y-1.5 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Slug:</p>
+                                <button
+                                    onClick={() => handleSaveMetadata('slug', editableSlug)}
+                                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                                >
+                                    SAVE
+                                </button>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    value={editableSlug}
+                                    onChange={(e) => setEditableSlug(e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''))}
+                                    className="h-10 text-xs font-medium text-gray-600 bg-gray-50 border-gray-100 shadow-none focus-visible:ring-emerald-500 pr-8"
+                                />
+                                <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-300" />
+                            </div>
+                        </div>
+
+                        {/* Meta Description with counter */}
+                        <div className="space-y-2 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Meta Description:</p>
+                                <span className={cn(
+                                    "text-[10px] font-bold",
+                                    metaCharCount > metaLimit ? "text-red-500" : "text-gray-400"
+                                )}>
+                                    {metaCharCount}/{metaLimit}
+                                </span>
+                            </div>
+                            <Textarea
+                                value={editableMetaDesc}
+                                onChange={(e) => setEditableMetaDesc(e.target.value)}
+                                className="min-h-[100px] text-xs leading-relaxed text-gray-600 bg-gray-50 border-gray-100 shadow-none focus-visible:ring-emerald-500 resize-none p-3"
+                                placeholder="Describe your masterpiece..."
+                            />
+                            <Button
+                                onClick={() => handleSaveMetadata('meta_description', editableMetaDesc)}
+                                disabled={isSaving}
+                                className="w-full h-8 text-[10px] font-bold bg-[#F3F4F6] text-gray-900 border-none shadow-none hover:bg-gray-200 transition-colors uppercase tracking-widest"
+                            >
+                                {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : "Save Description"}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Referral / Bottom Promo matching the design */}
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 text-center">
+                        <Button variant="outline" className="w-full justify-center gap-2 h-11 border-dashed border-gray-300 text-gray-400 hover:text-emerald-600 hover:border-emerald-300 transition-all font-bold">
+                            <Target className="h-4 w-4" />
+                            Join Referral Program
+                        </Button>
+                    </div>
+                </aside>
+            </main>
+
+            {/* Premium Typography System */}
             <style jsx global>{`
-        .article-body h1 { font-size: 2.25rem; font-weight: 800; color: #111827; margin-top: 2rem; margin-bottom: 1.5rem; line-height: 1.2; }
-        .article-body h2 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 1rem; line-height: 1.3; }
-        .article-body h3 { font-size: 1.25rem; font-weight: 600; color: #111827; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-        .article-body p { font-size: 1.0625rem; line-height: 1.8; color: #4B5563; margin-bottom: 1.5rem; }
-        .article-body ul, .article-body ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
-        .article-body li { margin-bottom: 0.5rem; color: #4B5563; }
-        .article-body strong { color: #111827; font-weight: 600; }
-        .article-body blockquote { border-left: 4px solid #10B981; padding-left: 1.5rem; italic; margin: 2rem 0; color: #374151; }
-      `}</style>
+                .article-body-premium {
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                }
+                .article-body-premium h1 { font-size: 2.75rem; font-weight: 900; color: #111827; margin-top: 2rem; margin-bottom: 2rem; line-height: 1.1; letter-spacing: -0.02em; }
+                .article-body-premium h2 { font-size: 1.875rem; font-weight: 800; color: #111827; margin-top: 3rem; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.01em; }
+                .article-body-premium h3 { font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.3; }
+                .article-body-premium p { 
+                    font-size: 1.125rem; 
+                    line-height: 1.85; 
+                    color: #374151; 
+                    margin-bottom: 2rem; 
+                    font-weight: 400;
+                    letter-spacing: -0.005em;
+                }
+                .article-body-premium ul, .article-body-premium ol { margin-bottom: 2rem; padding-left: 1.25rem; }
+                .article-body-premium li { 
+                    margin-bottom: 0.75rem; 
+                    font-size: 1.125rem; 
+                    line-height: 1.8; 
+                    color: #374151; 
+                }
+                .article-body-premium li::marker { color: #10B981; font-weight: bold; }
+                .article-body-premium strong { color: #111827; font-weight: 700; }
+                .article-body-premium blockquote { 
+                    border-left: 4px solid #10B981; 
+                    padding-left: 2rem; 
+                    font-style: italic; 
+                    margin: 3.5rem 0; 
+                    color: #1F2937;
+                    font-size: 1.5rem;
+                    line-height: 1.6;
+                    font-weight: 500;
+                    background: #F9FAFB;
+                    padding-top: 2rem;
+                    padding-bottom: 2rem;
+                    border-radius: 0 1rem 1rem 0;
+                }
+                .article-body-premium a {
+                    color: #059669;
+                    text-decoration: underline;
+                    text-underline-offset: 4px;
+                    font-weight: 600;
+                    transition: color 0.2s;
+                }
+                .article-body-premium a:hover {
+                    color: #047857;
+                }
+                .article-body-premium img {
+                    border-radius: 1rem;
+                    box-shadow: 0 4px 20px -2px rgba(0,0,0,0.1);
+                    margin: 3rem 0;
+                }
+            `}</style>
         </div>
     );
 }
