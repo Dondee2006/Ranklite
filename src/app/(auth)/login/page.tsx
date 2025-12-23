@@ -41,9 +41,10 @@ export default function LoginPage() {
     const { data: authUser } = await supabase.auth.getUser();
     const userId = authUser.user?.id;
     const userEmail = authUser.user?.email;
+    const ALLOWED_EMAILS = ["dondorian7@gmail.com", "dondonnel08@gmail.com"];
 
     // Special bypass for the main user to resolve redirection issues
-    if (userEmail === "dondorian7@gmail.com") {
+    if (userEmail && ALLOWED_EMAILS.includes(userEmail)) {
       const { data: sites } = await supabase
         .from("sites")
         .select("id")

@@ -65,8 +65,8 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && (request.nextUrl.pathname.startsWith("/dashboard") || request.nextUrl.pathname.startsWith("/onboarding"))) {
-    // Special bypass for the main user
-    if (user.email === "dondorian7@gmail.com") {
+    const ALLOWED_EMAILS = ["dondorian7@gmail.com", "dondonnel08@gmail.com"];
+    if (user.email && ALLOWED_EMAILS.includes(user.email)) {
       return NextResponse.next();
     }
 
