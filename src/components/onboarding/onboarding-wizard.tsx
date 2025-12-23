@@ -233,7 +233,7 @@ export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?
           competitors: formData.competitors,
           sitemapUrl: formData.sitemapUrl,
           blogAddress: formData.blogAddress,
-          articleUrls: formData.articleUrls,
+          articleExamples: formData.articleUrls,
           autoPublish: formData.autoPublish,
           articleStyle: formData.articleStyle,
           internalLinks: formData.internalLinks,

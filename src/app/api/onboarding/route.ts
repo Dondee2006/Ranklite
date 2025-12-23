@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       site_id: site.id,
       sitemap_url: body.sitemapUrl,
       blog_address: body.blogAddress,
-      example_urls: body.articleUrls || [],
+      example_urls: body.articleExamples || [],
       auto_publish: body.autoPublish ?? true,
       article_style: body.articleStyle || "Informative",
       internal_links: body.internalLinks || "3 links per article",
