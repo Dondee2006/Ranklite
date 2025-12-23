@@ -2,13 +2,24 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useMemo } from "react";
+import dynamicImport from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { marked } from "marked";
+
+// Dynamically import ReactQuill to avoid SSR issues
+const ReactQuill = dynamicImport(() => import("react-quill-new"), {
+    ssr: false,
+    loading: () => <div className="h-[700px] w-full bg-gray-50 animate-pulse rounded-xl border border-gray-100" />,
+});
+
+// Import Quill styles
+import "react-quill-new/dist/quill.snow.css";
 import {
     Loader2,
     ChevronLeft,
@@ -95,7 +106,16 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
 
                 // Initialize editable states
                 setEditableTitle(data.article.title || "");
-                setEditableContent(data.article.html_content || data.article.content || "");
+
+                // If content is Markdown, convert it to HTML for the editor
+                const content = data.article.html_content || data.article.content || "";
+                // Check if it's likely markdown (has # or * or [ or \n\n)
+                if (content.includes("#") || content.includes("*") || content.includes("[") || content.includes("\n\n")) {
+                    setEditableContent(marked.parse(content) as string);
+                } else {
+                    setEditableContent(content);
+                }
+
                 setEditableSlug(data.article.slug || "");
                 setEditableMetaDesc(data.article.meta_description || "");
                 setEditableStatus(data.article.status || "planned");
@@ -244,7 +264,16 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     variant="outline"
                                     size="sm"
                                     className="h-9 px-4 text-xs font-bold text-gray-700 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
-                                    onClick={() => setIsEditingContent(true)}
+                                    onClick={() => {
+                                        // Ensure content is in HTML format before opening editor
+                                        const content = article.html_content || article.content || "";
+                                        if (content.includes("#") || content.includes("*") || content.includes("[") || content.includes("\n\n")) {
+                                            setEditableContent(marked.parse(content) as string);
+                                        } else {
+                                            setEditableContent(content);
+                                        }
+                                        setIsEditingContent(true);
+                                    }}
                                 >
                                     <Pencil className="h-3.5 w-3.5" />
                                     Edit Article
@@ -282,14 +311,56 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         placeholder="Enter article title..."
                                     />
                                 </div>
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content (HTML/Markdown supported)</label>
-                                    <Textarea
+                                <div className="space-y-4 quill-editor-container">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content (Visual Editor)</label>
+                                    <ReactQuill
+                                        theme="snow"
                                         value={editableContent}
-                                        onChange={(e) => setEditableContent(e.target.value)}
-                                        className="min-h-[700px] text-lg leading-relaxed text-gray-700 bg-gray-50/50 border-gray-100 focus-visible:ring-emerald-500/20 p-8 font-sans"
-                                        placeholder="Write your masterpiece here..."
+                                        onChange={setEditableContent}
+                                        className="bg-white rounded-xl overflow-hidden border-gray-100"
+                                        modules={{
+                                            toolbar: [
+                                                [{ 'header': [1, 2, 3, false] }],
+                                                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                ['link', 'image'],
+                                                ['clean']
+                                            ],
+                                        }}
                                     />
+                                    <style jsx global>{`
+                                        .quill-editor-container .ql-container {
+                                            min-height: 600px;
+                                            font-size: 1.125rem;
+                                            font-family: 'Inter', sans-serif;
+                                            color: #334155;
+                                            line-height: 1.8;
+                                            border-bottom-left-radius: 0.75rem;
+                                            border-bottom-right-radius: 0.75rem;
+                                            border: 1px solid #f1f5f9 !important;
+                                        }
+                                        .quill-editor-container .ql-toolbar {
+                                            border-top-left-radius: 0.75rem;
+                                            border-top-right-radius: 0.75rem;
+                                            border: 1px solid #f1f5f9 !important;
+                                            background: #f8fafc;
+                                            padding: 0.75rem !important;
+                                        }
+                                        .quill-editor-container .ql-editor {
+                                            padding: 2rem !important;
+                                        }
+                                        .quill-editor-container .ql-editor h1,
+                                        .quill-editor-container .ql-editor h2,
+                                        .quill-editor-container .ql-editor h3 {
+                                            color: #0f172a;
+                                            font-weight: 700;
+                                            margin-top: 1.5rem;
+                                            margin-bottom: 1rem;
+                                        }
+                                        .quill-editor-container .ql-editor p {
+                                            margin-bottom: 1.5rem;
+                                        }
+                                    `}</style>
                                 </div>
                             </div>
                         ) : (
@@ -298,9 +369,11 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     {article.title}
                                 </h1>
                                 <div className="article-body-premium">
-                                    {article.content || article.html_content ? (
+                                    {article.html_content ? (
+                                        <div dangerouslySetInnerHTML={{ __html: article.html_content }} />
+                                    ) : article.content ? (
                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {article.content || article.html_content || ""}
+                                            {article.content}
                                         </ReactMarkdown>
                                     ) : (
                                         <p className="grow-0 text-gray-400 italic py-10">AI is tailoring your content masterpieces...</p>

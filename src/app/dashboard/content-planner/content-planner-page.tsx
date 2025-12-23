@@ -30,6 +30,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import NextLink from "next/link";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -1004,25 +1007,49 @@ export default function ContentPlannerPage() {
                                         <div className="flex items-center justify-between mb-3">
                                             <p className="text-sm font-medium text-slate-700">Article Content Preview</p>
                                             <div className="flex items-center gap-2">
+                                                <NextLink href={`/dashboard/content/${selectedArticle.id}`}>
+                                                    <button className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors flex items-center gap-1.5">
+                                                        <Pencil className="h-3 w-3" />
+                                                        Open Full Editor
+                                                    </button>
+                                                </NextLink>
                                                 <button
-                                                    onClick={() => copyToClipboard(selectedArticle.markdown_content, "markdown")}
+                                                    onClick={() => copyToClipboard(selectedArticle.markdown_content || selectedArticle.content, "markdown")}
                                                     className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
                                                 >
                                                     {copiedId === "markdown" ? "Copied!" : "Copy Markdown"}
                                                 </button>
                                                 <button
-                                                    onClick={() => copyToClipboard(selectedArticle.html_content, "html")}
+                                                    onClick={() => copyToClipboard(selectedArticle.html_content || selectedArticle.content, "html")}
                                                     className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
                                                 >
                                                     {copiedId === "html" ? "Copied!" : "Copy HTML"}
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="max-h-60 overflow-y-auto rounded-lg bg-slate-50 p-4">
-                                            <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono">
-                                                {selectedArticle.content?.slice(0, 2000)}...
-                                            </pre>
+                                        <div className="max-h-80 overflow-y-auto rounded-lg bg-white border border-slate-100 p-6 shadow-inner">
+                                            <div className="article-preview-rendered prose prose-sm max-w-none">
+                                                {selectedArticle.html_content ? (
+                                                    <div dangerouslySetInnerHTML={{ __html: selectedArticle.html_content }} />
+                                                ) : selectedArticle.content ? (
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {selectedArticle.content}
+                                                    </ReactMarkdown>
+                                                ) : (
+                                                    <p className="text-slate-400 italic">No content available.</p>
+                                                )}
+                                            </div>
                                         </div>
+                                        <style jsx global>{`
+                                            .article-preview-rendered h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
+                                            .article-preview-rendered h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #0f172a; }
+                                            .article-preview-rendered h3 { font-size: 1.125rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #0f172a; }
+                                            .article-preview-rendered p { font-size: 0.875rem; line-height: 1.6; color: #475569; margin-bottom: 1rem; }
+                                            .article-preview-rendered ul, .article-preview-rendered ol { margin-bottom: 1rem; padding-left: 1.25rem; font-size: 0.875rem; color: #475569; }
+                                            .article-preview-rendered li { margin-bottom: 0.25rem; }
+                                            .article-preview-rendered img { border-radius: 0.5rem; margin: 1rem 0; max-width: 100%; }
+                                            .article-preview-rendered a { color: #2563eb; text-decoration: underline; }
+                                        `}</style>
                                     </div>
 
                                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
