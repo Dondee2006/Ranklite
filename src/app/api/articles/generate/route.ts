@@ -290,7 +290,7 @@ async function generateSectionContent(
 ): Promise<string> {
   try {
     const { text } = await generateText({
-      model: requesty("openai/gpt-4o"),
+      model: requesty("openai/gpt-4o-mini"),
       prompt: `Write a "Smart Content" section for an SEO article that readers actually enjoy.
 
 ARTICLE TITLE: ${articleTitle}
@@ -457,7 +457,7 @@ function generateMarkdown(content: string, title: string, images: object[], inte
 async function generateMetaDescription(keyword: string, title: string, site: any): Promise<string> {
   try {
     const { text } = await generateText({
-      model: requesty("openai/gpt-4o"),
+      model: requesty("openai/gpt-4o-mini"),
       prompt: `Write a compelling, high-CTR "Smart Content" meta description for an article titled "${title}".
 
 PRIMARY KEYWORD: ${keyword}
