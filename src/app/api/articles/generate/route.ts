@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, domain, name")
+    .select("id, url, name, niche, target_audience, brand_voice, description")
     .eq("user_id", user.id)
     .single();
 
@@ -65,7 +65,8 @@ export async function POST(request: Request) {
     article.title,
     article.keyword,
     article.secondary_keywords || [],
-    outline
+    outline,
+    site
   );
 
   const internalLinks = detectInternalLinks(content, existingArticles || [], site.domain);
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
 
   const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
   const markdownContent = generateMarkdown(content, article.title, images, internalLinks, externalLinks);
-  const metaDescription = await generateMetaDescription(article.keyword, article.title);
+  const metaDescription = await generateMetaDescription(article.keyword, article.title, site);
   const slug = article.slug || generateSlug(article.title);
 
   const cmsExports = {
@@ -253,14 +254,15 @@ async function generateArticleContent(
   title: string,
   keyword: string,
   secondaryKeywords: string[],
-  outline: object
+  outline: object,
+  site: any
 ): Promise<string> {
   const sections = (outline as { sections: { title: string; wordCount: number }[] }).sections;
   let content = "";
 
   for (const section of sections) {
     content += `## ${section.title}\n\n`;
-    const sectionContent = await generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount);
+    const sectionContent = await generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount, site, title);
     content += sectionContent;
     content += "\n\n";
   }
@@ -268,28 +270,42 @@ async function generateArticleContent(
   return content.trim();
 }
 
-async function generateSectionContent(sectionTitle: string, keyword: string, secondaryKeywords: string[], wordCount: number): Promise<string> {
+async function generateSectionContent(
+  sectionTitle: string,
+  keyword: string,
+  secondaryKeywords: string[],
+  wordCount: number,
+  site: any,
+  articleTitle: string
+): Promise<string> {
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o"),
-      prompt: `Write a detailed, engaging section for an SEO article with the following specifications:
+      model: requesty("openai/gpt-4o"),
+      prompt: `Write a "Smart Content" section for an SEO article that readers actually enjoy.
 
-Section Title: ${sectionTitle}
-Target Keyword: ${keyword}
-Secondary Keywords: ${secondaryKeywords.join(", ")}
-Target Word Count: ${wordCount} words
+ARTICLE TITLE: ${articleTitle}
+SECTION TITLE: ${sectionTitle}
+PRIMARY KEYWORD: ${keyword}
+SECONDARY KEYWORDS: ${secondaryKeywords.join(", ")}
+TARGET LENGTH: ~${wordCount} words
 
-Requirements:
-- Write in a professional, informative tone
-- Naturally incorporate the target keyword and secondary keywords
-- Provide actionable insights and practical information
-- Use clear, concise language
-- Include specific examples or data points when relevant
-- Ensure the content flows naturally and is engaging to read
-- Do NOT include the section title in the output
+WEBSITE CONTEXT:
+- Site Name: ${site.name}
+- Niche: ${site.niche || "General"}
+- Target Audience: ${site.target_audience || "General readers"}
+- Brand Voice: ${site.brand_voice || "Empathetic, expert, and actionable"}
+- Description: ${site.description || ""}
 
-Write the section content now:`,
-      maxTokens: Math.ceil(wordCount * 2),
+REQUIREMENTS:
+1. "SMART CONTENT" STYLE: Use a conversational yet authoritative tone. Use metaphors, analogies, or practical examples to make points clear. Speak directly to the reader ("you").
+2. EMPATHETIC & ACTIONABLE: Acknowledge the reader's pain points and provide specific, high-value advice. Avoid generic fluff or surface-level "professional" filler.
+3. KEYWORD INTEGRATION: Naturally weave the primary and secondary keywords into the narrative.
+4. STRUCTURE: Use short paragraphs (2-3 sentences), bold key terms for scannability, and use bullet points or numbered lists if it adds value.
+5. FLOW: Ensure the section transitions logically and maintains high engagement.
+6. NO TITLE: Do NOT include the section title or the article title in the output.
+
+Generate the section content now:`,
+      maxOutputTokens: Math.ceil(wordCount * 2),
     });
 
     return text.trim();
@@ -427,24 +443,26 @@ function generateMarkdown(content: string, title: string, images: object[], inte
   return md;
 }
 
-async function generateMetaDescription(keyword: string, title: string): Promise<string> {
+async function generateMetaDescription(keyword: string, title: string, site: any): Promise<string> {
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o"),
-      prompt: `Write a compelling SEO meta description for an article about "${title}".
+      model: requesty("openai/gpt-4o"),
+      prompt: `Write a compelling, high-CTR "Smart Content" meta description for an article titled "${title}".
 
-Target Keyword: ${keyword}
+PRIMARY KEYWORD: ${keyword}
+WEBSITE: ${site.name} (${site.niche})
+AUDIENCE: ${site.target_audience}
 
-Requirements:
-- Maximum 155 characters
-- Include the target keyword naturally
-- Make it engaging and click-worthy
-- Clearly communicate the value of the article
-- Use active voice
-- Do NOT include quotes or special formatting
+REQUIREMENTS:
+- Exact length: 140-155 characters.
+- Tone: Empathetic, expert, and intriguing.
+- Goal: Make the reader feel that this article is the definitive solution to their problem.
+- Keywords: Naturally include the Primary Keyword.
+- No quotes or special formatting.
+- Active voice.
 
-Write only the meta description:`,
-      maxTokens: 100,
+Write only the meta description text:`,
+      maxOutputTokens: 100,
     });
 
     return text.trim().slice(0, 160);
