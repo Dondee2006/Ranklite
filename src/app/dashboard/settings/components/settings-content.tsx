@@ -36,7 +36,6 @@ export function SettingsContent() {
   const [gscConnected, setGscConnected] = useState(false);
   const [gscLoading, setGscLoading] = useState(false);
   const [gscError, setGscError] = useState<string | null>(null);
-  const [gscLoading, setGscLoading] = useState(false);
 
   useEffect(() => {
     async function loadSettings() {
