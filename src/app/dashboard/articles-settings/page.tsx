@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Check, ChevronRight, HelpCircle, Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type ImageStyle = "brand-text" | "watercolor" | "cinematic" | "illustration" | "sketch";
 type SettingsTab = "articles" | "blog";
@@ -141,8 +143,10 @@ export default function ArticlesSettingsPage() {
           example_urls: exampleUrls.filter(u => u.trim()),
         }),
       });
+      toast.success("Settings saved successfully");
     } catch (error) {
       console.error("Failed to save settings:", error);
+      toast.error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -387,10 +391,27 @@ export default function ArticlesSettingsPage() {
               <section>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Images & Media</h2>
                 <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900">AI Generated Images</div>
-                      <div className="text-sm text-gray-500">Automatically generate images for articles</div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Brand Color</label>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-10 w-10 rounded-xl border border-gray-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-green-500/20 transition-all"
+                        style={{ backgroundColor: brandColor }}
+                        onClick={() => document.getElementById('color-picker')?.click()}
+                      />
+                      <Input
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        className="h-11 w-32 font-mono text-sm"
+                        placeholder="#000000"
+                      />
+                      <input
+                        id="color-picker"
+                        type="color"
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        className="hidden"
+                      />
                     </div>
                     <Switch
                       checked={aiImages}
@@ -406,19 +427,22 @@ export default function ArticlesSettingsPage() {
                           key={style.id}
                           onClick={() => setSelectedImageStyle(style.id)}
                           className={cn(
-                            "relative rounded-xl overflow-hidden border-2 transition-all p-3",
+                            "flex flex-col items-center gap-2 rounded-xl border-2 p-2 transition-all",
                             selectedImageStyle === style.id
                               ? "border-[#22C55E] bg-[#F0FDF4]"
-                              : "border-gray-200 hover:border-gray-300"
+                              : "border-gray-100 hover:border-gray-200 bg-white"
                           )}
                         >
-                          <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-2" />
-                          {selectedImageStyle === style.id && (
-                            <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-[#22C55E] flex items-center justify-center">
-                              <Check className="h-3 w-3 text-white" />
-                            </div>
-                          )}
-                          <span className="text-xs font-medium text-gray-700">{style.label}</span>
+                          <div className="h-20 w-full rounded-lg bg-gray-100 overflow-hidden">
+                            <img
+                              src={`/images/article-styles/${style.id}.png`}
+                              alt={style.label}
+                              className="w-full h-full object-cover transition-transform hover:scale-105"
+                            />
+                          </div>
+                          <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-700">
+                            {style.label}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -480,12 +504,16 @@ export default function ArticlesSettingsPage() {
         )}
 
         <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
-          <Button variant="outline" className="px-6">
-            Back
-          </Button>
-          <Button className="bg-[#22C55E] hover:bg-[#16A34A] px-8">
-            Continue
-          </Button>
+          <Link href="/dashboard">
+            <Button variant="outline" className="px-6">
+              Back
+            </Button>
+          </Link>
+          <Link href="/dashboard/content-planner">
+            <Button className="bg-[#22C55E] hover:bg-[#16A34A] px-8">
+              Continue
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

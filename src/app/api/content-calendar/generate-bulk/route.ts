@@ -51,6 +51,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No site found" }, { status: 404 });
   }
 
+  // Fetch article settings for this site
+  const { data: settings } = await supabase
+    .from("article_settings")
+    .select("*")
+    .eq("site_id", site.id)
+    .single();
+
   const startDate = new Date(year, month, 1);
   const today = new Date();
   const startDay = month === today.getMonth() && year === today.getFullYear()
@@ -119,23 +126,26 @@ export async function POST(request: Request) {
     if (generateContent) {
       try {
         const content = await generateArticleContent({
-          title: articleData.title,
-          keyword: articleData.keyword,
-          secondaryKeywords: articleData.secondary_keywords,
-          articleType: articleData.article_type,
-          wordCount: articleData.word_count,
+          title: articleData.title as string,
+          keyword: articleData.keyword as string,
+          secondaryKeywords: articleData.secondary_keywords as string[],
+          articleType: articleData.article_type as string,
+          wordCount: articleData.word_count as number,
           siteName: site.name,
-          searchIntent: articleData.search_intent,
+          searchIntent: articleData.search_intent as string,
+          settings: settings || {},
         });
 
-        articleData.content = content.content;
-        articleData.html_content = content.htmlContent;
-        articleData.markdown_content = content.markdownContent;
-        articleData.meta_description = content.metaDescription;
-        articleData.outline = content.outline;
-        articleData.status = "generated";
-        articleData.seo_score = content.seoScore || 85;
-        articleData.readability_score = content.readabilityScore || 75;
+        if (content) {
+          articleData.content = content.content;
+          articleData.html_content = content.htmlContent;
+          articleData.markdown_content = content.markdownContent;
+          articleData.meta_description = content.metaDescription;
+          articleData.outline = content.outline;
+          articleData.status = "generated";
+          articleData.seo_score = (content.seoScore as number) || 85;
+          articleData.readability_score = (content.readabilityScore as number) || 75;
+        }
       } catch (error) {
         console.error(`Failed to generate content for article ${articles.length + 1}:`, error);
       }
@@ -170,7 +180,19 @@ async function generateArticleContent(params: {
   wordCount: number;
   siteName: string;
   searchIntent: string;
+  settings: any;
 }): Promise<Record<string, unknown> | null> {
+  const { settings } = params;
+
+  const styleMap: Record<string, string> = {
+    Informative: "Maintain a factual, educational, and objective tone. Focus on providing clear information and depth.",
+    Conversational: "Write in a friendly, relatable, and engaging tone. Use 'you' and 'we' to connect with the reader.",
+    Professional: "Use formal, sophisticated language. Maintain authority and industry-standard terminology.",
+    Casual: "Keep it light, relaxed, and easy to read. Use simple language and a breezy pace."
+  };
+
+  const styleInstructions = styleMap[settings?.article_style as string] || "Professional and informative.";
+
   const prompt = `Write a comprehensive, SEO-optimized article with the following specifications:
 
 Title: ${params.title}
@@ -181,19 +203,28 @@ Target Word Count: ${params.wordCount}
 Search Intent: ${params.searchIntent}
 Site Name: ${params.siteName}
 
-Requirements:
-1. Write in a natural, engaging, human tone (avoid AI patterns)
-2. Include proper heading structure (H2, H3)
-3. Use the primary keyword naturally throughout
-4. Incorporate secondary keywords where relevant
-5. Include a compelling introduction and conclusion
-6. Add specific examples and actionable advice
-7. Write in markdown format
+TONE AND STYLE:
+${styleInstructions}
+
+${settings?.global_instructions ? `GLOBAL USER INSTRUCTIONS (CRITICAL):
+${settings.global_instructions}` : ""}
+
+ADDITIONAL REQUIREMENTS:
+1. Write in a natural, engaging, human tone (avoid AI patterns).
+2. Include proper heading structure (H2, H3).
+3. Use the primary keyword naturally throughout.
+4. Incorporate secondary keywords where relevant.
+5. Include a compelling introduction and conclusion.
+6. Add specific examples and actionable advice.
+${settings?.include_emojis ? "7. STRATEGIC EMOJI USAGE: Use relevant emojis to enhance engagement and visual appeal throughout the text." : "7. Do not use emojis."}
+${settings?.youtube_video ? "8. YOUTUBE VIDEO PLACEHOLDER: Find a highly relevant YouTube search query for this topic and include a placeholder in the format [YOUTUBE_VIDEO: Search Query] right after the first H2 section." : ""}
+${settings?.call_to_action ? "9. CALL TO ACTION: Include a professional CTA section at the end of the article encouraging users to visit ${params.siteName}." : ""}
+10. Write in markdown format.
 
 Return a JSON object with:
 {
   "content": "full article content in plain text",
-  "htmlContent": "article in HTML format",
+  "htmlContent": "article in HTML format (use standard tags, no head/body tags)",
   "markdownContent": "article in markdown format",
   "metaDescription": "160 character SEO meta description",
   "outline": { "sections": ["section titles"] },
@@ -202,13 +233,13 @@ Return a JSON object with:
 }`;
 
   const { text } = await generateText({
-      model: openai("gpt-4o"),
-      system:
-        "You are an expert SEO content writer. Return ONLY valid JSON (no markdown fences, no extra commentary).",
-      prompt,
-      temperature: 0.8,
-      maxTokens: 4096,
-    });
+    model: requesty("openai/gpt-4o"),
+    system:
+      "You are an expert SEO content writer. Follow the user's brand settings and style precisely. Return ONLY valid JSON.",
+    prompt,
+    temperature: 0.7,
+    maxOutputTokens: 4096,
+  });
 
 <<<<<<< HEAD
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -222,7 +253,22 @@ Return a JSON object with:
   }
 >>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 
-    return JSON.parse(jsonMatch[0]);
+  let result = JSON.parse(jsonMatch[0]);
+
+  // Handle YouTube Embedding if requested
+  if (settings?.youtube_video && result.markdownContent.includes("[YOUTUBE_VIDEO:")) {
+    const videoMatch = result.markdownContent.match(/\[YOUTUBE_VIDEO:\s*(.*?)\]/);
+    if (videoMatch) {
+      const searchQuery = videoMatch[1];
+      // In a real production app, you would call YouTube API here.
+      // For now, we provide a placeholder that the frontend can render or we can simulate.
+      const videoEmbed = `\n\n<div class="video-container"><iframe width="560" height="315" src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(searchQuery)}" frameborder="0" allowfullscreen></iframe></div>\n\n`;
+      result.markdownContent = result.markdownContent.replace(videoMatch[0], videoEmbed);
+      result.htmlContent = result.htmlContent.replace(videoMatch[0], videoEmbed);
+    }
+  }
+
+  return result;
 }
 
 function generateKeywordsForNiche(niche: string, count: number) {
