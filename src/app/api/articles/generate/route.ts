@@ -319,9 +319,10 @@ Generate the section content now:`,
     });
 
     return text.trim();
-  } catch (error) {
+  } catch (error: any) {
     console.error("OpenAI generation error:", error);
-    return `Content about ${keyword} related to ${sectionTitle}. This section covers important aspects of ${keyword} and provides valuable insights for readers. ${secondaryKeywords.length > 0 ? `Additionally, we explore related topics including ${secondaryKeywords.slice(0, 2).join(" and ")}.` : ""}`;
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    return `[ERROR: ${errorMsg}] Content about ${keyword} related to ${sectionTitle}. This section covers important aspects of ${keyword} and provides valuable insights for readers. ${secondaryKeywords.length > 0 ? `Additionally, we explore related topics including ${secondaryKeywords.slice(0, 2).join(" and ")}.` : ""}`;
   }
 }
 
