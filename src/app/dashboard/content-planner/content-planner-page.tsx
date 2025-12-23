@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -326,7 +327,18 @@ export default function ContentPlannerPage() {
                     year: currentYear,
                 }),
             });
-            const { jobId } = await startResponse.json();
+
+            const data = await startResponse.json();
+
+            if (!startResponse.ok || !data.jobId) {
+                console.error("Generation failed:", data.error || "No job ID returned");
+                toast.error(data.error || "Failed to start generation. Please try again.");
+                setGenerating(false);
+                return;
+            }
+            toast.info("Generating 30 articles. This may take a moment...");
+
+            const { jobId } = data;
 
             const pollInterval = setInterval(async () => {
                 const statusResponse = await fetch(`/api/content-calendar/generate-bulk/status/${jobId}`);
@@ -335,15 +347,18 @@ export default function ContentPlannerPage() {
                 if (status.status === "completed") {
                     clearInterval(pollInterval);
                     await loadArticles();
+                    toast.success("Articles generated successfully!");
                     setGenerating(false);
                 } else if (status.status === "failed") {
                     clearInterval(pollInterval);
                     console.error("Generation failed:", status.error);
+                    toast.error(`Generation failed: ${status.error}`);
                     setGenerating(false);
                 }
             }, 3000);
         } catch (error) {
             console.error("Failed to start generation:", error);
+            toast.error("Failed to start generation. Please check the console for details.");
             setGenerating(false);
         }
     }
@@ -363,14 +378,15 @@ export default function ContentPlannerPage() {
                     if (selectedArticle?.id === articleId) {
                         setSelectedArticle(data.article);
                     }
+                    toast.success("Article content generated!");
                 }
             } else {
                 const errorMsg = data.error || data.message || "Failed to generate article content";
-                alert(`Error: ${errorMsg}`);
+                toast.error(`Error: ${errorMsg}`);
             }
         } catch (error) {
             console.error("Failed to generate article:", error);
-            alert("A network error occurred. Please check your connection and try again.");
+            toast.error("A network error occurred. Please check your connection and try again.");
         }
         finally {
             setGeneratingArticle(null);
@@ -398,6 +414,7 @@ export default function ContentPlannerPage() {
             });
             if (response.ok) {
                 setShowAddModal(false);
+                toast.success("Article scheduled successfully!");
                 loadArticles();
             }
         } catch (error) {
@@ -413,6 +430,7 @@ export default function ContentPlannerPage() {
                 method: "DELETE",
             });
             if (response.ok) {
+                toast.success("Article deleted successfully");
                 loadArticles();
                 setShowArticleDetail(false);
                 setSelectedArticle(null);
@@ -430,6 +448,7 @@ export default function ContentPlannerPage() {
                 body: JSON.stringify(autopilotSettings),
             });
             if (response.ok) {
+                toast.success("Autopilot settings updated");
                 setShowAutopilotModal(false);
             }
         } catch (error) {
