@@ -132,7 +132,7 @@ export default function ArticlesSettingsPage() {
   async function saveSettings() {
     setSaving(true);
     try {
-      await fetch("/api/article-settings", {
+      const response = await fetch("/api/article-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -152,10 +152,16 @@ export default function ArticlesSettingsPage() {
           includeEmojis,
         }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to save settings");
+      }
+
       toast.success("Settings saved successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save settings:", error);
-      toast.error("Failed to save settings");
+      toast.error(error.message || "Failed to save settings");
     } finally {
       setSaving(false);
     }
