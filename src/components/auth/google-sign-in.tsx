@@ -15,7 +15,7 @@ export function GoogleSignIn({ text = "Sign in with Google" }: { text?: string }
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: "google",
                 options: {
-                    redirectTo: `https://urmujszchktxnuwknyrk.supabase.co/auth/v1/callback`,
+                    redirectTo: `${window.location.origin}/api/auth/callback`,
                 },
             });
 

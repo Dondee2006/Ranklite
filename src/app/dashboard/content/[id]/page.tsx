@@ -276,7 +276,7 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     <Input
                                         value={editableTitle}
                                         onChange={(e) => setEditableTitle(e.target.value)}
-                                        className="text-5xl font-extrabold text-gray-900 tracking-tight leading-tight border-none p-0 focus-visible:ring-0 bg-transparent h-auto"
+                                        className="text-4xl font-bold text-gray-900 tracking-tight leading-tight border-none p-0 focus-visible:ring-0 bg-transparent h-auto"
                                         placeholder="Enter article title..."
                                     />
                                 </div>
@@ -285,14 +285,14 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     <Textarea
                                         value={editableContent}
                                         onChange={(e) => setEditableContent(e.target.value)}
-                                        className="min-h-[700px] text-xl leading-relaxed text-gray-700 bg-gray-50/50 border-gray-100 focus-visible:ring-emerald-500/20 p-8 font-serif"
+                                        className="min-h-[700px] text-lg leading-relaxed text-gray-700 bg-gray-50/50 border-gray-100 focus-visible:ring-emerald-500/20 p-8 font-sans"
                                         placeholder="Write your masterpiece here..."
                                     />
                                 </div>
                             </div>
                         ) : (
                             <div className="article-preview-content">
-                                <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-12">
+                                <h1 className="text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-10">
                                     {article.title}
                                 </h1>
                                 <div
@@ -431,57 +431,51 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
             {/* Premium Typography System */}
             <style jsx global>{`
                 .article-body-premium {
-                    font-family: 'Newsreader', 'Charter', 'Georgia', serif;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 }
-                .article-body-premium h1 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 3.25rem; font-weight: 900; color: #111827; margin-top: 3rem; margin-bottom: 2.5rem; line-height: 1.1; letter-spacing: -0.03em; }
-                .article-body-premium h2 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 2.5rem; font-weight: 800; color: #111827; margin-top: 4rem; margin-bottom: 1.75rem; line-height: 1.2; letter-spacing: -0.02em; }
-                .article-body-premium h3 { font-family: var(--font-display, 'Outfit', sans-serif); font-size: 2rem; font-weight: 700; color: #111827; margin-top: 3.5rem; margin-bottom: 1.5rem; line-height: 1.3; }
+                .article-body-premium h1 { font-family: inherit; font-size: 2.25rem; font-weight: 800; color: #111827; margin-top: 2.5rem; margin-bottom: 2rem; line-height: 1.2; letter-spacing: -0.02em; }
+                .article-body-premium h2 { font-family: inherit; font-size: 1.875rem; font-weight: 700; color: #111827; margin-top: 3rem; margin-bottom: 1.5rem; line-height: 1.3; }
+                .article-body-premium h3 { font-family: inherit; font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2.5rem; margin-bottom: 1.25rem; line-height: 1.4; }
                 .article-body-premium p { 
-                    font-size: 1.45rem; 
-                    line-height: 1.85; 
-                    color: #1A1F2E; 
-                    margin-bottom: 2.5rem; 
+                    font-size: 1.125rem; 
+                    line-height: 1.75; 
+                    color: #374151; 
+                    margin-bottom: 1.75rem; 
                     font-weight: 400;
-                    letter-spacing: -0.003em;
                 }
-                .article-body-premium ul, .article-body-premium ol { margin-bottom: 2.5rem; padding-left: 1.75rem; }
+                .article-body-premium ul, .article-body-premium ol { margin-bottom: 1.75rem; padding-left: 1.5rem; }
                 .article-body-premium li { 
-                    margin-bottom: 1.25rem; 
-                    font-size: 1.45rem; 
-                    line-height: 1.8; 
-                    color: #1A1F2E; 
+                    margin-bottom: 0.75rem; 
+                    font-size: 1.125rem; 
+                    line-height: 1.75; 
+                    color: #374151; 
                 }
-                .article-body-premium li::marker { color: #10B981; font-weight: bold; }
+                .article-body-premium li::marker { color: #9CA3AF; }
                 .article-body-premium strong { color: #111827; font-weight: 700; }
                 .article-body-premium blockquote { 
-                    border-left: 5px solid #10B981; 
-                    padding-left: 3rem; 
+                    border-left: 4px solid #E5E7EB; 
+                    padding-left: 1.5rem; 
                     font-style: italic; 
-                    margin: 5rem 0; 
-                    color: #1F2937;
-                    font-size: 2rem;
-                    line-height: 1.4;
-                    font-weight: 500;
-                    background: #F0FDF4;
-                    padding-top: 4rem;
-                    padding-bottom: 4rem;
-                    border-radius: 0 2rem 2rem 0;
-                    font-family: 'Newsreader', serif;
+                    margin: 2.5rem 0; 
+                    color: #4B5563;
+                    font-size: 1.25rem;
+                    line-height: 1.6;
                 }
                 .article-body-premium a {
-                    color: #059669;
+                    color: #111827;
                     text-decoration: underline;
-                    text-underline-offset: 5px;
-                    font-weight: 600;
+                    text-underline-offset: 3px;
+                    font-weight: 500;
                     transition: color 0.2s;
                 }
                 .article-body-premium a:hover {
-                    color: #047857;
+                    color: #059669;
                 }
                 .article-body-premium img {
-                    border-radius: 2rem;
-                    box-shadow: 0 15px 40px -10px rgba(0,0,0,0.12);
-                    margin: 5rem 0;
+                    border-radius: 1rem;
+                    box-shadow: 0 4px 20px -5px rgba(0,0,0,0.1);
+                    margin: 3rem 0;
+                    width: 100%;
                 }
             `}</style>
         </div>
