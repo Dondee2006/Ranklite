@@ -20,6 +20,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         name: body.businessName || "My Site",
         url: body.websiteUrl,
+        niche: body.niche || body.businessName,
         language: body.language || "en",
         country: body.country || "US",
         description: body.businessDescription,
