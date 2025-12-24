@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .order("id", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(1);
 
     const site = sites?.[0];
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .order("id", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(1);
 
     const site = sites?.[0];

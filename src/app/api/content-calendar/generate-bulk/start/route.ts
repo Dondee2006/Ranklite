@@ -2,8 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    console.log("Start Endpoint Hit!");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -45,6 +47,30 @@ export async function POST(request: Request) {
       console.error("Site is null or missing id:", site);
       return NextResponse.json({ error: "Failed to get or create site" }, { status: 500 });
     }
+
+    // --- ONCE PER MONTH RESTRICTION ---
+    const now = new Date();
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    const { data: existingJob, error: jobCheckError } = await supabase
+      .from("generation_jobs")
+      .select("id, created_at")
+      .eq("site_id", site.id)
+      .eq("status", "completed")
+      .gte("created_at", firstOfMonth)
+      .limit(1)
+      .maybeSingle();
+
+    if (jobCheckError) {
+      console.error("Failed to check for existing jobs:", jobCheckError);
+    }
+
+    if (existingJob) {
+      return NextResponse.json({
+        error: "Monthly limit reached. You can only generate bulk articles once per calendar month."
+      }, { status: 403 });
+    }
+    // ---------------------------------
 
     const { data: job, error } = await supabase
       .from("generation_jobs")

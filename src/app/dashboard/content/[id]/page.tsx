@@ -12,14 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { marked } from "marked";
 
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamicImport(() => import("react-quill-new"), {
+const TipTapEditor = dynamicImport(() => import("@/components/dashboard/tiptap-editor").then(mod => mod.TipTapEditor), {
     ssr: false,
-    loading: () => <div className="h-[700px] w-full bg-gray-50 animate-pulse rounded-xl border border-gray-100" />,
+    loading: () => <div className="h-[500px] w-full bg-gray-50 animate-pulse rounded-xl border border-gray-100" />,
 });
-
-// Import Quill styles
-import "react-quill-new/dist/quill.snow.css";
 import {
     Loader2,
     ChevronLeft,
@@ -92,6 +88,20 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
 
     // UI states
     const [isEditingContent, setIsEditingContent] = useState(false);
+    const [integrations, setIntegrations] = useState<any[]>([]);
+    const [isPublishing, setIsPublishing] = useState<string | null>(null);
+
+    const parseYouTubeShortcodes = (content: string): string => {
+        if (!content) return content;
+        // Handle both formats: [YOUTUBE:id] and <!-- YOUTUBE:id -->
+        return content.replace(/(?:\[YOUTUBE:|<!--\s*YOUTUBE:)([a-zA-Z0-9_-]+)(?:\]|\s*-->)/g, (match, videoId) => {
+            return `<div class="video-container" style="margin: 2rem 0; aspect-ratio: 16/9; border-radius: 0.75rem; overflow: hidden; max-width: 100%;">
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>`;
+        });
+    };
+
+
 
     useEffect(() => {
         async function loadArticle() {
@@ -107,14 +117,11 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 // Initialize editable states
                 setEditableTitle(data.article.title || "");
 
-                // If content is Markdown, convert it to HTML for the editor
-                const content = data.article.html_content || data.article.content || "";
-                // Check if it's likely markdown (has # or * or [ or \n\n)
-                if (content.includes("#") || content.includes("*") || content.includes("[") || content.includes("\n\n")) {
-                    setEditableContent(marked.parse(content) as string);
-                } else {
-                    setEditableContent(content);
-                }
+                // Load content for editing
+                // Convert shortcodes to iframes so TipTap extension picks them up
+                const rawContent = data.article.html_content || data.article.content || "";
+                const processedContent = parseYouTubeShortcodes(rawContent);
+                setEditableContent(processedContent);
 
                 setEditableSlug(data.article.slug || "");
                 setEditableMetaDesc(data.article.meta_description || "");
@@ -126,7 +133,55 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
             }
         }
         loadArticle();
+        fetchIntegrations();
     }, [id]);
+
+    const fetchIntegrations = async () => {
+        try {
+            const res = await fetch("/api/cms/integrations");
+            if (res.ok) {
+                const data = await res.json();
+                setIntegrations(data.integrations || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch integrations:", error);
+        }
+    };
+
+    const handlePublish = async (platform: string) => {
+        setIsPublishing(platform);
+        try {
+            const res = await fetch("/api/cms-publish", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    articleId: id,
+                    cmsTarget: platform
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Publishing failed");
+
+            toast.success(`Published to ${platform} as draft!`);
+            if (data.publishedUrl) {
+                window.open(data.publishedUrl, '_blank');
+            }
+
+            // Refresh article to get updated status/cms_exports
+            const refreshRes = await fetch(`/api/articles/${id}`);
+            if (refreshRes.ok) {
+                const refreshData = await refreshRes.json();
+                setArticle(refreshData.article);
+                setEditableStatus(refreshData.article.status);
+            }
+
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsPublishing(null);
+        }
+    };
 
     const handleSaveMetadata = async (field: 'slug' | 'meta_description' | 'status' | 'content' | 'title', value: string) => {
         setIsSaving(true);
@@ -158,16 +213,29 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
         }
     };
 
+    // Convert TipTap YouTube embeds back to shortcode format for storage
+    const convertYouTubeToShortcode = (html: string): string => {
+        // TipTap YouTube extension creates divs with data-youtube-video attribute
+        // We need to convert these back to <!-- YOUTUBE:id --> format
+        return html.replace(
+            /<div[^>]*data-youtube-video="([^"]+)"[^>]*>.*?<\/div>/gs,
+            (match, videoId) => `<!-- YOUTUBE:${videoId} -->`
+        );
+    };
+
     const handleSaveAllContent = async () => {
         setIsSaving(true);
         try {
+            // Convert YouTube embeds back to shortcodes before saving
+            const contentToSave = convertYouTubeToShortcode(editableContent);
+
             const response = await fetch(`/api/articles/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: editableTitle,
-                    html_content: editableContent,
-                    content: editableContent
+                    html_content: contentToSave,
+                    content: contentToSave
                 }),
             });
 
@@ -265,12 +333,10 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     size="sm"
                                     className="h-9 px-4 text-xs font-bold text-gray-700 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
                                     onClick={() => {
-                                        // Force conversion of any legacy markdown format to clean HTML for the visual editor
+                                        // Load content for editing
                                         const rawContent = article.html_content || article.content || "";
-
-                                        // Even if it's already HTML, running it through marked ensures nested symbols are resolved
-                                        // and legacy markdown articles are converted instantly.
-                                        setEditableContent(marked.parse(rawContent) as string);
+                                        const processedContent = parseYouTubeShortcodes(rawContent);
+                                        setEditableContent(processedContent);
                                         setIsEditingContent(true);
                                     }}
                                 >
@@ -296,9 +362,9 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="bg-white border-r border-gray-100 min-h-[calc(100vh-65px)]"
+                    className="bg-white border-r border-gray-100 min-h-[calc(100vh-65px)] min-w-0"
                 >
-                    <div className="max-w-[1100px] mx-auto px-12 py-20 prose prose-slate">
+                    <div className="max-w-[1100px] mx-auto px-12 py-20 prose prose-slate break-words">
                         {isEditingContent ? (
                             <div className="space-y-10">
                                 <div className="space-y-4">
@@ -310,33 +376,23 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         placeholder="Enter article title..."
                                     />
                                 </div>
-                                <div className="space-y-4 quill-editor-container">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content (Visual Editor)</label>
-                                    <ReactQuill
-                                        theme="snow"
-                                        value={editableContent}
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Content (Premium Editor)</label>
+                                    <TipTapEditor
+                                        content={editableContent}
                                         onChange={setEditableContent}
-                                        className="bg-white rounded-xl overflow-hidden border-gray-100"
-                                        modules={{
-                                            toolbar: [
-                                                [{ 'header': [1, 2, 3, false] }],
-                                                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                                ['link', 'image'],
-                                                ['clean']
-                                            ],
-                                        }}
+                                        placeholder="Start writing your masterpiece..."
                                     />
                                 </div>
                             </div>
                         ) : (
-                            <div className="article-preview-content">
+                            <div className="article-preview-content" style={{ maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word', overflow: 'hidden' }}>
                                 <h1 className="text-4xl font-bold text-gray-900 tracking-tight leading-tight mb-10">
                                     {article.title}
                                 </h1>
                                 <div className="article-body-premium">
                                     {article.html_content ? (
-                                        <div dangerouslySetInnerHTML={{ __html: article.html_content }} />
+                                        <div dangerouslySetInnerHTML={{ __html: parseYouTubeShortcodes(article.html_content) }} />
                                     ) : article.content ? (
                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                             {article.content}
@@ -353,22 +409,22 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 {/* Right Column: Sidebar */}
                 <aside className="bg-[#F8F9FA] p-8 space-y-8 border-l border-gray-100 min-h-screen overflow-y-auto sticky top-[65px] h-[calc(100vh-65px)]">
                     {/* Featured Image Section */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-1.5 transition-transform hover:scale-[1.02] duration-300">
-                        <div className="aspect-video relative bg-gray-50 rounded-xl overflow-hidden group">
+                    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden p-2 transition-all duration-500 hover:shadow-2xl hover:border-emerald-200 group">
+                        <div className="aspect-video relative bg-slate-50 rounded-[1.5rem] overflow-hidden">
                             {(article.featured_image || article.featured_image_url) ? (
                                 <img
                                     src={article.featured_image || article.featured_image_url}
                                     alt="Hero"
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                             ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 gap-2 p-4 text-center">
-                                    <Globe className="h-8 w-8 opacity-20" />
-                                    <p className="text-[10px] font-medium opacity-50 uppercase tracking-widest">No Featured Image</p>
+                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-3 p-4 text-center">
+                                    <Globe className="h-10 w-10 opacity-30 animate-pulse" />
+                                    <p className="text-[11px] font-bold opacity-60 uppercase tracking-[0.2em] text-slate-400">No Featured Image</p>
                                 </div>
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                                <p className="text-[10px] text-white/90 font-bold uppercase tracking-widest bg-emerald-600/80 px-2 py-1 rounded backdrop-blur-sm">
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                                <p className="text-[10px] text-white font-black uppercase tracking-[0.25em] bg-emerald-500/90 px-3 py-1.5 rounded-full backdrop-blur-md w-fit shadow-lg shadow-emerald-500/20">
                                     Hero Image
                                 </p>
                             </div>
@@ -376,27 +432,38 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                     </div>
 
                     {/* Meta Section */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-8">
-                        <div className="space-y-2">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Target Keyword:</p>
-                            <p className="text-base font-bold text-gray-900 flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                                {article.keyword || "Not optimized"}
+                    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8 space-y-10 transition-all duration-500 hover:shadow-xl hover:border-emerald-100">
+                        <div className="space-y-3">
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Target className="h-3.5 w-3.5 text-emerald-500/60" />
+                                Target Keyword
                             </p>
+                            <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 group transition-colors hover:bg-white hover:border-emerald-200">
+                                <p className="text-lg font-bold text-slate-900 flex items-center gap-3">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]" />
+                                    {article.keyword || "Not optimized"}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="space-y-2 pt-6 border-t border-gray-100">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Article Type:</p>
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-none hover:bg-blue-50 font-bold px-3 py-1 text-xs capitalize">
-                                {article.article_type || "Standard"}
+                        <div className="space-y-3 pt-8 border-t border-slate-100/80">
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Tag className="h-3.5 w-3.5 text-blue-500/60" />
+                                Article Type
+                            </p>
+                            <Badge variant="secondary" className="bg-blue-50/50 text-blue-600 border-blue-100/50 hover:bg-blue-100/50 font-bold px-4 py-2 text-[13px] rounded-xl transition-all tracking-tight">
+                                {article.article_type || "Standard Post"}
                             </Badge>
                         </div>
 
                         {/* Editable Status */}
-                        <div className="space-y-3 pt-6 border-t border-gray-100">
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Publishing Status:</p>
-                                {isSaving ? <Loader2 className="h-3 w-3 animate-spin text-emerald-600" /> : <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />}
+                        <div className="space-y-4 pt-8 border-t border-slate-100/80">
+                            <div className="flex items-center justify-between mb-1">
+                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Clock className="h-3.5 w-3.5 text-amber-500/60" />
+                                    Status
+                                </p>
+                                {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" /> : <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] translate-y-[1px]" />}
                             </div>
                             <Select
                                 value={editableStatus}
@@ -405,10 +472,10 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     handleSaveMetadata('status', val);
                                 }}
                             >
-                                <SelectTrigger className="h-11 text-sm font-bold text-gray-900 border-gray-200 shadow-none focus:ring-emerald-500 bg-gray-50/50">
+                                <SelectTrigger className="h-12 text-[15px] font-bold text-slate-900 border-slate-200 rounded-xl shadow-none focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50/50 hover:bg-white transition-all">
                                     <SelectValue placeholder="Select Status" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="rounded-xl shadow-2xl border-slate-100">
                                     <SelectItem value="planned">Planned</SelectItem>
                                     <SelectItem value="generated">Generated</SelectItem>
                                     <SelectItem value="published">Published</SelectItem>
@@ -417,33 +484,41 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                         </div>
 
                         {/* Editable Slug */}
-                        <div className="space-y-3 pt-6 border-t border-gray-100">
+                        <div className="space-y-4 pt-8 border-t border-slate-100/80">
                             <div className="flex items-center justify-between">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">URL Slug:</p>
+                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <Link2 className="h-3.5 w-3.5 text-slate-400/60" />
+                                    URL Slug
+                                </p>
                                 <button
                                     onClick={() => handleSaveMetadata('slug', editableSlug)}
-                                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors tracking-widest"
+                                    className="text-[11px] font-black text-emerald-600 hover:text-emerald-500 transition-all tracking-[0.1em] bg-emerald-50 px-2 py-1 rounded-lg"
                                 >
-                                    SAVE SLUG
+                                    SAVE
                                 </button>
                             </div>
-                            <div className="relative">
+                            <div className="relative group/input">
                                 <Input
                                     value={editableSlug}
                                     onChange={(e) => setEditableSlug(e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''))}
-                                    className="h-11 text-xs font-semibold text-gray-600 bg-gray-50/80 border-gray-100 shadow-none focus-visible:ring-emerald-500 pr-10"
+                                    className="h-12 text-sm font-semibold text-slate-600 bg-slate-50 border-slate-200 rounded-xl shadow-none focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 transition-all pr-12 group-hover/input:bg-white"
                                 />
-                                <Link2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 group-hover/input:text-emerald-500 transition-colors">
+                                    <Globe className="h-4 w-4" />
+                                </div>
                             </div>
                         </div>
 
                         {/* Meta Description with counter */}
-                        <div className="space-y-4 pt-6 border-t border-gray-100">
+                        <div className="space-y-4 pt-8 border-t border-slate-100/80">
                             <div className="flex items-center justify-between">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SEO Description:</p>
+                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <FileText className="h-3.5 w-3.5 text-slate-400/60" />
+                                    SEO Description
+                                </p>
                                 <span className={cn(
-                                    "text-[10px] font-bold",
-                                    metaCharCount > metaLimit ? "text-red-500" : "text-gray-400"
+                                    "text-[11px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm transition-all",
+                                    metaCharCount > metaLimit ? "bg-red-50 text-red-500" : "bg-slate-100 text-slate-400"
                                 )}>
                                     {metaCharCount}/{metaLimit}
                                 </span>
@@ -451,67 +526,98 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                             <Textarea
                                 value={editableMetaDesc}
                                 onChange={(e) => setEditableMetaDesc(e.target.value)}
-                                className="min-h-[120px] text-xs leading-relaxed text-gray-600 bg-gray-50/80 border-gray-100 shadow-none focus-visible:ring-emerald-500 resize-none p-4 font-medium"
-                                placeholder="Write a compelling SEO description..."
+                                className="min-h-[140px] text-[14px] leading-relaxed text-slate-600 bg-slate-50 border-slate-200 rounded-xl shadow-none focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 resize-none p-5 font-medium transition-all hover:bg-white"
+                                placeholder="Describe your masterpiece for search engines..."
                             />
                             <Button
                                 onClick={() => handleSaveMetadata('meta_description', editableMetaDesc)}
                                 disabled={isSaving}
-                                className="w-full h-10 text-[11px] font-bold bg-gray-900 text-white border-none shadow-lg hover:bg-gray-800 transition-all uppercase tracking-widest"
+                                className="w-full h-12 text-[12px] font-black bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-300 uppercase tracking-[0.2em] rounded-xl active:scale-95 translate-y-0 hover:-translate-y-0.5"
                             >
-                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Save SEO Meta"}
+                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                                Save Metadata
                             </Button>
                         </div>
+
+                        {/* CMS Export Section */}
+                        {integrations.length > 0 && (
+                            <div className="bg-emerald-50/30 rounded-[2rem] border border-emerald-100/50 shadow-sm p-8 space-y-7 transition-all duration-500 hover:shadow-xl hover:bg-white hover:border-emerald-200">
+                                <p className="text-[11px] font-black text-emerald-700/60 uppercase tracking-[0.25em] flex items-center gap-2">
+                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                    CMS Integration
+                                </p>
+                                <div className="space-y-5">
+                                    {integrations.map((integration) => {
+                                        const exportData = (article as any)?.cms_exports?.[integration.platform];
+                                        const isNotion = integration.platform.toLowerCase() === 'notion';
+
+                                        return (
+                                            <div key={integration.id} className="space-y-4">
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full justify-between px-6 h-14 rounded-2xl border-slate-200 transition-all duration-500 group/btn translate-y-0 active:scale-95",
+                                                        exportData
+                                                            ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:shadow-emerald-100 shadow-lg"
+                                                            : "bg-white hover:border-emerald-400 hover:text-emerald-700 hover:shadow-2xl hover:-translate-y-1"
+                                                    )}
+                                                    onClick={() => handlePublish(integration.platform)}
+                                                    disabled={isPublishing !== null}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        {isPublishing === integration.platform ? (
+                                                            <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+                                                        ) : isNotion ? (
+                                                            <img src="/notion-icon.png" className="w-5 h-5 opacity-80" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                                        ) : (
+                                                            <Globe className="h-5 w-5 opacity-40 group-hover/btn:rotate-12 transition-transform" />
+                                                        )}
+                                                        <span className="text-[14px] font-black uppercase tracking-widest">
+                                                            {exportData ? `Update ${integration.platform}` : `Push to ${integration.platform}`}
+                                                        </span>
+                                                    </div>
+                                                    {exportData ? (
+                                                        <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                                    ) : (
+                                                        <ChevronLeft className="h-4 w-4 rotate-180 opacity-20 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" />
+                                                    )}
+                                                </Button>
+
+                                                {exportData?.published_url && (
+                                                    <a
+                                                        href={exportData.published_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-center gap-2 group/link py-2 rounded-xl border border-dashed border-emerald-100/50 hover:bg-emerald-50/50 transition-all"
+                                                    >
+                                                        <span className="text-[11px] font-black text-emerald-600/60 group-hover/link:text-emerald-600 uppercase tracking-[0.15em] transition-colors">
+                                                            View live on {integration.platform}
+                                                        </span>
+                                                        <ExternalLink className="h-3 w-3 text-emerald-400 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Referral / Bottom Promo */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-center group cursor-pointer hover:border-emerald-200 transition-all">
-                        <Button variant="outline" className="w-full justify-center gap-2 h-12 border-dashed border-gray-300 text-gray-400 group-hover:text-emerald-600 group-hover:border-emerald-300 transition-all font-bold text-xs uppercase tracking-widest">
-                            <Target className="h-4 w-4" />
-                            Join Referral Program
-                        </Button>
-                    </div>
                 </aside>
             </main>
 
-            {/* Premium Typography & Editor System */}
             <style jsx global>{`
-                /* Editor Styles */
-                .quill-editor-container .ql-container {
-                    min-height: 600px;
-                    font-size: 1.125rem;
-                    font-family: 'Inter', sans-serif;
-                    color: #334155;
-                    line-height: 1.8;
-                    border-bottom-left-radius: 0.75rem;
-                    border-bottom-right-radius: 0.75rem;
-                    border: 1px solid #f1f5f9 !important;
-                }
-                .quill-editor-container .ql-toolbar {
-                    border-top-left-radius: 0.75rem;
-                    border-top-right-radius: 0.75rem;
-                    border: 1px solid #f1f5f9 !important;
-                    background: #f8fafc;
-                    padding: 0.75rem !important;
-                }
-                .quill-editor-container .ql-editor {
-                    padding: 2rem !important;
-                }
-                .quill-editor-container .ql-editor h1,
-                .quill-editor-container .ql-editor h2,
-                .quill-editor-container .ql-editor h3 {
-                    color: #0f172a;
-                    font-weight: 700;
-                    margin-top: 1.5rem;
-                    margin-bottom: 1rem;
-                }
-                .quill-editor-container .ql-editor p {
-                    margin-bottom: 1.5rem;
-                }
-
                 /* Content Preview Styles */
                 .article-body-premium {
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                    max-width: 100%;
+                    overflow-x: hidden;
+                }
+                .article-body-premium * {
+                    max-width: 100%;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
                 }
                 .article-body-premium h1 { 
                     font-family: inherit; 
@@ -590,7 +696,17 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                     border-radius: 0.75rem;
                     box-shadow: 0 4px 20px -5px rgba(0,0,0,0.08);
                     margin: 3rem 0;
-                    width: 100%;
+                    max-width: 100%;
+                    height: auto;
+                }
+                .article-body-premium iframe {
+                    max-width: 100%;
+                }
+                .article-body-premium .video-container {
+                    max-width: 100%;
+                }
+                .article-body-premium a {
+                    word-break: break-all;
                 }
                 .article-body-premium hr {
                     border: 0;

@@ -68,6 +68,10 @@ create table articles (
   images jsonb,
   featured_image text,
   cms_exports jsonb,
+  backlinks_status text default 'pending',
+  backlinks_count integer default 0,
+  volume integer default 0,
+  difficulty integer default 0,
 
   constraint articles_status_check check (status in ('draft', 'published', 'scheduled', 'planned', 'generating', 'qa_validated', 'generated'))
 );

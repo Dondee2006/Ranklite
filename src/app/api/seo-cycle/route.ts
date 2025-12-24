@@ -56,23 +56,25 @@ export async function GET(req: NextRequest) {
       },
     };
 
-      const [campaignRes, articlesRes, tasksRes, submissionsTodayRes, submissionsThisMonthRes] =
-        await retryWithBackoff(() =>
-          Promise.all([
-            supabase.from("backlink_campaigns").select("*").eq("user_id", userId).maybeSingle(),
-            supabase.from("articles").select("status, site_id").eq("user_id", userId),
-            supabase.from("backlink_tasks").select("status, outreach_status"),
-            supabase
-              .from("backlink_tasks")
-              .select("id", { count: "exact", head: true })
-              .gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)
-              .lte("created_at", `${new Date().toISOString().split("T")[0]}T23:59:59Z`),
-            supabase
-              .from("backlink_tasks")
-              .select("id", { count: "exact", head: true })
-              .gte("created_at", `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`),
-          ])
-        );
+    const [campaignRes, articlesRes, tasksRes, submissionsTodayRes, submissionsThisMonthRes] =
+      await retryWithBackoff(() =>
+        Promise.all([
+          supabase.from("backlink_campaigns").select("*").eq("user_id", userId).maybeSingle(),
+          supabase.from("articles").select("status, site_id").eq("user_id", userId),
+          supabase.from("backlink_tasks").select("status, outreach_status, platform:backlink_platforms(category)").eq("user_id", userId),
+          supabase
+            .from("backlink_tasks")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .gte("created_at", `${new Date().toISOString().split("T")[0]}T00:00:00Z`)
+            .lte("created_at", `${new Date().toISOString().split("T")[0]}T23:59:59Z`),
+          supabase
+            .from("backlink_tasks")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .gte("created_at", `${new Date().toISOString().slice(0, 7)}-01T00:00:00Z`),
+        ])
+      );
 
     if (campaignRes.error || articlesRes.error || tasksRes.error || submissionsTodayRes.error || submissionsThisMonthRes.error) {
       console.error("SEO cycle query errors:", {
@@ -89,9 +91,12 @@ export async function GET(req: NextRequest) {
       draft: "PLAN",
       planned: "PLAN",
       generating: "CREATE",
+      generated: "CREATE",
       scheduled: "CREATE",
       published: "PUBLISH",
       pending: "PROMOTE",
+      queued: "PROMOTE",
+      require_manual: "PROMOTE",
       completed: "VALIDATE",
       verified: "COMPLETE",
     };
@@ -110,13 +115,20 @@ export async function GET(req: NextRequest) {
       stageCounts[stage] = (stageCounts[stage] || 0) + 1;
     });
 
+    let foundationLinks = 0;
+    let growthLinks = 0;
+    const FOUNDATION_CATEGORIES = ["Business Directory", "Local Directory", "Review Platform"];
+
     (tasksRes.data || []).forEach((row) => {
-      if (row.status === "pending") {
+      const isFoundation = FOUNDATION_CATEGORIES.includes((row as any).platform?.category || "");
+      if (row.status === "pending" || row.status === "queued" || row.status === "require_manual") {
         stageCounts.PROMOTE += 1;
       } else if (row.status === "completed" && row.outreach_status !== "verified") {
         stageCounts.VALIDATE += 1;
       } else if (row.outreach_status === "verified") {
         stageCounts.COMPLETE += 1;
+        if (isFoundation) foundationLinks++;
+        else growthLinks++;
       }
     });
 
@@ -126,11 +138,14 @@ export async function GET(req: NextRequest) {
       stageCounts,
       metrics: {
         totalBacklinks: campaign?.total_backlinks || 0,
+        foundationLinks,
+        growthLinks,
         uniqueSources: campaign?.unique_sources || 0,
         avgDomainRating: parseFloat(campaign?.avg_domain_rating || "0"),
         thisMonthBacklinks: submissionsThisMonthRes.count || 0,
         dailySubmissionCount: submissionsTodayRes.count || 0,
         maxDailySubmissions: campaign?.max_daily_submissions || 10,
+        isAggressive: (campaign?.max_daily_submissions || 10) > 10
       },
       agent: {
         status: campaign?.agent_status || "idle",
