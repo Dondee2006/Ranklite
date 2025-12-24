@@ -28,6 +28,7 @@ export function createCMSClient(integration: CMSIntegration) {
     case 'notion':
       return new NotionClient({
         accessToken: integration.access_token,
+        databaseId: integration.settings.database_id as string,
       });
     default:
       throw new Error(`Unsupported CMS type: ${integration.cms_type}`);

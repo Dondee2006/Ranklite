@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       .from('cms_integrations')
       .update({
         last_sync_at: new Date().toISOString(),
-        status: 'connected',
+        status: 'active',
       })
       .eq('id', integration_id);
 

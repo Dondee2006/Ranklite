@@ -420,7 +420,40 @@ export default function ArticlesSettingsPage() {
                   </div>
 
                   <div>
-                    <div className="text-sm font-medium text-gray-700 mb-3">Image Style</div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-medium text-gray-700">Image Style</label>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-[11px] font-bold border-green-200 text-green-700 hover:bg-green-50"
+                        onClick={async () => {
+                          const promise = new Promise(async (resolve, reject) => {
+                            try {
+                              const res = await fetch("/api/articles/test-image", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ style: selectedImageStyle, brandColor }),
+                              });
+                              const data = await res.json();
+                              if (data.url) resolve(data.url);
+                              else reject(data.error || "Failed to generate");
+                            } catch (e) { reject(e); }
+                          });
+
+                          toast.promise(promise, {
+                            loading: 'Generating style preview...',
+                            success: (url: any) => {
+                              window.open(url, '_blank');
+                              return 'Preview generated successfully!';
+                            },
+                            error: (err) => `Error: ${err}`,
+                          });
+                        }}
+                      >
+                        <RefreshCw className="mr-1.5 h-3 w-3" />
+                        Test Style
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-5 gap-3">
                       {IMAGE_STYLES.map((style) => (
                         <button

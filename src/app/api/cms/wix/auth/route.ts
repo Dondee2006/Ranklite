@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const siteInfo = await wixService.getSiteInfo(accessToken);
+    const siteInfo: any = await wixService.getSiteInfo(accessToken);
     const finalSiteUrl = site_url || siteInfo?.url || `wix-site-${instance_id}`;
 
     const { data: existingIntegration } = await supabase
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         .update({
           credentials: { access_token: accessToken },
           site_url: finalSiteUrl,
-          status: "connected",
+          status: "active",
           config: {
             app_id,
             instance_id,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         platform: "wix",
         credentials: { access_token: accessToken },
         site_url: finalSiteUrl,
-        status: "connected",
+        status: "active",
         config: {
           app_id,
           instance_id,
