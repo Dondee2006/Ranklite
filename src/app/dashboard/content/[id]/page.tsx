@@ -328,39 +328,6 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                             ],
                                         }}
                                     />
-                                    <style jsx global>{`
-                                        .quill-editor-container .ql-container {
-                                            min-height: 600px;
-                                            font-size: 1.125rem;
-                                            font-family: 'Inter', sans-serif;
-                                            color: #334155;
-                                            line-height: 1.8;
-                                            border-bottom-left-radius: 0.75rem;
-                                            border-bottom-right-radius: 0.75rem;
-                                            border: 1px solid #f1f5f9 !important;
-                                        }
-                                        .quill-editor-container .ql-toolbar {
-                                            border-top-left-radius: 0.75rem;
-                                            border-top-right-radius: 0.75rem;
-                                            border: 1px solid #f1f5f9 !important;
-                                            background: #f8fafc;
-                                            padding: 0.75rem !important;
-                                        }
-                                        .quill-editor-container .ql-editor {
-                                            padding: 2rem !important;
-                                        }
-                                        .quill-editor-container .ql-editor h1,
-                                        .quill-editor-container .ql-editor h2,
-                                        .quill-editor-container .ql-editor h3 {
-                                            color: #0f172a;
-                                            font-weight: 700;
-                                            margin-top: 1.5rem;
-                                            margin-bottom: 1rem;
-                                        }
-                                        .quill-editor-container .ql-editor p {
-                                            margin-bottom: 1.5rem;
-                                        }
-                                    `}</style>
                                 </div>
                             </div>
                         ) : (
@@ -508,8 +475,42 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                 </aside>
             </main>
 
-            {/* Premium Typography System */}
+            {/* Premium Typography & Editor System */}
             <style jsx global>{`
+                /* Editor Styles */
+                .quill-editor-container .ql-container {
+                    min-height: 600px;
+                    font-size: 1.125rem;
+                    font-family: 'Inter', sans-serif;
+                    color: #334155;
+                    line-height: 1.8;
+                    border-bottom-left-radius: 0.75rem;
+                    border-bottom-right-radius: 0.75rem;
+                    border: 1px solid #f1f5f9 !important;
+                }
+                .quill-editor-container .ql-toolbar {
+                    border-top-left-radius: 0.75rem;
+                    border-top-right-radius: 0.75rem;
+                    border: 1px solid #f1f5f9 !important;
+                    background: #f8fafc;
+                    padding: 0.75rem !important;
+                }
+                .quill-editor-container .ql-editor {
+                    padding: 2rem !important;
+                }
+                .quill-editor-container .ql-editor h1,
+                .quill-editor-container .ql-editor h2,
+                .quill-editor-container .ql-editor h3 {
+                    color: #0f172a;
+                    font-weight: 700;
+                    margin-top: 1.5rem;
+                    margin-bottom: 1rem;
+                }
+                .quill-editor-container .ql-editor p {
+                    margin-bottom: 1.5rem;
+                }
+
+                /* Content Preview Styles */
                 .article-body-premium {
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                 }
