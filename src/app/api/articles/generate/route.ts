@@ -39,6 +39,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No site found" }, { status: 404 });
   }
 
+  // Fetch article settings for the site
+  const { data: settings } = await supabase
+    .from("article_settings")
+    .select("*")
+    .eq("site_id", site.id)
+    .single();
+
   const { data: article } = await supabase
     .from("articles")
     .select("*")
@@ -63,15 +70,16 @@ export async function POST(request: Request) {
     article.keyword,
     article.secondary_keywords || [],
     outline,
-    site
+    site,
+    settings || {}
   );
 
   const domain = site.url ? new URL(site.url.startsWith('http') ? site.url : `https://${site.url}`).hostname : "";
-  const internalLinks = detectInternalLinks(content, existingArticles || [], domain);
+  const internalLinks = detectInternalLinks(content, existingArticles || [], domain, settings?.internal_links);
   const externalLinks = generateExternalLinks(article.keyword);
-  const images = generateImagePlaceholders(article.title, article.keyword);
+  const images = generateImagePlaceholders(article.title, article.keyword, settings);
 
-  const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks);
+  const htmlContent = generateHTML(content, article.title, images, internalLinks, externalLinks, settings);
   const markdownContent = generateMarkdown(content, article.title, images, internalLinks, externalLinks);
   const metaDescription = await generateMetaDescription(article.keyword, article.title, site);
   const slug = article.slug || generateSlug(article.title);
@@ -266,14 +274,15 @@ async function generateArticleContent(
   keyword: string,
   secondaryKeywords: string[],
   outline: object,
-  site: any
+  site: any,
+  settings: any
 ): Promise<string> {
   const sections = (outline as { sections: { title: string; wordCount: number }[] }).sections;
   let content = "";
 
   for (const section of sections) {
     content += `## ${section.title}\n\n`;
-    const sectionContent = await generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount, site, title);
+    const sectionContent = await generateSectionContent(section.title, keyword, secondaryKeywords, section.wordCount, site, title, settings);
     content += sectionContent;
     content += "\n\n";
   }
@@ -287,7 +296,8 @@ async function generateSectionContent(
   secondaryKeywords: string[],
   wordCount: number,
   site: any,
-  articleTitle: string
+  articleTitle: string,
+  settings: any
 ): Promise<string> {
   try {
     const { text } = await generateText({
@@ -304,16 +314,20 @@ WEBSITE CONTEXT:
 - Site Name: ${site.name}
 - Niche: ${site.niche || "General"}
 - Target Audience: ${site.target_audience || "General readers"}
-- Brand Voice: ${site.brand_voice || "Empathetic, expert, and actionable"}
+- Brand Voice: ${settings?.article_style || site.brand_voice || "Empathetic, expert, and actionable"}
 - Description: ${site.description || ""}
 
+${settings?.global_instructions ? `CUSTOM INSTRUCTIONS:
+${settings.global_instructions}` : ""}
+
 REQUIREMENTS:
-1. "SMART CONTENT" STYLE: Use a conversational yet authoritative tone. Use metaphors, analogies, or practical examples to make points clear. Speak directly to the reader ("you").
+1. "SMART CONTENT" STYLE: Use a ${settings?.article_style?.toLowerCase() || "conversational"} yet authoritative tone. Use metaphors, analogies, or practical examples to make points clear. Speak directly to the reader ("you").
 2. EMPATHETIC & ACTIONABLE: Acknowledge the reader's pain points and provide specific, high-value advice. Avoid generic fluff or surface-level "professional" filler.
 3. KEYWORD INTEGRATION: Naturally weave the primary and secondary keywords into the narrative.
 4. STRUCTURE: Use short paragraphs (2-3 sentences), bold key terms for scannability, and use bullet points or numbered lists if it adds value.
-5. FLOW: Ensure the section transitions logically and maintains high engagement.
-6. NO TITLE: Do NOT include the section title or the article title in the output.
+${settings?.include_emojis ? '5. EMOJIS: Include appropriate emojis naturally throughout the text to increase engagement.' : ''}
+${settings?.include_emojis ? '6' : '5'}. FLOW: Ensure the section transitions logically and maintains high engagement.
+${settings?.include_emojis ? '7' : '6'}. NO TITLE: Do NOT include the section title or the article title in the output.
 
 Generate the section content now:`,
       maxOutputTokens: Math.ceil(wordCount * 2),
@@ -327,10 +341,14 @@ Generate the section content now:`,
   }
 }
 
-function detectInternalLinks(content: string, existingArticles: { id: string; title: string; slug: string; keyword: string }[], domain: string): object[] {
+function detectInternalLinks(content: string, existingArticles: { id: string; title: string; slug: string; keyword: string }[], domain: string, limitSetting?: string): object[] {
   const links: object[] = [];
 
-  for (const article of existingArticles.slice(0, 5)) {
+  // Parse limit from setting (e.g., "3 links per article")
+  const limitMatch = limitSetting?.match(/\d+/);
+  const limit = limitMatch ? parseInt(limitMatch[0]) : 3;
+
+  for (const article of existingArticles.slice(0, limit)) {
     links.push({
       title: article.title,
       url: `https://${domain}/blog/${article.slug}`,
@@ -361,7 +379,7 @@ function generateExternalLinks(keyword: string): object[] {
   }));
 }
 
-function generateImagePlaceholders(title: string, keyword: string): object[] {
+function generateImagePlaceholders(title: string, keyword: string, settings: any): object[] {
   const imageTypes = [
     { type: "featured", size: "1200x630" },
     { type: "inline", size: "800x450" },
@@ -369,18 +387,21 @@ function generateImagePlaceholders(title: string, keyword: string): object[] {
     { type: "diagram", size: "800x600" },
   ];
 
+  const brandColor = settings?.brand_color?.replace('#', '') || '22C55E';
+  const imageStyle = settings?.image_style || 'brand-text';
+
   return imageTypes.map((img, index) => ({
     id: `img-${index + 1}`,
     type: img.type,
     size: img.size,
-    alt: `${title} - ${img.type} image`,
+    alt: `${title} - ${img.type} image in ${imageStyle} style`,
     caption: `Visual representation of ${keyword}`,
-    url: `https://placehold.co/${img.size}/22C55E/FFFFFF?text=${encodeURIComponent(keyword.slice(0, 20))}`,
+    url: `https://placehold.co/${img.size}/${brandColor}/FFFFFF?text=${encodeURIComponent(keyword.slice(0, 20) + " (" + imageStyle + ")")}`,
     placeholder: true,
   }));
 }
 
-function generateHTML(content: string, title: string, images: object[], internalLinks: object[], externalLinks: object[]): string {
+function generateHTML(content: string, title: string, images: object[], internalLinks: object[], externalLinks: object[], settings: any): string {
   // Use marked to parse the markdown content into HTML
   const parsedContent = marked.parse(content);
 
@@ -401,13 +422,23 @@ function generateHTML(content: string, title: string, images: object[], internal
     html += `<figure><img src="${(images as { url: string }[])[0].url}" alt="${(images as { alt: string }[])[0].alt}"><figcaption>${(images as { caption: string }[])[0].caption}</figcaption></figure>\n`;
   }
 
+  // Add a YouTube placeholder if enabled
+  if (settings?.youtube_video) {
+    html += `\n<div class="video-container" style="margin: 2rem 0; aspect-ratio: 16/9; background: #f1f5f9; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; border: 2px border-dashed border-slate-200;">
+      <div style="text-align: center;">
+        <p style="font-weight: bold; color: #475569; margin-bottom: 0.5rem;">[Relevant YouTube Video Placeholder]</p>
+        <p style="font-size: 0.875rem; color: #64748b;">A video about "${title}" would be embedded here.</p>
+      </div>
+    </div>\n`;
+  }
+
   // Add the main content (already converted from markdown to HTML)
   html += parsedContent;
 
   // Add internal links
   if (internalLinks.length > 0) {
     html += `\n<aside class="related-content"><h3>Related Articles</h3><ul>`;
-    for (const link of internalLinks.slice(0, 3) as { url: string; anchor_text: string }[]) {
+    for (const link of internalLinks as { url: string; anchor_text: string }[]) {
       html += `<li><a href="${link.url}">${link.anchor_text}</a></li>`;
     }
     html += `</ul></aside>\n`;
@@ -420,6 +451,15 @@ function generateHTML(content: string, title: string, images: object[], internal
       html += `<li><a href="${link.url}" target="_blank" rel="noopener">${link.source}</a></li>`;
     }
     html += `</ul></section>\n`;
+  }
+
+  // Add Call to Action if enabled
+  if (settings?.call_to_action) {
+    html += `\n<section class="cta" style="margin-top: 4rem; padding: 3rem; background: ${settings.brand_color || '#10b981'}; color: white; border-radius: 1.5rem; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
+      <h2 style="color: white; margin-top: 0; font-size: 1.875rem;">Ready to Take the Next Step?</h2>
+      <p style="font-size: 1.125rem; margin-bottom: 2rem; opacity: 0.9;">Join thousands of others who are already using our solutions to grow their business.</p>
+      <a href="/signup" style="display: inline-block; background: white; color: ${settings.brand_color || '#10b981'}; font-weight: bold; padding: 0.875rem 2rem; rounded-lg: 0.5rem; text-decoration: none; border-radius: 0.75rem;">Get Started Today &rarr;</a>
+    </section>\n`;
   }
 
   html += `</article>\n</body>\n</html>`;
