@@ -1032,9 +1032,7 @@ export default function ContentPlannerPage() {
                                                 {selectedArticle.html_content ? (
                                                     <div dangerouslySetInnerHTML={{ __html: selectedArticle.html_content }} />
                                                 ) : selectedArticle.content ? (
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                        {selectedArticle.content}
-                                                    </ReactMarkdown>
+                                                    <div dangerouslySetInnerHTML={{ __html: marked.parse(selectedArticle.content) }} />
                                                 ) : (
                                                     <p className="text-slate-400 italic">No content available.</p>
                                                 )}

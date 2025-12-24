@@ -265,13 +265,12 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     size="sm"
                                     className="h-9 px-4 text-xs font-bold text-gray-700 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
                                     onClick={() => {
-                                        // Ensure content is in HTML format before opening editor
-                                        const content = article.html_content || article.content || "";
-                                        if (content.includes("#") || content.includes("*") || content.includes("[") || content.includes("\n\n")) {
-                                            setEditableContent(marked.parse(content) as string);
-                                        } else {
-                                            setEditableContent(content);
-                                        }
+                                        // Force conversion of any legacy markdown format to clean HTML for the visual editor
+                                        const rawContent = article.html_content || article.content || "";
+
+                                        // Even if it's already HTML, running it through marked ensures nested symbols are resolved
+                                        // and legacy markdown articles are converted instantly.
+                                        setEditableContent(marked.parse(rawContent) as string);
                                         setIsEditingContent(true);
                                     }}
                                 >
