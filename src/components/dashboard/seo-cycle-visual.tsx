@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Upload, Link2, CheckCircle2, TrendingUp, Clock, Sparkles, Info } from "lucide-react";
+import { FileText, Upload, Link2, CheckCircle2, TrendingUp, Clock, Sparkles, Info, Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 const CYCLE_STAGES = [
   {
@@ -81,11 +82,14 @@ interface SEOCycleData {
   stageCounts: Record<string, number>;
   metrics: {
     totalBacklinks: number;
+    foundationLinks?: number;
+    growthLinks?: number;
     uniqueSources: number;
     avgDomainRating: number;
     thisMonthBacklinks: number;
     dailySubmissionCount: number;
     maxDailySubmissions: number;
+    isAggressive?: boolean;
   };
   agent: {
     status: string;
@@ -99,58 +103,121 @@ export function SEOCycleVisual() {
   const [loading, setLoading] = useState(true);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const fallbackData: SEOCycleData = {
+    stageCounts: { PLAN: 0, CREATE: 0, PUBLISH: 0, PROMOTE: 0, VALIDATE: 0, COMPLETE: 0 },
+    metrics: {
+      totalBacklinks: 0,
+      uniqueSources: 0,
+      avgDomainRating: 0,
+      thisMonthBacklinks: 0,
+      dailySubmissionCount: 0,
+      maxDailySubmissions: 10,
+    },
+    agent: {
+      status: "idle",
+      currentStep: "Awaiting data",
+      isPaused: true,
+    },
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/seo-cycle");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const result = await response.json();
+      setData(result);
+      setError(null);
+
+      const stepIndex = AGENT_STEPS.findIndex(step =>
+        step.text.toLowerCase().includes(result.agent.currentStep?.toLowerCase() || "")
+      );
+      setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
+    } catch (err) {
+      console.error("Failed to fetch SEO cycle data:", err);
+      setError("We couldn't load your SEO cycle data right now. Showing the latest available snapshot.");
+      setData((prev) => prev || fallbackData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTogglePause = async () => {
+    if (!data || isToggling) return;
+
+    setIsToggling(true);
+    const newPausedState = !data.agent.isPaused;
+
+    try {
+      const response = await fetch("/api/backlinks/campaign", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_paused: newPausedState }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update status");
+
+      const result = await response.json();
+
+      setData(prev => prev ? {
+        ...prev,
+        agent: {
+          ...prev.agent,
+          isPaused: newPausedState,
+          status: newPausedState ? "paused" : "scanning",
+        }
+      } : null);
+
+      toast.success(newPausedState ? "AI Agent paused" : "AI Agent resumed");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update AI Agent status");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
+  const handleQuickSync = async () => {
+    if (isToggling) return;
+    setIsToggling(true);
+    try {
+      const response = await fetch("/api/backlinks/agent", { method: "POST" });
+      if (!response.ok) throw new Error("Sync failed");
+      const result = await response.json();
+      toast.success(`Sync complete: ${result.created} new tasks found`);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to sync backlinks");
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   useEffect(() => {
-    const fallbackData: SEOCycleData = {
-      stageCounts: { PLAN: 0, CREATE: 0, PUBLISH: 0, PROMOTE: 0, VALIDATE: 0, COMPLETE: 0 },
-      metrics: {
-        totalBacklinks: 0,
-        uniqueSources: 0,
-        avgDomainRating: 0,
-        thisMonthBacklinks: 0,
-        dailySubmissionCount: 0,
-        maxDailySubmissions: 10,
-      },
-      agent: {
-        status: "idle",
-        currentStep: "Awaiting data",
-        isPaused: true,
-      },
-    };
-
-    async function fetchData() {
-      try {
-        const response = await fetch("/api/seo-cycle");
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const result = await response.json();
-        setData(result);
-        setError(null);
-        
-        const stepIndex = AGENT_STEPS.findIndex(step => 
-          step.text.toLowerCase().includes(result.agent.currentStep?.toLowerCase() || "")
-        );
-        setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
-      } catch (err) {
-        console.error("Failed to fetch SEO cycle data:", err);
-        setError("We couldn't load your SEO cycle data right now. Showing the latest available snapshot.");
-        setData((prev) => prev || fallbackData);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchData();
     const interval = setInterval(fetchData, 30000);
+
+    // Initial worker trigger if active
+    if (data && !data.agent.isPaused) {
+      fetch("/api/backlinks/worker", { method: "POST" }).catch(console.error);
+    }
+
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (!data?.agent.isPaused && data?.agent.status === "scanning") {
+    if (!data?.agent.isPaused && (data?.agent.status === "scanning" || data?.agent.status === "processing")) {
       const interval = setInterval(() => {
         setCurrentStepIndex((prev) => (prev < AGENT_STEPS.length - 1 ? prev + 1 : prev));
-      }, 4000);
+        // Real worker kick
+        fetch("/api/backlinks/worker", { method: "POST" })
+          .then(() => fetchData())
+          .catch(console.error);
+      }, 15000);
       return () => clearInterval(interval);
     }
   }, [data?.agent.isPaused, data?.agent.status]);
@@ -186,8 +253,28 @@ export function SEOCycleVisual() {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 text-sm font-medium text-[#DC2626] border border-[#E5E5E5] rounded-md hover:bg-[#FEF2F2] transition-colors">
-              <Clock className="w-4 h-4 inline-block mr-1.5" />
+            <button
+              onClick={handleQuickSync}
+              disabled={isToggling}
+              className="px-4 py-2 text-sm font-medium text-emerald-600 border border-emerald-100 bg-emerald-50/50 rounded-md hover:bg-emerald-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isToggling ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              Quick Sync
+            </button>
+            <button
+              onClick={handleTogglePause}
+              disabled={isToggling}
+              className="px-4 py-2 text-sm font-medium text-[#DC2626] border border-[#E5E5E5] rounded-md hover:bg-[#FEF2F2] transition-colors disabled:opacity-50"
+            >
+              {isToggling ? (
+                <Loader2 className="w-4 h-4 animate-spin inline-block mr-1.5" />
+              ) : (
+                <Clock className="w-4 h-4 inline-block mr-1.5" />
+              )}
               {data.agent.isPaused ? "Resume" : "Pause"}
             </button>
             <button className="px-4 py-2 text-sm font-medium text-[#6B7280] border border-[#E5E5E5] rounded-md hover:bg-[#F9FAFB] transition-colors">
@@ -240,10 +327,18 @@ export function SEOCycleVisual() {
                 <h3 className="text-lg font-semibold text-[#1A1A1A] flex items-center gap-2">
                   AI Agent {data.agent.isPaused ? "Paused" : "Running"}
                   {!data.agent.isPaused && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#D1FAE5] text-[#065F46] text-xs font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-                      LIVE
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#D1FAE5] text-[#065F46] text-xs font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                        LIVE
+                      </span>
+                      {data.metrics.isAggressive && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-xs font-bold animate-pulse">
+                          <Sparkles className="w-3 h-3" />
+                          BOOST ACTIVE
+                        </span>
+                      )}
+                    </div>
                   )}
                 </h3>
                 <p className="text-sm text-[#6B7280]">{data.agent.currentStep}</p>
@@ -253,7 +348,7 @@ export function SEOCycleVisual() {
             <div className="space-y-3">
               {AGENT_STEPS.map((step, index) => {
                 const status = index < currentStepIndex ? "complete" : index === currentStepIndex ? "in-progress" : "pending";
-                
+
                 return (
                   <motion.div
                     key={step.id}
@@ -299,7 +394,14 @@ export function SEOCycleVisual() {
                 <Link2 className="w-4 h-4 text-[#6B7280]" />
               </div>
               <div className="text-3xl font-bold text-[#1A1A1A] mb-1">{data.metrics.totalBacklinks}</div>
-              <div className="text-xs text-[#6B7280]">ALL TIME</div>
+              <div className="flex items-center gap-2 text-[10px]">
+                <div title="Site-wide authority links" className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-medium cursor-help">
+                  FDN: {data.metrics.foundationLinks || 0}
+                </div>
+                <div title="Article-specific promotion" className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-medium cursor-help">
+                  GROWTH: {data.metrics.growthLinks || 0}
+                </div>
+              </div>
             </div>
 
             <div className="rounded-xl border border-[#E5E5E5] bg-white p-5">

@@ -97,7 +97,8 @@ export default function IntegrationsPage() {
     shop: "",
     appId: "",
     appSecret: "",
-    instanceId: ""
+    instanceId: "",
+    databaseId: ""
   });
   const [feedback, setFeedback] = useState<Feedback>(null);
 
@@ -123,7 +124,7 @@ export default function IntegrationsPage() {
           if (cms) {
             return {
               ...integration,
-              status: cms.status === "connected" ? "Connected" : "Not connected",
+              status: cms.status === "active" ? "Connected" : "Not connected",
               last_sync: cms.last_sync_at ? new Date(cms.last_sync_at).toLocaleString() : null,
               integration_id: cms.id,
             };
@@ -148,7 +149,8 @@ export default function IntegrationsPage() {
       shop: "",
       appId: "",
       appSecret: "",
-      instanceId: ""
+      instanceId: "",
+      databaseId: ""
     });
     setFeedback(null);
     setConnectOpen(true);
@@ -192,12 +194,12 @@ export default function IntegrationsPage() {
         break;
 
       case "notion":
-        if (!form.accessToken) {
-          setFeedback({ type: "error", text: "Integration Token is required." });
+        if (!form.accessToken || !form.databaseId) {
+          setFeedback({ type: "error", text: "Integration Token and Database ID are required." });
           return;
         }
         endpoint = "/api/cms/notion/auth";
-        body = { access_token: form.accessToken };
+        body = { access_token: form.accessToken, database_id: form.databaseId };
         break;
 
       case "wix":
@@ -532,7 +534,24 @@ export default function IntegrationsPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-2">
+            {currentPlatform === "notion" && (
+              <div className="space-y-2 pb-2">
+                <Label htmlFor="databaseId">Database ID</Label>
+                <Input
+                  id="databaseId"
+                  placeholder="Enter your Notion database ID"
+                  value={form.databaseId}
+                  onChange={(e) => setForm((prev) => ({ ...prev, databaseId: e.target.value }))}
+                  required
+                />
+                <p className="text-[10px] text-gray-500 font-medium italic leading-relaxed">
+                  Find the ID in your Notion database URL:<br />
+                  notion.so/workspace/<b>[DATABASE_ID]</b>?v=...
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
               <Button
                 type="button"
                 variant="outline"

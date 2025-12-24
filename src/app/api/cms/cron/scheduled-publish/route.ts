@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { createTasksForUser } from "@/lib/backlink-engine";
 
 export async function GET(request: Request) {
   try {
@@ -18,10 +19,10 @@ export async function GET(request: Request) {
       .eq("scheduled_date", today);
 
     if (!articlesToPublish || articlesToPublish.length === 0) {
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: "No articles scheduled for publishing today",
-        count: 0 
+        count: 0
       });
     }
 
@@ -30,10 +31,10 @@ export async function GET(request: Request) {
     for (const article of articlesToPublish) {
       try {
         const { data: integrations } = await supabase
-          .from("integrations")
+          .from("cms_integrations")
           .select("*")
           .eq("user_id", article.sites.user_id)
-          .eq("connected", true);
+          .eq("status", "active");
 
         let published = false;
 
@@ -77,24 +78,13 @@ export async function GET(request: Request) {
             status: "published",
           });
 
-          const { data: planData } = await supabase
-            .from("user_subscriptions")
-            .select("plan_id, plans(backlinks_per_post)")
-            .eq("user_id", article.sites.user_id)
-            .single();
-
-          const backlinksToGenerate = planData?.plans?.backlinks_per_post || 3;
-
-          await supabase
-            .from("backlink_tasks")
-            .insert({
-              article_id: article.id,
-              site_id: article.site_id,
-              user_id: article.sites.user_id,
-              target_backlinks: backlinksToGenerate,
-              status: "queued",
-              priority: "normal",
-            });
+          await createTasksForUser(
+            article.sites.user_id,
+            article.sites.domain || article.sites.url,
+            article.sites.name,
+            article.meta_description || article.title,
+            article.id
+          );
         } else {
           publishResults.push({
             articleId: article.id,

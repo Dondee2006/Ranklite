@@ -30,7 +30,11 @@ export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get("Authorization");
+  console.log("Process received Auth Header:", authHeader);
+  console.log("Server Expects Secret:", process.env.CRON_SECRET);
+
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.error("Authorization mismatch!");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -100,52 +104,111 @@ export async function POST(request: Request) {
       .gte("scheduled_date", startDateStr);
 
     const usedDates = new Set<string>((existingArticles || []).map(a => a.scheduled_date));
-    const keywordPool = generateKeywordsForNiche(site.name, 30);
+    // Phase 1: AI-Powered Topic Clustering
+    console.log(`Generating clusters for niche: "${site.niche || site.name}"`);
+    const clustersData = await generateTopicClusters(site.niche || site.name, 30);
+    console.log("AI Cluster Data received");
 
-    // We only process ONE article per hit now for maximum reliability
-    const currentProgress = job.progress;
+    const currentDate = new Date(startDate);
     const totalToGenerate = job.total || 30;
 
-    if (currentProgress < totalToGenerate) {
-      const currentDate = new Date(startDate);
-      // Skip ahead by current progress to find the next available date
-      // We essentially want to find the (progress + 1)-th available date
-      let foundDatesCount = 0;
-      let dateToUse = "";
+    // Flatten clusters into a sequence of slots
+    // We want to distribute Pillars first, then Spokes
+    const planSlots: any[] = new Array(totalToGenerate).fill(null);
 
-      while (foundDatesCount <= currentProgress) {
-        const dateStr = formatDate(currentDate);
-        if (!usedDates.has(dateStr)) {
-          if (foundDatesCount === currentProgress) {
-            dateToUse = dateStr;
-          }
-          foundDatesCount++;
-        }
-        if (foundDatesCount <= currentProgress) {
-          currentDate.setDate(currentDate.getDate() + 1);
+    // Assign Pillars to Mondays (or first available day of week)
+    let pillarIndex = 0;
+    for (let i = 0; i < totalToGenerate && pillarIndex < clustersData.length; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      if (d.getDay() === 1) { // Monday
+        const cluster = clustersData[pillarIndex];
+        planSlots[i] = {
+          keyword: cluster.pillar.keyword,
+          title: cluster.pillar.title,
+          volume: cluster.pillar.volume || 1000 + Math.floor(Math.random() * 5000),
+          difficulty: cluster.pillar.difficulty || 20 + Math.floor(Math.random() * 40),
+          cluster_name: cluster.topic,
+          is_pillar: true,
+          article_type: "guide"
+        };
+        pillarIndex++;
+      }
+    }
+
+    // Fill remaining slots with Spokes
+    let currentClusterIdx = 0;
+    let currentSpokeIdx = 0;
+    for (let i = 0; i < totalToGenerate; i++) {
+      if (planSlots[i]) continue;
+
+      // Find next available spoke
+      while (currentClusterIdx < clustersData.length) {
+        const cluster = clustersData[currentClusterIdx];
+        if (cluster.spokes && currentSpokeIdx < cluster.spokes.length) {
+          const spoke = cluster.spokes[currentSpokeIdx];
+          planSlots[i] = {
+            keyword: spoke.keyword,
+            title: spoke.title,
+            volume: spoke.volume || 100 + Math.floor(Math.random() * 900),
+            difficulty: spoke.difficulty || 5 + Math.floor(Math.random() * 25),
+            cluster_name: cluster.topic,
+            is_pillar: false,
+            article_type: selectArticleType()
+          };
+          currentSpokeIdx++;
+          break;
+        } else {
+          currentClusterIdx++;
+          currentSpokeIdx = 0;
         }
       }
 
-      console.log(`Processing article ${currentProgress + 1}/${totalToGenerate} for date ${dateToUse}`);
+      // Safety fallback if AI didn't give enough spokes
+      if (!planSlots[i]) {
+        planSlots[i] = {
+          keyword: `${site.niche || site.name} article ${i}`,
+          title: null,
+          volume: 200 + Math.floor(Math.random() * 500),
+          difficulty: 10 + Math.floor(Math.random() * 20),
+          cluster_name: "General",
+          is_pillar: false,
+          article_type: selectArticleType()
+        };
+      }
+    }
 
-      const keyword = keywordPool[currentProgress % keywordPool.length];
-      const articleType = selectArticleType();
-      const searchIntent = determineSearchIntent(articleType);
-      const title = generateTitle(keyword, articleType);
+    const articlesToInsert = [];
+
+    for (let i = 0; i < totalToGenerate; i++) {
+      const dateStr = formatDate(currentDate);
+      if (usedDates.has(dateStr)) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+
+      const slot = planSlots[i];
+      const { keyword, cluster_name, is_pillar, article_type, title: aiTitle, volume, difficulty } = slot;
+      const searchIntent = determineSearchIntent(article_type);
+      const title = aiTitle || generateTitle(keyword, article_type);
 
       const articleData: Record<string, unknown> = {
         site_id: site.id,
         title,
         slug: generateSlug(title),
-        keyword,
+        keyword: keyword,
         secondary_keywords: generateSecondaryKeywords(keyword),
         search_intent: searchIntent,
-        article_type: articleType,
-        word_count: 1500 + Math.floor(Math.random() * 1000),
-        cta_placement: ["beginning", "middle", "end"][Math.floor(Math.random() * 3)],
+        article_type,
+        word_count: is_pillar ? 2500 + Math.floor(Math.random() * 500) : 1500 + Math.floor(Math.random() * 500),
+        cta_placement: ["beginning", "middle", "end", "both"][Math.floor(Math.random() * 4)],
         status: "planned",
-        scheduled_date: dateToUse,
-      };
+        scheduled_date: dateStr,
+        cluster_name,
+        is_pillar,
+        volume,
+        difficulty
+      });
 
       try {
         const content = await generateArticleWithRetry({
@@ -216,7 +279,28 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, progress: job.progress + 1 });
+    if (articlesToInsert.length > 0) {
+      console.log(`Inserting ${articlesToInsert.length} planned articles...`);
+      const { error: insertError } = await supabase.from("articles").insert(articlesToInsert);
+
+      if (insertError) {
+        console.error("Failed to insert planned articles:", insertError);
+        throw new Error(`Database Insert Failed: ${insertError.message}`);
+      }
+    }
+
+    await supabase
+      .from("generation_jobs")
+      .update({
+        progress: totalToGenerate,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", jobId);
+
+    return NextResponse.json({ success: true, count: articlesToInsert.length });
+
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Bulk generation process error:", error);
@@ -312,6 +396,109 @@ Return a JSON object with:
   } catch (e) {
     console.error("JSON parse error:", e, "Raw match:", jsonMatch[0]);
     throw new Error("Failed to parse AI JSON response");
+  }
+}
+
+async function generateTopicClusters(niche: string, targetCount: number): Promise<any[]> {
+  const prompt = `Act as a senior SEO Strategist. Create a detailed "Hub and Spoke" topic cluster map for a website in the "${niche}" niche.
+  
+  TARGET: Total of ${targetCount} articles.
+  STRUCTURE:
+  1. Identify 3-4 major semantic topics (Clusters).
+  2. For each Cluster, define 1 "Pillar" article (comprehensive, broad authority).
+  3. For each Cluster, define 8-9 "Spoke" articles (specific, long-tail keywords that support the Pillar).
+  
+  OUTPUT: Return a JSON array of clusters:
+  [
+    {
+      "topic": "Cluster Category Name",
+      "pillar": { 
+        "keyword": "Primary Authority Keyword", 
+        "title": "Engaging, Click-Worthy Title",
+        "volume": 2500,
+        "difficulty": 45
+      },
+      "spokes": [
+        { 
+          "keyword": "Long-tail Keyword 1", 
+          "title": "Natural Title for Spoke 1",
+          "volume": 450,
+          "difficulty": 12
+        },
+        ...
+      ]
+    }
+  ]
+  
+  Quality Requirements:
+  - Generate realistic estimated monthly search volume and keyword difficulty (0-100).
+  - Keywords must be high-volume/low-competition style.
+  - The Spokes must logically connect to their Cluster Pillar.
+  - NON-REPETITIVE TITLES: Do NOT start every title with the same words. Varied phrasing is required.
+  - Do NOT spam the niche name in every title. Use synonyms or imply the topic.
+  - RETURN ONLY VALID JSON.`;
+
+  try {
+    const { text } = await generateText({
+      model: requesty("openai/gpt-4o-mini"),
+      system: "You are a world-class SEO strategist. You only speak JSON.",
+      prompt,
+      temperature: 0.8,
+    });
+
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("Could not parse AI cluster JSON");
+    return JSON.parse(jsonMatch[0]);
+  } catch (error) {
+    console.error("Failed to generate AI clusters:", error);
+    // Fallback static clusters
+    return [
+      {
+        topic: "Fundamentals",
+        pillar: { keyword: `${niche} guide`, title: `The Combined Guide to ${niche} for Beginners`, volume: 1500, difficulty: 30 },
+        spokes: [
+          { keyword: `best ${niche} tips`, title: `10 Best ${niche} Tips You Need to Know`, volume: 800, difficulty: 15 },
+          { keyword: `how to ${niche}`, title: `How to Master ${niche} in 2025`, volume: 1200, difficulty: 25 },
+          { keyword: `${niche} for beginners`, title: `Getting Started with ${niche}: A complete Roadmap`, volume: 2000, difficulty: 20 },
+          { keyword: `${niche} tools`, title: `Top 5 ${niche} Tools for Better Results`, volume: 600, difficulty: 12 },
+          { keyword: `${niche} benefits`, title: `Why ${niche} Matters for Your Business`, volume: 400, difficulty: 10 },
+          { keyword: `${niche} myths`, title: `Common ${niche} Myths Debunked`, volume: 300, difficulty: 8 },
+          { keyword: `${niche} history`, title: `The History and Evolution of ${niche}`, volume: 200, difficulty: 5 },
+          { keyword: `${niche} checklist`, title: `Your Ultimate ${niche} Success Checklist`, volume: 500, difficulty: 14 },
+          { keyword: `${niche} tutorial`, title: `A Step-by-Step ${niche} Tutorial`, volume: 900, difficulty: 18 }
+        ]
+      },
+      {
+        topic: "Advanced",
+        pillar: { keyword: `advanced ${niche}`, title: `Advanced ${niche} Strategies for Experts`, volume: 2200, difficulty: 55 },
+        spokes: [
+          { keyword: `${niche} strategies`, title: `Proven ${niche} Strategies that Work`, volume: 1100, difficulty: 40 },
+          { keyword: `${niche} automation`, title: `Automating ${niche} for Scale`, volume: 500, difficulty: 35 },
+          { keyword: `${niche} scaling`, title: `How to Scale Your ${niche} Efforts`, volume: 400, difficulty: 30 },
+          { keyword: `${niche} psychology`, title: `The Psychology Behind Effective ${niche}`, volume: 300, difficulty: 25 },
+          { keyword: `${niche} future`, title: `The Future of ${niche}: What to Expect`, volume: 700, difficulty: 45 },
+          { keyword: `${niche} expert tips`, title: `Insider ${niche} Tips from Industry Leaders`, volume: 600, difficulty: 50 },
+          { keyword: `${niche} case studies`, title: `Real World ${niche} Case Studies`, volume: 450, difficulty: 20 },
+          { keyword: `${niche} ROI`, title: `Measuring the ROI of your ${niche} Campaigns`, volume: 350, difficulty: 28 },
+          { keyword: `${niche} methodology`, title: `A Deep Dive into ${niche} Methodology`, volume: 250, difficulty: 32 }
+        ]
+      },
+      {
+        topic: "Commercial",
+        pillar: { keyword: `best ${niche} solutions`, title: `The Best ${niche} Solutions Rated & Reviewed`, volume: 1800, difficulty: 48 },
+        spokes: [
+          { keyword: `${niche} reviews`, title: `In-Depth ${niche} Software Reviews`, volume: 950, difficulty: 38 },
+          { keyword: `${niche} comparison`, title: `${niche} Tools Comparison: Which is Best?`, volume: 1100, difficulty: 42 },
+          { keyword: `${niche} vs alternatives`, title: `${niche} vs The Competition`, volume: 1300, difficulty: 45 },
+          { keyword: `top ${niche} software`, title: `Top Rated ${niche} Software`, volume: 850, difficulty: 35 },
+          { keyword: `${niche} pricing`, title: `Understanding ${niche} Pricing Models`, volume: 400, difficulty: 25 },
+          { keyword: `${niche} features`, title: `Essential ${niche} Features to Look For`, volume: 300, difficulty: 20 },
+          { keyword: `${niche} services`, title: `Hiring ${niche} Services vs In-House`, volume: 250, difficulty: 15 },
+          { keyword: `${niche} ROI analysis`, title: `Is ${niche} Worth the Investment?`, volume: 350, difficulty: 22 },
+          { keyword: `${niche} testimonials`, title: `What Users Say About Top ${niche} Tools`, volume: 200, difficulty: 12 }
+        ]
+      }
+    ];
   }
 }
 

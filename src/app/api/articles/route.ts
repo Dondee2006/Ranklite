@@ -18,7 +18,10 @@ export async function GET(request: Request) {
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const site = sites?.[0];
 
     if (!site) {
       return NextResponse.json({ articles: [] });
@@ -66,7 +69,10 @@ export async function POST(request: Request) {
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const site = sites?.[0];
 
     if (!site) {
       return NextResponse.json({ error: "No site found" }, { status: 404 });
