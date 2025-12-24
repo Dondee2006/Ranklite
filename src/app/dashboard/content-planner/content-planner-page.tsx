@@ -1018,10 +1018,16 @@ export default function ContentPlannerPage() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="max-h-60 overflow-y-auto rounded-lg bg-slate-50 p-4">
-                                            <pre className="text-xs text-slate-600 whitespace-pre-wrap font-mono">
-                                                {selectedArticle.content?.slice(0, 2000)}...
-                                            </pre>
+                                        <div className="max-h-80 overflow-y-auto rounded-lg bg-white border border-slate-100 p-6 shadow-inner">
+                                            <div className="article-preview-rendered prose prose-sm max-w-none">
+                                                {selectedArticle.html_content ? (
+                                                    <div dangerouslySetInnerHTML={{ __html: selectedArticle.html_content }} />
+                                                ) : selectedArticle.content ? (
+                                                    <div dangerouslySetInnerHTML={{ __html: marked.parse(selectedArticle.content) }} />
+                                                ) : (
+                                                    <p className="text-slate-400 italic">No content available.</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 

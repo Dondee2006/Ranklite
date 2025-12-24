@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { checkPostGenerationLimit, incrementPostUsage } from "@/lib/usage-limits";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { marked } from "marked";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -365,6 +366,9 @@ function generateImagePlaceholders(title: string, keyword: string): object[] {
 }
 
 function generateHTML(content: string, title: string, images: object[], internalLinks: object[], externalLinks: object[]): string {
+  // Use marked to parse the markdown content into HTML
+  const parsedContent = marked.parse(content);
+
   let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -377,30 +381,24 @@ function generateHTML(content: string, title: string, images: object[], internal
 <h1>${title}</h1>
 `;
 
-  const sections = content.split("## ");
-  for (let i = 1; i < sections.length; i++) {
-    const [heading, ...paragraphs] = sections[i].split("\n\n");
-    html += `<h2>${heading}</h2>\n`;
-
-    if (i === 1 && (images as { url: string }[])[0]) {
-      html += `<figure><img src="${(images as { url: string }[])[0].url}" alt="${(images as { alt: string }[])[0].alt}"><figcaption>${(images as { caption: string }[])[0].caption}</figcaption></figure>\n`;
-    }
-
-    for (const p of paragraphs) {
-      if (p.trim()) {
-        html += `<p>${p.trim()}</p>\n`;
-      }
-    }
-
-    if (i === 2 && internalLinks.length > 0) {
-      html += `<aside class="related-content"><h3>Related Articles</h3><ul>`;
-      for (const link of internalLinks.slice(0, 3) as { url: string; anchor_text: string }[]) {
-        html += `<li><a href="${link.url}">${link.anchor_text}</a></li>`;
-      }
-      html += `</ul></aside>\n`;
-    }
+  // Add the featured image if it exists
+  if ((images as { url: string }[])[0]) {
+    html += `<figure><img src="${(images as { url: string }[])[0].url}" alt="${(images as { alt: string }[])[0].alt}"><figcaption>${(images as { caption: string }[])[0].caption}</figcaption></figure>\n`;
   }
 
+  // Add the main content (already converted from markdown to HTML)
+  html += parsedContent;
+
+  // Add internal links
+  if (internalLinks.length > 0) {
+    html += `\n<aside class="related-content"><h3>Related Articles</h3><ul>`;
+    for (const link of internalLinks.slice(0, 3) as { url: string; anchor_text: string }[]) {
+      html += `<li><a href="${link.url}">${link.anchor_text}</a></li>`;
+    }
+    html += `</ul></aside>\n`;
+  }
+
+  // Add external links
   if (externalLinks.length > 0) {
     html += `<section class="references"><h3>Further Reading</h3><ul>`;
     for (const link of externalLinks as { url: string; anchor_text: string; source: string }[]) {

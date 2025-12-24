@@ -333,10 +333,12 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                     size="sm"
                                     className="h-9 px-4 text-xs font-bold text-gray-700 border-gray-200 hover:bg-gray-50 hover:text-gray-900 gap-2 transition-all"
                                     onClick={() => {
-                                        // Load content for editing
+                                        // Force conversion of any legacy markdown format to clean HTML for the visual editor
                                         const rawContent = article.html_content || article.content || "";
-                                        const processedContent = parseYouTubeShortcodes(rawContent);
-                                        setEditableContent(processedContent);
+
+                                        // Even if it's already HTML, running it through marked ensures nested symbols are resolved
+                                        // and legacy markdown articles are converted instantly.
+                                        setEditableContent(marked.parse(rawContent) as string);
                                         setIsEditingContent(true);
                                     }}
                                 >
