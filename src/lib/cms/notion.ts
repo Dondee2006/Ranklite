@@ -26,6 +26,13 @@ export class NotionClient {
 
   constructor(config: NotionConfig) {
     this.accessToken = config.accessToken;
+    console.log(`[NOTION DEBUG] Token available: ${!!config.accessToken}`);
+    if (config.accessToken) {
+      console.log(`[NOTION DEBUG] Token prefix: ${config.accessToken.substring(0, 5)}...`);
+      console.log(`[NOTION DEBUG] Token length: ${config.accessToken.length}`);
+    } else {
+      console.log(`[NOTION DEBUG] Token IS EMPTY!`);
+    }
     this.client = new Client({
       auth: config.accessToken,
       notionVersion: '2022-06-28', // Use older API version that supports databases.query
