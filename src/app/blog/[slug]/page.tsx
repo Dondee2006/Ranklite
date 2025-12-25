@@ -96,6 +96,22 @@ function NotionRenderer({ blocks }: { blocks: any[] }) {
                                 {text}
                             </blockquote>
                         );
+                    case "video":
+                    case "embed":
+                        const videoUrl = value.type === "external" ? value.external.url : value.file?.url;
+                        if (!videoUrl) return null;
+
+                        return (
+                            <div key={block.id} className="my-8 aspect-video w-full overflow-hidden rounded-xl border border-border bg-slate-100">
+                                <iframe
+                                    src={videoUrl.replace("watch?v=", "embed/")}
+                                    title="Video player"
+                                    className="h-full w-full"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                        );
                     default:
                         return null;
                 }

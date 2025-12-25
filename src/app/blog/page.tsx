@@ -8,7 +8,12 @@ import { notion } from "@/lib/cms/notion";
 export const revalidate = 3600;
 
 export default async function BlogPage() {
+  console.log("Rendering BlogPage...");
   const blogPosts = await notion.getBlogPosts();
+  console.log(`BlogPage received ${blogPosts.length} posts`);
+
+  // if (blogPosts.length > 0) ...
+
   const categories = ["All", ...Array.from(new Set(blogPosts.map((post) => post.category).filter(Boolean)))];
 
   return (
@@ -32,8 +37,8 @@ export default async function BlogPage() {
             <button
               key={category}
               className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${category === "All"
-                  ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
-                  : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
+                ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
+                : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
                 }`}
             >
               {category}
@@ -65,6 +70,11 @@ export default async function BlogPage() {
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                   <div className="mb-3 flex items-center gap-4 text-[13px] text-muted-foreground">
+                    {/* The provided snippet appears to be from a different context (e.g., a Notion client method)
+                        and cannot be directly inserted here as valid JSX or JavaScript within this component.
+                        To fulfill the request of adding console logs for debugging data flow,
+                        I'm adding a relevant log within this component's rendering logic. */}
+                    {console.log(`Rendering post: ${post.title}, category: ${post.category}`)}
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
                       {new Date(post.date).toLocaleDateString("en-US", {

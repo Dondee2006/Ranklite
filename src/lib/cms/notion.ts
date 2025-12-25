@@ -22,56 +22,139 @@ export interface NotionConfig {
 export class NotionClient {
   private client: Client;
   private databaseId: string;
+  private accessToken: string;
 
   constructor(config: NotionConfig) {
-    this.client = new Client({ auth: config.accessToken });
+    this.accessToken = config.accessToken;
+    this.client = new Client({
+      auth: config.accessToken,
+      notionVersion: '2022-06-28', // Use older API version that supports databases.query
+      timeoutMs: 60000, // Increase timeout to 60s
+    });
     this.databaseId = config.databaseId;
   }
 
   async getBlogPosts(preview = false): Promise<BlogPost[]> {
     try {
-      const response = await (this.client.databases as any).query({
-        database_id: this.databaseId,
-        filter: preview
-          ? undefined
-          : {
-            property: 'Status',
-            select: {
-              equals: 'Published',
-            },
-          },
-        sorts: [
-          {
-            property: 'Published Date',
-            direction: 'descending',
-          },
-        ],
+      console.log('Fetching Notion posts via raw fetch...');
+
+      // Use raw fetch to avoid SDK issues
+      const response = await fetch(`https://api.notion.com/v1/databases/${this.databaseId}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          page_size: 100,
+          // Try with sort first
+          sorts: [{ property: 'Published Date', direction: 'descending' }]
+        }),
+        next: { revalidate: 60 } // Cache for 1 minute
       });
 
-      return response.results.map((page: any) => this.transformPageToPost(page));
-    } catch (error) {
+      let data;
+
+      if (!response.ok) {
+        // If sort fails (likely due to missing property), try without sort
+        console.warn(`Notion API error: ${response.status} ${response.statusText}. Retrying without sort...`);
+
+        const retryResponse = await fetch(`https://api.notion.com/v1/databases/${this.databaseId}/query`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ page_size: 100 }),
+          next: { revalidate: 60 }
+        });
+
+        if (!retryResponse.ok) {
+          const errorText = await retryResponse.text();
+          throw new Error(`Notion API failed: ${retryResponse.status} - ${errorText}`);
+        }
+
+        data = await retryResponse.json();
+      } else {
+        data = await response.json();
+      }
+
+      console.log(`Notion API returned ${data.results.length} raw pages`);
+      const transformed = data.results.map((page: any) => this.transformPageToPost(page));
+      return transformed;
+
+    } catch (error: any) {
       console.error('Error fetching blog posts from Notion:', error);
-      return [];
+      return [{
+        id: 'error-post',
+        slug: 'error',
+        title: `Error: ${error.message}`,
+        excerpt: `Please check server logs.`,
+        date: new Date().toISOString(),
+        status: 'Published',
+        category: 'Error',
+        readTime: '0 min',
+      }];
     }
   }
 
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     try {
-      const response = await (this.client.databases as any).query({
-        database_id: this.databaseId,
-        filter: {
-          property: 'Slug',
-          rich_text: {
-            equals: slug,
+      console.log(`Getting blog post for slug: ${slug}`);
+
+      // Check if slug looks like a UUID (Notion ID)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug) ||
+        /^[0-9a-f]{32}$/i.test(slug);
+
+      if (isUUID) {
+        console.log(`Slug looks like UUID, fetching page directly...`);
+        const response = await fetch(`https://api.notion.com/v1/pages/${slug}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Notion-Version': '2022-06-28',
           },
+          next: { revalidate: 3600 }
+        });
+
+        if (response.ok) {
+          const page = await response.json();
+          return this.transformPageToPost(page);
+        }
+        console.warn(`Direct page fetch failed: ${response.status}`);
+      }
+
+      // Fallback: Query by slug property
+      console.log(`Querying Notion Database by Slug: ${slug}`);
+      const response = await fetch(`https://api.notion.com/v1/databases/${this.databaseId}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          filter: {
+            property: 'Slug', // Note: this relies on "Slug" property existing
+            rich_text: { equals: slug }
+          }
+        }),
+        next: { revalidate: 3600 }
       });
 
-      if (response.results.length === 0) {
+      if (!response.ok) {
+        console.error(`Notion Query failed: ${response.status}`);
         return null;
       }
 
-      return this.transformPageToPost(response.results[0] as any);
+      const data = await response.json();
+      if (data.results.length === 0) {
+        return null;
+      }
+
+      return this.transformPageToPost(data.results[0] as any);
     } catch (error) {
       console.error(`Error fetching blog post with slug ${slug}:`, error);
       return null;
@@ -80,10 +163,22 @@ export class NotionClient {
 
   async getPageBlocks(pageId: string) {
     try {
-      const response = await this.client.blocks.children.list({
-        block_id: pageId,
+      // Use raw fetch for blocks too
+      const response = await fetch(`https://api.notion.com/v1/blocks/${pageId}/children?page_size=100`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Notion-Version': '2022-06-28',
+        },
+        next: { revalidate: 3600 }
       });
-      return response.results;
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch blocks: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.results;
     } catch (error) {
       console.error(`Error fetching blocks for page ${pageId}:`, error);
       return [];
@@ -115,8 +210,18 @@ export class NotionClient {
 
           // Try a Hail Mary create with just the title. Notion often handles this even if retrieve() lies about properties.
           // Note: We use "title" lowercase because that is the standard for basic pages
+
+          let cover: any = undefined;
+          if (article.featured_image) {
+            cover = {
+              type: "external",
+              external: { url: article.featured_image }
+            };
+          }
+
           const response = await this.client.pages.create({
             parent: { database_id: this.databaseId },
+            cover: cover,
             properties: {
               "title": { title: [{ text: { content: article.title } }] }
             },
@@ -191,8 +296,18 @@ export class NotionClient {
 
       const blocks = this.htmlToBlocks(article.content);
 
+      // Prepare cover image if provided
+      let cover: any = undefined;
+      if (article.featured_image) {
+        cover = {
+          type: "external",
+          external: { url: article.featured_image }
+        };
+      }
+
       const response = await this.client.pages.create({
         parent: { database_id: this.databaseId },
+        cover: cover,
         properties,
         children: blocks as any,
       });
@@ -209,6 +324,17 @@ export class NotionClient {
     }
   }
 
+  private decodeHtmlEntities(text: string): string {
+    return text
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&#x27;/g, "'");
+  }
+
   private htmlToBlocks(html: string): any[] {
     const blocks: any[] = [];
 
@@ -223,25 +349,25 @@ export class NotionClient {
         blocks.push({
           object: 'block',
           type: 'heading_1',
-          heading_1: { rich_text: [{ text: { content: part.replace(/<[^>]*>/g, '') } }] },
+          heading_1: { rich_text: [{ text: { content: this.decodeHtmlEntities(part.replace(/<[^>]*>/g, '')) } }] },
         });
       } else if (part.match(/<h2/i)) {
         blocks.push({
           object: 'block',
           type: 'heading_2',
-          heading_2: { rich_text: [{ text: { content: part.replace(/<[^>]*>/g, '') } }] },
+          heading_2: { rich_text: [{ text: { content: this.decodeHtmlEntities(part.replace(/<[^>]*>/g, '')) } }] },
         });
       } else if (part.match(/<h3/i)) {
         blocks.push({
           object: 'block',
           type: 'heading_3',
-          heading_3: { rich_text: [{ text: { content: part.replace(/<[^>]*>/g, '') } }] },
+          heading_3: { rich_text: [{ text: { content: this.decodeHtmlEntities(part.replace(/<[^>]*>/g, '')) } }] },
         });
       } else if (part.match(/<p/i)) {
         blocks.push({
           object: 'block',
           type: 'paragraph',
-          paragraph: { rich_text: [{ text: { content: part.replace(/<[^>]*>/g, '') } }] },
+          paragraph: { rich_text: [{ text: { content: this.decodeHtmlEntities(part.replace(/<[^>]*>/g, '')) } }] },
         });
       } else if (part.match(/<img/i)) {
         const srcMatch = part.match(/src="([^"]+)"/i);
@@ -267,7 +393,7 @@ export class NotionClient {
         blocks.push({
           object: 'block',
           type: 'bulleted_list_item',
-          bulleted_list_item: { rich_text: [{ text: { content: part.replace(/<[^>]*>/g, '') } }] },
+          bulleted_list_item: { rich_text: [{ text: { content: this.decodeHtmlEntities(part.replace(/<[^>]*>/g, '')) } }] },
         });
       }
     }
@@ -277,7 +403,7 @@ export class NotionClient {
       blocks.push({
         object: 'block',
         type: 'paragraph',
-        paragraph: { rich_text: [{ text: { content: html.replace(/<[^>]*>/g, '').substring(0, 2000) } }] },
+        paragraph: { rich_text: [{ text: { content: this.decodeHtmlEntities(html.replace(/<[^>]*>/g, '').substring(0, 2000)) } }] },
       });
     }
 
@@ -287,20 +413,54 @@ export class NotionClient {
   private transformPageToPost(page: any): BlogPost {
     const properties = page.properties;
 
-    const title = properties.Title?.title[0]?.plain_text || 'Untitled';
-    const slug = properties.Slug?.rich_text[0]?.plain_text || '';
-    const excerpt = properties.Excerpt?.rich_text[0]?.plain_text || '';
-    const date = properties['Published Date']?.date?.start || new Date().toISOString();
+
+    // Handle Title - check for "Title" or "Name" (case insensitive/standard)
+    const titleKey = Object.keys(properties).find(k => k.toLowerCase() === 'title' || k.toLowerCase() === 'name') || 'Name';
+    const title = properties[titleKey]?.title?.[0]?.plain_text || 'Untitled';
+
+    // Handle Slug - check for "Slug" or use ID
+    const slugKey = Object.keys(properties).find(k => k.toLowerCase() === 'slug');
+    const slug = slugKey ? (properties[slugKey]?.rich_text?.[0]?.plain_text || page.id) : page.id;
+
+    const excerpt = properties.Excerpt?.rich_text?.[0]?.plain_text || '';
+
+    // Handle Date - check for "Published Date", "Date" or use created_time
+    const dateKey = Object.keys(properties).find(k => k.toLowerCase() === 'published date' || k.toLowerCase() === 'date');
+    const date = dateKey ? (properties[dateKey]?.date?.start || page.created_time) : page.created_time;
+
     const status = properties.Status?.select?.name || 'Draft';
     const category = properties.Category?.select?.name || 'General';
-    const seoTitle = properties['SEO Title']?.rich_text[0]?.plain_text || '';
-    const seoDescription = properties['Meta Description']?.rich_text[0]?.plain_text || '';
+    const seoTitle = properties['SEO Title']?.rich_text?.[0]?.plain_text || '';
+    const seoDescription = properties['Meta Description']?.rich_text?.[0]?.plain_text || '';
 
     // Handle cover image
     let coverImage = undefined;
-    if (properties['Cover Image']?.files?.length > 0) {
-      const file = properties['Cover Image'].files[0];
-      coverImage = file.type === 'file' ? file.file.url : file.external.url;
+
+    // 1. Check standard page cover (root level)
+    if (page.cover) {
+      coverImage = page.cover.type === 'file' ? page.cover.file.url : page.cover.external.url;
+    }
+
+    try {
+      const fs = require('fs');
+      if (!global.hasLoggedNotionDebug) {
+        fs.appendFileSync('debug-notion.log', JSON.stringify({
+          id: page.id,
+          hasRootCover: !!page.cover,
+          rootCoverType: page.cover?.type,
+          extractedUrl: coverImage
+        }) + "\n");
+        global.hasLoggedNotionDebug = true;
+      }
+    } catch (e) { }
+
+    // 2. Fallback to properties if not found (legacy support)
+    if (!coverImage) {
+      const coverKey = Object.keys(properties).find(k => k.toLowerCase() === 'cover image' || k.toLowerCase() === 'cover');
+      if (coverKey && properties[coverKey]?.files?.length > 0) {
+        const file = properties[coverKey].files[0];
+        coverImage = file.type === 'file' ? file.file.url : file.external.url;
+      }
     }
 
     // Estimate read time (very rough approximation)

@@ -10,6 +10,7 @@ import FeaturesAutopilotPublishing from "@/components/sections/features-autopilo
 import BoostVisibility from "@/components/sections/boost-visibility";
 import AdditionalFeatures from "@/components/sections/additional-features";
 import WritingExamples from "@/components/sections/writing-examples";
+import BlogSection from "@/components/sections/blog-section";
 import AIInSEO from "@/components/sections/ai-in-seo";
 import WhyRanklite from "@/components/sections/why-ranklite";
 import Pricing from "@/components/sections/pricing";
@@ -35,6 +36,7 @@ export default function Home() {
         <BoostVisibility />
         <AdditionalFeatures />
         <WritingExamples />
+        <BlogSection />
         <AIInSEO />
         <WhyRanklite />
         <Pricing />
