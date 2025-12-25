@@ -423,13 +423,15 @@ export class NotionClient {
 
     // Handle Title - check for "Title" or "Name" (case insensitive/standard)
     const titleKey = Object.keys(properties).find(k => k.toLowerCase() === 'title' || k.toLowerCase() === 'name') || 'Name';
-    const title = properties[titleKey]?.title?.[0]?.plain_text || 'Untitled';
+    const rawTitle = properties[titleKey]?.title?.[0]?.plain_text || 'Untitled';
+    const title = this.decodeHtmlEntities(rawTitle);
 
     // Handle Slug - check for "Slug" or use ID
     const slugKey = Object.keys(properties).find(k => k.toLowerCase() === 'slug');
     const slug = slugKey ? (properties[slugKey]?.rich_text?.[0]?.plain_text || page.id) : page.id;
 
-    const excerpt = properties.Excerpt?.rich_text?.[0]?.plain_text || '';
+    const rawExcerpt = properties.Excerpt?.rich_text?.[0]?.plain_text || '';
+    const excerpt = this.decodeHtmlEntities(rawExcerpt);
 
     // Handle Date - check for "Published Date", "Date" or use created_time
     const dateKey = Object.keys(properties).find(k => k.toLowerCase() === 'published date' || k.toLowerCase() === 'date');
