@@ -1,9 +1,12 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { BacklinkTask, Platform, SubmissionData, TaskStatus } from "./types";
 import { runPolicyCheck, shouldRequireManualReview } from "./policy-engine";
-import { checkBacklinkGenerationLimit, incrementBacklinkUsage } from "@/lib/usage-limits";
+import { checkBacklinkGenerationLimit, getUserPlanAndUsage, incrementBacklinkUsage } from "@/lib/usage-limits";
 
 const FOUNDATION_CATEGORIES = ["Business Directory", "Local Directory", "Review Platform"];
+const MIN_DELAY_BETWEEN_SUBMISSIONS_MS = 15 * 60 * 1000;
+const MAX_DAILY_SUBMISSIONS = 50;
+const EXPONENTIAL_BACKOFF_BASE = 2;
 
 export async function createTasksForUser(
   userId: string,
@@ -22,9 +25,29 @@ export async function createTasksForUser(
     return { created: 0, skipped: 0, blocked: 0 };
   }
 
-  const limitCheck = await checkBacklinkGenerationLimit(userId, platforms.length);
+  // 1. Get Plan Limit
+  const { plan } = await getUserPlanAndUsage(userId, supabaseAdmin);
+  const maxBacklinks = plan?.backlinks_per_post || 10; // Default fallback
+
+  // 2. Slice platforms to fit limit
+  // We take the top N platforms based on the existing sort (Domain Rating) using sortedPlatforms later
+  // Actually, let's sort first then slice.
+
+  const sortedPlatforms = [...platforms].sort((a, b) => {
+    const aIsFoundation = FOUNDATION_CATEGORIES.includes(a.category || "");
+    const bIsFoundation = FOUNDATION_CATEGORIES.includes(b.category || "");
+    if (aIsFoundation && !bIsFoundation) return 1;
+    if (!aIsFoundation && bIsFoundation) return -1;
+    return (b.domain_rating || 0) - (a.domain_rating || 0);
+  });
+
+  const platformsToProcess = sortedPlatforms.slice(0, maxBacklinks);
+
+  // 3. Check limit with the SLICED count (should pass)
+  const limitCheck = await checkBacklinkGenerationLimit(userId, platformsToProcess.length, supabaseAdmin);
   if (!limitCheck.allowed) {
     console.error(`Backlink limit exceeded for user ${userId}: ${limitCheck.message}`);
+    // If even the sliced amount fails (e.g. they verified 0 links left?), execute nothing.
     return { created: 0, skipped: 0, blocked: 0 };
   }
 
@@ -44,17 +67,10 @@ export async function createTasksForUser(
   let blocked = 0;
   const now = new Date();
 
-  // Sort platforms: Prioritize Growth for fast-start if articleId is provided
-  const sortedPlatforms = [...platforms].sort((a, b) => {
-    const aIsFoundation = FOUNDATION_CATEGORIES.includes(a.category || "");
-    const bIsFoundation = FOUNDATION_CATEGORIES.includes(b.category || "");
-    if (aIsFoundation && !bIsFoundation) return 1;
-    if (!aIsFoundation && bIsFoundation) return -1;
-    return (b.domain_rating || 0) - (a.domain_rating || 0);
-  });
+  // Sort logic moved up.
 
-  for (let i = 0; i < sortedPlatforms.length; i++) {
-    const platform = sortedPlatforms[i] as Platform;
+  for (let i = 0; i < platformsToProcess.length; i++) {
+    const platform = platformsToProcess[i] as Platform;
     const isFoundation = FOUNDATION_CATEGORIES.includes(platform.category || "");
 
     // Logic:
@@ -111,13 +127,17 @@ export async function createTasksForUser(
       priority: Math.ceil((platform.domain_rating || 50) / 10),
       submission_type: platform.submission_type,
       submission_data: submissionData,
-      policy_check_result: policyResult,
-      requires_manual_review: manualReviewCheck.required,
-      manual_review_reason: manualReviewCheck.reason,
+      // policy_check_result: policyResult, // Column missing in DB
+      // requires_manual_review: manualReviewCheck.required, // Column missing in DB
+      // manual_review_reason: manualReviewCheck.reason, // Column missing in DB
       scheduled_for: scheduledFor.toISOString(),
     };
 
     const { error } = await supabaseAdmin.from("backlink_tasks").insert(task);
+
+    if (error) {
+      console.error("Error inserting task:", error);
+    }
 
     if (!error) {
       if (manualReviewCheck.required) {

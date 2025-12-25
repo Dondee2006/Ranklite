@@ -1,3 +1,4 @@
+import { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 
 export interface PlanLimits {
@@ -25,13 +26,13 @@ export interface UsageStatus {
   message?: string;
 }
 
-export async function getUserPlanAndUsage(userId: string): Promise<{
+export async function getUserPlanAndUsage(userId: string, client?: SupabaseClient): Promise<{
   plan: PlanLimits | null;
   usage: UsageData | null;
   status: string;
   periodEnd: string | null;
 }> {
-  const supabase = await createServerClient();
+  const supabase = client || await createServerClient();
 
   const { data: userPlan } = await supabase
     .from("user_plans")
@@ -78,12 +79,13 @@ export async function getUserPlanAndUsage(userId: string): Promise<{
 }
 
 export async function checkPostGenerationLimit(
-  userId: string
+  userId: string,
+  client?: SupabaseClient
 ): Promise<UsageStatus> {
   // DEVELOPMENT MODE: Bypass all limits
   console.log("⚠️ DEV MODE: Usage limits bypassed");
 
-  const { plan, usage, status } = await getUserPlanAndUsage(userId);
+  const { plan, usage, status } = await getUserPlanAndUsage(userId, client);
 
   // Always allow in development
   return {
@@ -126,17 +128,43 @@ export async function checkPostGenerationLimit(
   */
 
   if (status !== "active") {
+    // If status is not active, we still need to return usage data if available
     return {
       allowed: false,
-      usage,
-      limits: plan,
+      usage: usage || {
+        posts_generated: 0,
+        backlinks_generated: 0,
+        period_start: new Date().toISOString(),
+        period_end: new Date().toISOString(),
+      },
+      limits: plan || {
+        posts_per_month: 0,
+        backlinks_per_post: 0,
+        qa_validation: false,
+        integrations_limit: 0,
+      },
       percentUsed: {
-        posts: (usage.posts_generated / plan.posts_per_month) * 100,
+        posts: plan ? (usage ? (usage.posts_generated / plan.posts_per_month) * 100 : 0) : 0,
         backlinks: 0,
       },
       message: `Plan status is ${status}. Please update your subscription.`,
     };
   }
+
+  // At this point we know plan and usage are not null because status is active
+  // but typescript might not know it if status logic implies it.
+  // Actually, getUserPlanAndUsage implementation returns "no_plan" status if plan is null using !userPlan check.
+  // But usage might be null if no record? In getUserPlanAndUsage we default usage.
+  // So usage should be UsageData (not null) unless logic changed.
+
+  // Let's force verify for TS
+  if (!plan || !usage) return {
+    allowed: false,
+    usage: usage!,
+    limits: plan!,
+    percentUsed: { posts: 0, backlinks: 0 },
+    message: "System Error: Plan active but data missing"
+  };
 
   const postsUsedPercent =
     (usage.posts_generated / plan.posts_per_month) * 100;
@@ -167,9 +195,10 @@ export async function checkPostGenerationLimit(
 
 export async function checkBacklinkGenerationLimit(
   userId: string,
-  requestedBacklinks: number
+  requestedBacklinks: number,
+  client?: SupabaseClient
 ): Promise<UsageStatus> {
-  const { plan, usage } = await getUserPlanAndUsage(userId);
+  const { plan, usage } = await getUserPlanAndUsage(userId, client);
 
   if (!plan || !usage) {
     return {
@@ -216,10 +245,11 @@ export async function checkBacklinkGenerationLimit(
 }
 
 export async function checkIntegrationLimit(
-  userId: string
+  userId: string,
+  client?: SupabaseClient
 ): Promise<{ allowed: boolean; current: number; limit: number; message?: string }> {
-  const { plan } = await getUserPlanAndUsage(userId);
-  const supabase = await createServerClient();
+  const { plan } = await getUserPlanAndUsage(userId, client);
+  const supabase = client || await createServerClient();
 
   if (!plan) {
     return { allowed: false, current: 0, limit: 0, message: "No active plan found." };
@@ -248,9 +278,9 @@ export async function checkIntegrationLimit(
   return { allowed: true, current: currentIntegrations, limit: plan.integrations_limit };
 }
 
-export async function incrementPostUsage(userId: string): Promise<void> {
-  const supabase = await createServerClient();
-  const { usage } = await getUserPlanAndUsage(userId);
+export async function incrementPostUsage(userId: string, client?: SupabaseClient): Promise<void> {
+  const supabase = client || await createServerClient();
+  const { usage } = await getUserPlanAndUsage(userId, supabase);
 
   const periodStart = usage?.period_start || new Date().toISOString();
   const periodEnd = usage?.period_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -266,10 +296,11 @@ export async function incrementPostUsage(userId: string): Promise<void> {
 
 export async function incrementBacklinkUsage(
   userId: string,
-  count: number
+  count: number,
+  client?: SupabaseClient
 ): Promise<void> {
-  const supabase = await createServerClient();
-  const { usage } = await getUserPlanAndUsage(userId);
+  const supabase = client || await createServerClient();
+  const { usage } = await getUserPlanAndUsage(userId, supabase);
 
   const periodStart = usage?.period_start || new Date().toISOString();
   const periodEnd = usage?.period_end || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
