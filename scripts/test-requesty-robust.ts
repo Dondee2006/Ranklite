@@ -29,21 +29,22 @@ async function testRequesty() {
     console.log("Testing Requesty Integration with @requesty/ai-sdk...");
     console.log("API Key found:", !!process.env.REQUESTY_API_KEY);
 
-    try {
-        const { text } = await generateText({
-            model: requesty("openai/gpt-4o-mini"),
-            prompt: "Hello, this is a test. Please respond with 'Ranklite Requesty Integration Successful'.",
-            maxOutputTokens: 20,
-        });
+    const models = ["openai/gpt-4o-mini", "anthropic/claude-3-5-haiku-20241022", "google/gemini-1.5-flash"];
 
-        console.log("Response:", text);
-        if (text.length > 5) {
-            console.log("✅ Verification Passed!");
-        } else {
-            console.log("⚠️ Verification Failed: Unexpected response.");
+    for (const modelId of models) {
+        console.log(`\nTesting with model: ${modelId}`);
+        try {
+            const { text } = await generateText({
+                model: requesty(modelId),
+                prompt: "Hello, this is a test. Please respond with 'OK'.",
+                maxOutputTokens: 10,
+            });
+
+            console.log(`Response from ${modelId}:`, text);
+            console.log(`✅ Verification Passed for ${modelId}!`);
+        } catch (error: any) {
+            console.error(`❌ Verification Failed for ${modelId}:`, error.message);
         }
-    } catch (error: any) {
-        console.error("❌ Verification Failed Error:", error.message);
     }
 }
 
