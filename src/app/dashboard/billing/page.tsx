@@ -36,32 +36,12 @@ const PLANS: Plan[] = [
 ];
 
 export default function BillingPage() {
-  const [plans, setPlans] = useState<Plan[]>(PLANS);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [plans] = useState<Plan[]>(PLANS);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  const handleUpgradeClick = (plan: Plan) => {
-    setSelectedPlan(plan);
-    setShowModal(true);
-  };
-
-  const confirmUpgrade = () => {
-    if (!selectedPlan) return;
-
-    setPlans((prev) =>
-      prev.map((p) => ({
-        ...p,
-        isActive: p.id === selectedPlan.id,
-      }))
-    );
-
-    setShowModal(false);
-    setToastMessage("Plan upgraded successfully");
-    setShowToast(true);
-
-    setTimeout(() => setShowToast(false), 3000);
+  const handleUpgradeClick = () => {
+    window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
   };
 
   const getStatusBadge = (isActive: boolean) => {
@@ -91,13 +71,6 @@ export default function BillingPage() {
           </h1>
           <p className="text-sm text-[#6B7280]">
             Manage your SEO automation plan and billing
-          </p>
-        </div>
-
-        {/* Demo Notice */}
-        <div className="mb-6 p-3 rounded-lg bg-[#FEF3C7] border border-[#F59E0B]/20">
-          <p className="text-xs text-[#92400E] font-medium">
-            Demo billing — MVP mode
           </p>
         </div>
 
@@ -168,9 +141,7 @@ export default function BillingPage() {
                         </button>
                         <button
                           onClick={() => {
-                            setToastMessage("Billing portal is coming soon");
-                            setShowToast(true);
-                            setTimeout(() => setShowToast(false), 3000);
+                            window.location.href = "https://whop.com/hub/";
                           }}
                           className="w-full px-4 py-2.5 text-sm font-medium text-[#4B5563] bg-white border border-[#E5E5E5] rounded-md hover:bg-[#F9FAFB] transition-colors"
                         >
@@ -179,7 +150,7 @@ export default function BillingPage() {
                       </>
                     ) : (
                       <button
-                        onClick={() => handleUpgradeClick(plan)}
+                        onClick={handleUpgradeClick}
                         className="w-full px-4 py-2.5 text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] rounded-md transition-colors shadow-sm"
                       >
                         Activate Plan
@@ -201,48 +172,6 @@ export default function BillingPage() {
           </div>
         ))}
       </div>
-
-      {/* Upgrade Modal */}
-      {showModal && selectedPlan && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-[#DBEAFE] flex items-center justify-center">
-                <Zap className="h-5 w-5 text-[#2563EB]" />
-              </div>
-              <h3 className="text-lg font-semibold text-[#1A1A1A]">
-                Confirm Upgrade
-              </h3>
-            </div>
-            <p className="text-sm text-[#6B7280] mb-6">
-              This is a demo upgrade for MVP testing.
-            </p>
-            <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E5E5E5] mb-6">
-              <div className="text-xs text-[#6B7280] mb-1">Upgrading to</div>
-              <div className="text-base font-semibold text-[#1A1A1A]">
-                {selectedPlan.name} Plan
-              </div>
-              <div className="text-sm text-[#6B7280] mt-1">
-                ${selectedPlan.price}/month • {selectedPlan.growthMode}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-[#6B7280] bg-white border border-[#E5E5E5] rounded-md hover:bg-[#F9FAFB] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmUpgrade}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] rounded-md transition-colors shadow-sm"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Success Toast */}
       {showToast && (
