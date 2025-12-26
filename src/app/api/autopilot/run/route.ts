@@ -109,14 +109,23 @@ async function processSiteAutopilot(site: any) {
   const today = now.toISOString().split("T")[0];
   const currentTimeStr = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
 
-  // 1. First, find all articles manually scheduled for today that aren't published yet
+  // Check how many were already published today
+  const { data: publishedToday } = await supabaseAdmin
+    .from("articles")
+    .select("id")
+    .eq("site_id", site.id)
+    .eq("status", "published")
+    .gte("published_at", `${today}T00:00:00Z`);
+
+  // 1. First, find all articles manually scheduled for today (or overdue) that aren't published yet
   let { data: candidates } = await supabaseAdmin
     .from("articles")
     .select("*")
     .eq("site_id", site.id)
-    .eq("scheduled_date", today)
+    .lte("scheduled_date", today)
     .in("status", ["planned", "generated", "draft"])
     .or(`scheduled_time.is.null,scheduled_time.lte.${currentTimeStr}`)
+    .order('scheduled_date', { ascending: true })
     .order('scheduled_time', { ascending: true, nullsFirst: true });
 
   // 2. If we don't have enough articles for today's quota, and we have remaining posts in plan, create seeds
