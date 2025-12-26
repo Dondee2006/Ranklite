@@ -33,6 +33,7 @@ export async function GET() {
       unique_sources: 0,
       avg_domain_rating: 0,
       this_month_backlinks: 0,
+      pending_tasks: 0,
       website_url: null,
       last_scan_at: null,
       next_scan_at: null,
@@ -50,9 +51,23 @@ export async function GET() {
       return NextResponse.json({ error: backlinksError.message }, { status: 500 });
     }
 
+    // Get current pending tasks count if campaign exists
+    let pendingTasksCount = campaign.pending_tasks || 0;
+    if (campaign.id) {
+      const { count } = await supabase
+        .from("backlink_tasks")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "pending");
+      pendingTasksCount = count || 0;
+    }
+
     return NextResponse.json({
       backlinks: backlinks || [],
-      campaign,
+      campaign: {
+        ...campaign,
+        pending_tasks: pendingTasksCount
+      },
     });
   } catch (error) {
     console.error("Failed to fetch backlinks:", error);

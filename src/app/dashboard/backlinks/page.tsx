@@ -30,6 +30,7 @@ function getDRColor(dr: number) {
 
 export default function BacklinksPage() {
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
+  const [campaign, setCampaign] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [filterDR, setFilterDR] = useState<number | null>(null);
@@ -45,6 +46,7 @@ export default function BacklinksPage() {
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setBacklinks(data.backlinks || []);
+      setCampaign(data.campaign || null);
     } catch (error) {
       console.error("Failed to load backlinks:", error);
       setBacklinks([]);
@@ -54,7 +56,9 @@ export default function BacklinksPage() {
   }
 
   const filteredBacklinks = backlinks.filter(b => {
-    if (filterStatus && b.status !== filterStatus) return false;
+    // Normalize status for filtering
+    const status = b.status === "pending_verification" ? "Pending" : b.status;
+    if (filterStatus && status !== filterStatus) return false;
     if (filterDR && b.domain_rating < filterDR) return false;
     return true;
   });
@@ -65,6 +69,13 @@ export default function BacklinksPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-[#1A1A1A]">Backlinks</h1>
           <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/backlink-generator"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#2563EB] rounded-md hover:bg-[#1E40AF] transition-colors shadow-sm flex items-center gap-2 mr-2"
+            >
+              <Loader2 className={cn("h-4 w-4", campaign?.agent_status === "scanning" && "animate-spin")} />
+              {campaign?.agent_status === "scanning" ? "Agent Running" : "Open Autopilot"}
+            </Link>
             <select
               value={filterStatus || ""}
               onChange={(e) => setFilterStatus(e.target.value || null)}
@@ -89,6 +100,29 @@ export default function BacklinksPage() {
       </header>
 
       <div className="p-8">
+        {campaign?.pending_tasks > 0 && backlinks.length === 0 && (
+          <div className="mb-8 p-6 rounded-xl border border-blue-100 bg-blue-50/50 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-blue-900">Campaign in Progress</h3>
+                <p className="text-xs text-blue-700 mt-1">
+                  We are currently processing <strong>{campaign.pending_tasks}</strong> backlink opportunities for your site. 
+                  Live links will appear here as they are verified.
+                </p>
+              </div>
+            </div>
+            <Link 
+              href="/dashboard/backlink-generator"
+              className="text-xs font-bold text-blue-600 hover:text-blue-800 uppercase tracking-widest px-4 py-2 bg-white rounded-lg border border-blue-200 shadow-sm transition-all"
+            >
+              Monitor Live Agent
+            </Link>
+          </div>
+        )}
+
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
@@ -126,7 +160,7 @@ export default function BacklinksPage() {
                   {filteredBacklinks.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center text-sm text-[#6B7280]">
-                        No backlinks found
+                        {campaign?.pending_tasks > 0 ? "First links arriving soon..." : "No backlinks found"}
                       </td>
                     </tr>
                   ) : (
@@ -142,7 +176,7 @@ export default function BacklinksPage() {
                             rel="noopener noreferrer"
                             className="text-sm text-[#2563EB] hover:text-[#1E40AF] underline"
                           >
-                            {backlink.linking_url?.slice(0, 40)}...
+                            {backlink.linking_url?.slice(0, 40)}{backlink.linking_url?.length > 40 ? "..." : ""}
                           </a>
                         </td>
                         <td className="px-6 py-4">
@@ -160,10 +194,10 @@ export default function BacklinksPage() {
                           <span className={cn(
                             "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
                             backlink.status === "Live" ? "bg-[#D1FAE5] text-[#065F46]" :
-                            backlink.status === "Pending" ? "bg-[#FEF3C7] text-[#92400E]" :
+                            (backlink.status === "Pending" || backlink.status === "pending_verification") ? "bg-[#FEF3C7] text-[#92400E]" :
                             "bg-[#FEE2E2] text-[#991B1B]"
                           )}>
-                            {backlink.status}
+                            {backlink.status === "pending_verification" ? "Pending" : backlink.status}
                           </span>
                         </td>
                         <td className="px-6 py-4">
