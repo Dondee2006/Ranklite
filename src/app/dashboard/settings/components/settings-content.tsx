@@ -101,7 +101,11 @@ export function SettingsContent() {
     try {
       const response = await fetch("/api/gsc/auth");
       const data = await response.json();
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
       if (data.error) {
         toast.error(data.error);
         setGscLoading(false);
@@ -119,7 +123,11 @@ export function SettingsContent() {
   const saveSettings = async () => {
     setSaving(true);
     try {
+<<<<<<< HEAD
       await fetch("/api/settings", {
+=======
+      const response = await fetch("/api/settings", {
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -476,7 +484,11 @@ export function SettingsContent() {
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-center">
                 <p className="text-gray-500 mb-4">
+<<<<<<< HEAD
                   {gscConnected 
+=======
+                  {gscConnected
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
                     ? "Your Google Search Console is connected and tracking performance data"
                     : "Connect your Google Search Console account to get insights about your search performance"
                   }
@@ -487,7 +499,11 @@ export function SettingsContent() {
                     Connected
                   </div>
                 ) : (
+<<<<<<< HEAD
                   <button 
+=======
+                  <button
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
                     onClick={connectGSC}
                     disabled={gscLoading}
                     className="px-6 py-2.5 bg-[#22C55E] hover:bg-[#16A34A] text-white rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-2"

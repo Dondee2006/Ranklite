@@ -122,6 +122,7 @@ export async function POST(request: Request) {
       error: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
+<<<<<<< HEAD
 
   const body = await request.json();
   const { month, year } = body;
@@ -159,4 +160,6 @@ export async function POST(request: Request) {
   }).catch(console.error);
 
   return NextResponse.json({ success: true, jobId: job.id });
+=======
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 }

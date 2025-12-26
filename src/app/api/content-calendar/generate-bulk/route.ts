@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+<<<<<<< HEAD
 import { openai } from "@ai-sdk/openai";
+=======
+import { requesty } from "@/lib/ai";
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 import { generateText } from "ai";
 
 const ARTICLE_TYPES = [
@@ -226,7 +230,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+<<<<<<< HEAD
     return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
+=======
+  return NextResponse.json({ success: true, articles: data, count: data?.length || 0 });
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 }
 
 async function generateArticleContent(params: {
@@ -298,10 +306,17 @@ Return a JSON object with:
     maxOutputTokens: 4096,
   });
 
+<<<<<<< HEAD
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("AI did not return a JSON object");
     }
+=======
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("AI did not return a JSON object");
+  }
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 
   let result = JSON.parse(jsonMatch[0]);
 

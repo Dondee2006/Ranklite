@@ -1024,6 +1024,7 @@ export default function ContentPlannerPage() {
                 </div>
             )}
 
+<<<<<<< HEAD
               {showArticleDetail && selectedArticle && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                       <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -1083,6 +1084,67 @@ export default function ContentPlannerPage() {
                                       />
                                   </div>
                               </div>
+=======
+            {showArticleDetail && selectedArticle && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">{getArticleTypeIcon(selectedArticle.article_type)}</span>
+                                <div>
+                                    <Input
+                                        value={selectedArticle.title}
+                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })}
+                                        className="text-lg font-bold mb-1"
+                                    />
+                                    <p className="text-sm text-slate-500">
+                                        Scheduled: {new Date(selectedArticle.scheduled_date).toLocaleDateString()} • {selectedArticle.word_count || 1500} words
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("px-3 py-1 rounded-full text-xs font-medium", getStatusColor(selectedArticle.status))}>
+                                    {selectedArticle.status}
+                                </span>
+                                <button onClick={() => { setShowArticleDetail(false); setSelectedArticle(null); }} className="text-slate-400 hover:text-slate-600 ml-2">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <div className="grid grid-cols-3 gap-6 mb-6">
+                                <div className="rounded-xl bg-slate-50 p-4">
+                                    <p className="text-xs text-slate-500 mb-2">Primary Keyword</p>
+                                    <Input
+                                        value={selectedArticle.keyword || ""}
+                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, keyword: e.target.value })}
+                                        className="h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="rounded-xl bg-slate-50 p-4">
+                                    <p className="text-xs text-slate-500 mb-2">Search Intent</p>
+                                    <select
+                                        value={selectedArticle.search_intent || "informational"}
+                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, search_intent: e.target.value })}
+                                        className="w-full h-9 rounded-lg border border-slate-200 px-3 text-sm"
+                                    >
+                                        {SEARCH_INTENTS.map(intent => (
+                                            <option key={intent.value} value={intent.value}>{intent.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="rounded-xl bg-slate-50 p-4">
+                                    <p className="text-xs text-slate-500 mb-2">Scheduled Date</p>
+                                    <Input
+                                        type="date"
+                                        value={selectedArticle.scheduled_date}
+                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, scheduled_date: e.target.value })}
+                                        className="h-9 text-sm"
+                                    />
+                                </div>
+                            </div>
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 
                             {selectedArticle.secondary_keywords?.length > 0 && (
                                 <div className="mb-6">
@@ -1236,6 +1298,7 @@ export default function ContentPlannerPage() {
                             )}
                         </div>
 
+<<<<<<< HEAD
                           <div className="p-6 border-t border-slate-100 flex items-center justify-between">
                               <button
                                   onClick={() => deleteArticle(selectedArticle.id)}
@@ -1303,6 +1366,75 @@ export default function ContentPlannerPage() {
                                   )}
                               </div>
                           </div>
+=======
+                        <div className="p-6 border-t border-slate-100 flex items-center justify-between">
+                            <button
+                                onClick={() => deleteArticle(selectedArticle.id)}
+                                className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                            </button>
+                            <div className="flex gap-3">
+                                <Button
+                                    onClick={async () => {
+                                        try {
+                                            const response = await fetch(`/api/articles/${selectedArticle.id}`, {
+                                                method: "PATCH",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    title: selectedArticle.title,
+                                                    keyword: selectedArticle.keyword,
+                                                    search_intent: selectedArticle.search_intent,
+                                                    scheduled_date: selectedArticle.scheduled_date,
+                                                }),
+                                            });
+                                            if (response.ok) {
+                                                await loadArticles();
+                                                setShowArticleDetail(false);
+                                            }
+                                        } catch (error) {
+                                            console.error("Failed to save article:", error);
+                                        }
+                                    }}
+                                    variant="outline"
+                                    className="gap-2"
+                                >
+                                    <Check className="h-4 w-4" />
+                                    Save Changes
+                                </Button>
+                                {!selectedArticle.content && (
+                                    <Button
+                                        onClick={() => generateArticleContent(selectedArticle.id)}
+                                        disabled={generatingArticle === selectedArticle.id}
+                                        className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                                    >
+                                        {generatingArticle === selectedArticle.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Sparkles className="h-4 w-4" />
+                                        )}
+                                        Generate Content
+                                    </Button>
+                                )}
+                                {selectedArticle.content && (
+                                    <Button
+                                        onClick={() => generateArticleContent(selectedArticle.id)}
+                                        disabled={generatingArticle === selectedArticle.id}
+                                        variant="outline"
+                                        className="gap-2"
+                                    >
+                                        {generatingArticle === selectedArticle.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <RefreshCw className="h-4 w-4" />
+                                        )}
+                                        Regenerate
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
                     </div>
                 </div>
             )}

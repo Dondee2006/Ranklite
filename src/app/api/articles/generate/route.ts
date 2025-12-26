@@ -15,7 +15,11 @@ export async function POST(request: Request) {
   const limitCheck = await checkPostGenerationLimit(user.id);
   if (!limitCheck.allowed) {
     return NextResponse.json(
+<<<<<<< HEAD
       { 
+=======
+      {
+>>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
         error: limitCheck.message,
         usage: limitCheck.usage,
         limits: limitCheck.limits,
