@@ -1,5 +1,5 @@
+import { createRequesty } from "@requesty/ai-sdk";
 import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -21,18 +21,17 @@ function loadEnv() {
 
 loadEnv();
 
-const requesty = createOpenAI({
+const requesty = createRequesty({
     apiKey: process.env.REQUESTY_API_KEY,
-    baseURL: "https://router.requesty.ai", // Removed /v1
 });
 
 async function testRequesty() {
-    console.log("Testing Requesty Integration (BaseURL without /v1)...");
+    console.log("Testing Requesty Integration with @requesty/ai-sdk...");
     console.log("API Key found:", !!process.env.REQUESTY_API_KEY);
 
     try {
         const { text } = await generateText({
-            model: requesty("gpt-4o"), // Trying without prefix first
+            model: requesty("openai/gpt-4o-mini"),
             prompt: "Hello, this is a test. Please respond with 'Ranklite Requesty Integration Successful'.",
             maxOutputTokens: 20,
         });
@@ -45,20 +44,6 @@ async function testRequesty() {
         }
     } catch (error: any) {
         console.error("❌ Verification Failed Error:", error.message);
-        if (error.responseBody) console.error("Response Body:", error.responseBody);
-
-        console.log("\nTrying with optional model prefix 'openai/gpt-4o'...");
-        try {
-            const { text } = await generateText({
-                model: requesty("openai/gpt-4o"),
-                prompt: "Hello",
-                maxOutputTokens: 20,
-            });
-            console.log("Response with prefix:", text);
-            console.log("✅ Verification Passed with prefix!");
-        } catch (err: any) {
-            console.error("❌ Failed with prefix as well:", err.message);
-        }
     }
 }
 
