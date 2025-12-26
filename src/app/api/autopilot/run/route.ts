@@ -3,33 +3,83 @@ import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { ArticleEngine } from "@/lib/services/article-engine";
 import { CMSEngine } from "@/lib/services/cms-engine";
+import { getUserPlanAndUsage } from "@/lib/usage-limits";
 
-export async function POST() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const isCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  
+  let user: any = null;
+  let targetSites: any[] = [];
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isCron) {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    user = authUser;
+
+    const { data: site } = await supabase
+      .from("sites")
+      .select("id, name, url, user_id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!site) {
+      return NextResponse.json({ error: "No site found" }, { status: 404 });
+    }
+    targetSites = [site];
+  } else {
+    // Cron mode: find all sites with autopilot enabled
+    const { data: activeSettings } = await supabaseAdmin
+      .from("autopilot_settings")
+      .select("site_id")
+      .eq("enabled", true);
+
+    if (!activeSettings || activeSettings.length === 0) {
+      return NextResponse.json({ success: true, message: "No active autopilot settings found" });
+    }
+
+    const { data: sites } = await supabaseAdmin
+      .from("sites")
+      .select("id, name, url, user_id")
+      .in("id", activeSettings.map(s => s.site_id));
+
+    if (!sites || sites.length === 0) {
+      return NextResponse.json({ success: true, message: "No sites found for active settings" });
+    }
+    targetSites = sites;
   }
 
-  const { data: site } = await supabase
-    .from("sites")
-    .select("id, name, url")
-    .eq("user_id", user.id)
-    .single();
+  const overallResults = [];
 
-  if (!site) {
-    return NextResponse.json({ error: "No site found" }, { status: 404 });
+  for (const site of targetSites) {
+    try {
+      const siteResult = await processSiteAutopilot(site);
+      overallResults.push({ siteId: site.id, ...siteResult });
+    } catch (err: any) {
+      console.error(`[AUTOPILOT] Error for site ${site.id}:`, err);
+      overallResults.push({ siteId: site.id, status: 'error', error: err.message });
+    }
   }
 
-  const { data: settings } = await supabase
+  return NextResponse.json({
+    success: true,
+    processedSites: overallResults.length,
+    results: overallResults
+  });
+}
+
+async function processSiteAutopilot(site: any) {
+  const { data: settings } = await supabaseAdmin
     .from("autopilot_settings")
     .select("*")
     .eq("site_id", site.id)
     .single();
 
   if (!settings || !settings.enabled) {
-    return NextResponse.json({ success: false, message: "Autopilot disabled" });
+    return { success: false, message: "Autopilot disabled" };
   }
 
   const now = new Date();
@@ -37,20 +87,28 @@ export async function POST() {
   const startHour = settings.publish_time_start ?? 7;
   const endHour = settings.publish_time_end ?? 9;
 
-  // Basic window check
   const withinWindow = startHour <= endHour
     ? hourUtc >= startHour && hourUtc <= endHour
     : hourUtc >= startHour || hourUtc <= endHour;
 
   if (!withinWindow) {
-    console.log(`[AUTOPILOT] Outside publish window (${hourUtc} UTC vs ${startHour}-${endHour} UTC)`);
-    return NextResponse.json({ success: false, message: "Outside publish window" });
+    return { success: false, message: `Outside window (${hourUtc} UTC vs ${startHour}-${endHour} UTC)` };
+  }
+
+  // Check plan limits
+  const { plan, usage, status: planStatus } = await getUserPlanAndUsage(site.user_id);
+  if (!plan || planStatus !== "active") {
+    return { success: false, message: "No active plan" };
+  }
+
+  const postsRemaining = plan.posts_per_month - (usage?.posts_generated || 0);
+  if (postsRemaining <= 0) {
+    return { success: false, message: "Post limit reached" };
   }
 
   const today = now.toISOString().split("T")[0];
 
-  // 1. Check if we already published enough today
-  const { data: publishedToday } = await supabase
+  const { data: publishedToday } = await supabaseAdmin
     .from("articles")
     .select("id")
     .eq("site_id", site.id)
@@ -60,27 +118,19 @@ export async function POST() {
   const alreadyPublished = publishedToday?.length || 0;
   const targetCount = Math.max(settings.articles_per_day || 1, 1);
 
-  if (alreadyPublished >= targetCount) {
-    return NextResponse.json({ success: true, message: "Already published for today" });
-  }
-
-  const remainingNeeded = targetCount - alreadyPublished;
-
-  // 2. Find or create candidates for today
-  let { data: candidates } = await supabase
+  // 1. First, find all articles manually scheduled for today that aren't published yet
+  let { data: candidates } = await supabaseAdmin
     .from("articles")
     .select("*")
     .eq("site_id", site.id)
     .eq("scheduled_date", today)
     .in("status", ["planned", "generated", "draft"])
-    .order('created_at', { ascending: true })
-    .limit(remainingNeeded);
+    .order('created_at', { ascending: true });
 
-  const foundCount = candidates?.length || 0;
-
-  if (foundCount < remainingNeeded) {
-    // Generate simple seed entries if not enough planned topics exist
-    const seedsToCreate = remainingNeeded - foundCount;
+  // 2. If we don't have enough articles for today's quota, and we have remaining posts in plan, create seeds
+  const currentCount = (candidates?.length || 0) + alreadyPublished;
+  if (currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
+    const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
     for (let i = 0; i < seedsToCreate; i++) {
       const articleType = pickArticleType(settings.preferred_article_types);
       const keyword = `${site.name} ${articleType} guide ${Math.floor(Math.random() * 1000)}`;
@@ -90,8 +140,9 @@ export async function POST() {
         .from("articles")
         .insert({
           site_id: site.id,
+          user_id: site.user_id,
           title,
-          slug: title.toLowerCase().replace(/ /g, '-'),
+          slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''),
           keyword,
           article_type: articleType,
           status: "planned",
@@ -110,22 +161,15 @@ export async function POST() {
   }
 
   if (!candidates || candidates.length === 0) {
-    return NextResponse.json({ success: false, message: "No candidates to process" });
+    return { success: false, message: "No candidates" };
   }
 
   const results = [];
-
-  // 3. Process candidates (real Gen -> Publish flow)
   for (const article of candidates) {
     try {
-      console.log(`[AUTOPILOT] Processing article: ${article.title}`);
-
       let currentArticle = article;
-
-      // Step A: Generate content if missing
       if (currentArticle.status === "planned" || !currentArticle.content) {
-        console.log(`[AUTOPILOT] Generating content for ${article.id}...`);
-        const { data: existingArticles } = await supabase
+        const { data: existingArticles } = await supabaseAdmin
           .from("articles")
           .select("id, title, slug, keyword")
           .eq("site_id", site.id)
@@ -133,7 +177,7 @@ export async function POST() {
           .not("content", "is", null)
           .limit(5);
 
-        const { data: artSettings } = await supabase
+        const { data: artSettings } = await supabaseAdmin
           .from("article_settings")
           .select("*")
           .eq("site_id", site.id)
@@ -172,9 +216,7 @@ export async function POST() {
         currentArticle = updated;
       }
 
-      // Step B: Publish to CMS
-      console.log(`[AUTOPILOT] Publishing article ${currentArticle.id} to CMS...`);
-      const publishResult = await CMSEngine.publishArticleToCMS(user.id, currentArticle);
+      const publishResult = await CMSEngine.publishArticleToCMS(site.user_id, currentArticle);
 
       if (publishResult.success) {
         await supabaseAdmin
@@ -187,29 +229,25 @@ export async function POST() {
             updated_at: new Date().toISOString()
           })
           .eq("id", currentArticle.id);
-
-        results.push({ id: article.id, status: 'published', url: publishResult.publishedUrl });
+        results.push({ id: article.id, status: 'published' });
       } else {
         results.push({ id: article.id, status: 'failed_publish', error: publishResult.error });
       }
-
     } catch (err: any) {
-      console.error(`[AUTOPILOT] Error processing ${article.id}:`, err);
       results.push({ id: article.id, status: 'error', error: err.message });
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    processed: results.length,
-    results
-  });
+  return { success: true, processed: results.length, results };
 }
 
 function pickArticleType(preferred: string[] | null | undefined) {
   if (preferred && preferred.length) {
     return preferred[Math.floor(Math.random() * preferred.length)];
   }
-  const types = ["guide", "how-to", "listicle", "review", "comparison"];
-  return types[Math.floor(Math.random() * types.length)];
+  return ["guide", "how-to", "listicle", "review", "comparison"][Math.floor(Math.random() * 5)];
+}
+
+export async function GET(request: Request) {
+  return POST(request);
 }

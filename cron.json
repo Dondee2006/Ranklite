@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/autopilot/run",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cms/cron/scheduled-publish",
       "schedule": "0 7 * * *"
     },
