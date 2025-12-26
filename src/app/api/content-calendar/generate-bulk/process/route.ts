@@ -1,10 +1,6 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
-<<<<<<< HEAD
-import { openai } from "@ai-sdk/openai";
-=======
 import { requesty } from "@/lib/ai";
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 import { generateText } from "ai";
 
 const ARTICLE_TYPES = [

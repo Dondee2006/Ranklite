@@ -20,15 +20,7 @@ async function getPesapalAccessToken() {
 
     if (!consumerKey || !consumerSecret) throw new Error("Missing Pesapal credentials");
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
-=======
-    const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/GetNotificationId`, {
->>>>>>> 7504f29 (Implement Pesapal payments for  trial)
-=======
-    const response = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
->>>>>>> 747d473 (Auto-sync on project load)
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ consumer_key: consumerKey, consumer_secret: consumerSecret }),
@@ -81,33 +73,15 @@ export async function POST(request: NextRequest) {
                         const trialEnd = new Date();
                         trialEnd.setDate(trialEnd.getDate() + 3); // 3 Days Trial
 
-<<<<<<< HEAD
-                          // 3. Update Supabase
-                          const { error } = await supabaseAdmin
-                              .from('user_plans')
-                              .upsert({
-                                  user_id: userId,
-                                  plan_id: 'free_trial',
-                                  status: 'active',
-                                  current_period_start: trialStart.toISOString(),
-                                  current_period_end: trialEnd.toISOString(),
-                                  // valid_until: trialEnd.toISOString() // if needed
-                              }, { onConflict: 'user_id' });
-
-=======
                         // 3. Update Supabase
                         const { error } = await supabaseAdmin
-                            .from('subscriptions')
+                            .from('user_plans')
                             .upsert({
                                 user_id: userId,
-                                plan: 'free_trial',
+                                plan_id: 'free_trial',
                                 status: 'active',
-                                trial_start: trialStart.toISOString(),
-                                trial_end: trialEnd.toISOString(),
-                                pesapal_tracking_id: orderTrackingId,
-                                // valid_until: trialEnd.toISOString() // if needed
+                                start_date: trialStart.toISOString(),
                             }, { onConflict: 'user_id' });
->>>>>>> 7504f29 (Implement Pesapal payments for  trial)
 
                         if (error) {
                             console.error('[Pesapal IPN] Database Update Error:', error);

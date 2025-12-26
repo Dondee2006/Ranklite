@@ -3,11 +3,7 @@
  * Uses AI to generate internal linking suggestions
  */
 
-<<<<<<< HEAD
-import { openai } from '@ai-sdk/openai';
-=======
 import { requesty } from '../ai';
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 import { generateText } from 'ai';
 
 export interface PageData {
@@ -39,11 +35,7 @@ export async function generateLinkSuggestions(
 
     try {
         const { text } = await generateText({
-<<<<<<< HEAD
-            model: openai('gpt-4o-mini'),
-=======
             model: requesty('openai/gpt-4o-mini'),
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
             prompt,
             temperature: 0.7,
 

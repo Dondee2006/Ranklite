@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-<<<<<<< HEAD
   Info,
   Lightbulb,
   Layers,
   List,
-=======
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
   CheckCircle2,
   Link2,
   Globe,
@@ -26,13 +23,10 @@ import {
   ClipboardList,
   X,
   Save,
-<<<<<<< HEAD
   Clock,
   ShieldCheck,
   Cpu,
   Fingerprint,
-=======
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -48,7 +42,6 @@ interface Backlink {
   status: string;
   verification_status?: string;
   is_dofollow?: boolean;
-<<<<<<< HEAD
   tier?: number;
   is_indexed?: boolean;
   article_id?: string;
@@ -56,11 +49,7 @@ interface Backlink {
   adapted_type?: string;
 }
 
-=======
-}
-
 // Map of real logos for known platforms
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 const PLATFORM_LOGOS: Record<string, string> = {
   "techpluto.com": "https://www.techpluto.com/wp-content/uploads/2016/09/Tech_Pluto_Logo.png",
   "sayellow.com": "https://www.sayellow.com/images/logo.png",
@@ -102,7 +91,6 @@ interface Stats {
   blocked: number;
 }
 
-<<<<<<< HEAD
 interface SiteSettings {
   name: string;
   url: string;
@@ -115,15 +103,7 @@ const AGENT_STEPS = [
   { id: 4, text: "Smart Submission", description: "Automated placement via secure APIs and cloud browser nodes" },
   { id: 5, text: "Indexation Pushing", description: "Forcing search engine discovery via premium indexing signals" },
   { id: 6, text: "Profile Health Check", description: "Monitoring persistence, metrics, and toxic link prevention" },
-=======
-const AGENT_STEPS = [
-  { id: 1, text: "Scanning directories" },
-  { id: 2, text: "Discovering opportunities" },
-  { id: 3, text: "Checking policy compliance" },
-  { id: 4, text: "Processing submissions" },
-  { id: 5, text: "Verifying backlinks" },
-  { id: 6, text: "Updating metrics" },
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
+];
 ];
 
 function getDRColor(dr: number) {

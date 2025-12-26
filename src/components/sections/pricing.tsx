@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import { Check, X, ArrowRight } from "lucide-react";
-
-export default function Pricing() {
-=======
 "use client";
 
 import Link from "next/link";
@@ -68,7 +63,6 @@ export default function Pricing() {
     }
   };
 
->>>>>>> 7504f29 (Implement Pesapal payments for  trial)
   const plans = [
     {
       name: "Pro Tier",
@@ -152,16 +146,6 @@ export default function Pricing() {
                 ))}
               </ul>
 
-<<<<<<< HEAD
-                {/* CTA Button */}
-                <a
-                  href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
-                >
-                  {plan.cta}
-                  <ArrowRight className="h-5 w-5" />
-                </a>
-=======
               {/* CTA Button */}
               <Link
                 href={plan.ctaLink}
@@ -177,7 +161,6 @@ export default function Pricing() {
                   </>
                 )}
               </Link>
->>>>>>> 7504f29 (Implement Pesapal payments for  trial)
               <p className="mt-4 text-center text-[13px] text-[#718096]">
                 * A one-time <strong>$1.00 USD</strong> activation fee applies to start the trial.
               </p>
@@ -237,19 +220,11 @@ export default function Pricing() {
         </div>
 
         {/* MVP Note */}
-<<<<<<< HEAD
-          <div className="mx-auto mt-12 max-w-[600px] text-center">
-            <p className="text-[13px] text-[#A0AEC0]">
-              🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Whop.
-            </p>
-          </div>
-=======
         <div className="mx-auto mt-12 max-w-[600px] text-center">
           <p className="text-[13px] text-[#A0AEC0]">
             🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Pesapal.
           </p>
         </div>
->>>>>>> 7504f29 (Implement Pesapal payments for  trial)
       </div>
     </section>
   );
