@@ -12,11 +12,12 @@ export async function createTasksForUser(
   description: string,
   articleId?: string
 ): Promise<{ created: number; skipped: number; blocked: number }> {
-  const { data: platforms } = await supabaseAdmin
-    .from("backlink_platforms")
-    .select("*")
-    .eq("automation_allowed", true)
-    .order("domain_rating", { ascending: false });
+    const { data: platforms } = await supabaseAdmin
+      .from("backlink_platforms")
+      .select("*")
+      .eq("automation_allowed", true)
+      .gte("domain_rating", 40)
+      .order("domain_rating", { ascending: false });
 
   if (!platforms?.length) {
     return { created: 0, skipped: 0, blocked: 0 };
