@@ -1,32 +1,73 @@
+import { Client } from '@notionhq/client';
+
 export interface NotionPage {
   id: string;
   created_time: string;
   last_edited_time: string;
-  properties: Record<string, unknown>;
+  properties: Record<string, any>;
   url: string;
 }
 
 export interface NotionDatabase {
   id: string;
   title: Array<{ plain_text: string }>;
-  properties: Record<string, unknown>;
+  properties: Record<string, any>;
 }
 
 export interface NotionConfig {
   accessToken: string;
+  databaseId?: string;
+}
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  status: string;
+  category: string;
+  coverImage?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  readTime?: string;
 }
 
 export class NotionClient {
   private config: NotionConfig;
-  private apiVersion = '2022-06-28';
+  private client: Client;
+  private databaseId?: string;
 
   constructor(config: NotionConfig) {
     this.config = config;
+    this.client = new Client({ auth: config.accessToken });
+    this.databaseId = config.databaseId;
+  }
+
+  private async request(path: string, options: any = {}) {
+    const url = `https://api.notion.com/v1${path}`;
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${this.config.accessToken}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Notion API error: ${response.status} ${errorText}`);
+    }
+
+    return response.json();
   }
 
   async getBlogPosts(preview = false): Promise<BlogPost[]> {
+    if (!this.databaseId) throw new Error('Database ID is required');
     try {
-      const response = await (this.client.databases as any).query({
+      const response = await this.client.databases.query({
         database_id: this.databaseId,
         filter: preview
           ? undefined
@@ -44,17 +85,17 @@ export class NotionClient {
         ],
       });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Notion API error: ${response.status} ${errorText}`);
+      return response.results.map(page => this.transformPageToPost(page));
+    } catch (error) {
+      console.error('Error fetching blog posts from Notion:', error);
+      throw error;
     }
-
-    return response.json();
   }
 
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    if (!this.databaseId) throw new Error('Database ID is required');
     try {
-      const response = await (this.client.databases as any).query({
+      const response = await this.client.databases.query({
         database_id: this.databaseId,
         filter: {
           property: 'Slug',
@@ -64,12 +105,19 @@ export class NotionClient {
         },
       });
 
-  async queryDatabase(databaseId: string, filter?: unknown) {
-    const response = await this.request(`/databases/${databaseId}/query`, {
+      if (response.results.length === 0) return null;
+      return this.transformPageToPost(response.results[0]);
+    } catch (error) {
+      console.error('Error fetching blog post by slug from Notion:', error);
+      throw error;
+    }
+  }
+
+  async queryDatabase(databaseId: string, filter?: any) {
+    return this.request(`/databases/${databaseId}/query`, {
       method: 'POST',
       body: JSON.stringify({ filter }),
     });
-    return response.results as NotionPage[];
   }
 
   async getPage(pageId: string) {
@@ -83,8 +131,8 @@ export class NotionClient {
 
   async createPage(data: {
     parent: { database_id: string } | { page_id: string };
-    properties: Record<string, unknown>;
-    children?: unknown[];
+    properties: Record<string, any>;
+    children?: any[];
   }) {
     return this.request('/pages', {
       method: 'POST',
@@ -93,7 +141,7 @@ export class NotionClient {
   }
 
   async updatePage(pageId: string, data: {
-    properties?: Record<string, unknown>;
+    properties?: Record<string, any>;
   }) {
     return this.request(`/pages/${pageId}`, {
       method: 'PATCH',
@@ -101,10 +149,22 @@ export class NotionClient {
     }) as Promise<NotionPage>;
   }
 
-  async appendBlocks(pageId: string, blocks: unknown[]) {
+  async appendBlocks(pageId: string, blocks: any[]) {
     return this.request(`/blocks/${pageId}/children`, {
       method: 'PATCH',
       body: JSON.stringify({ children: blocks }),
+    });
+  }
+
+  async searchDatabases() {
+    return this.request('/search', {
+      method: 'POST',
+      body: JSON.stringify({
+        filter: {
+          property: 'object',
+          value: 'database'
+        }
+      }),
     });
   }
 
@@ -126,66 +186,24 @@ export class NotionClient {
     category?: string;
     tags?: string[];
   }) {
+    if (!this.databaseId) throw new Error('Database ID is required');
     try {
-      // 1. Fetch database structure to check which properties exist
-      const database: any = await (this.client.databases as any).retrieve({
+      const database: any = await this.client.databases.retrieve({
         database_id: this.databaseId,
       });
 
-      if (!database || !database.properties) {
-        const isSynced = database && (database.data_sources || database.source);
-        const logMsg = `Properties missing. Synced detected: ${!!isSynced}. Attempting blind create...`;
-
-        try {
-          const fs = require('fs');
-          fs.appendFileSync("publish-debug.log", `${new Date().toISOString()} - ${logMsg}\n`);
-
-          // Try a Hail Mary create with just the title. Notion often handles this even if retrieve() lies about properties.
-          // Note: We use "title" lowercase because that is the standard for basic pages
-          const response = await this.client.pages.create({
-            parent: { database_id: this.databaseId },
-            properties: {
-              "title": { title: [{ text: { content: article.title } }] }
-            },
-            children: this.htmlToBlocks(article.content) as any,
-          });
-
-          fs.appendFileSync("publish-debug.log", `${new Date().toISOString()} - Blind create SUCCESS!\n`);
-          return {
-            id: response.id,
-            url: (response as any).url,
-            cmsPostId: response.id,
-            publishedUrl: (response as any).url,
-          };
-        } catch (blindError: any) {
-          const fs = require('fs');
-          fs.appendFileSync("publish-debug.log", `${new Date().toISOString()} - Blind create FAILED: ${blindError.message}\n`);
-
-          const errorMsg = isSynced
-            ? 'Your Notion database appears to be a "Synced Database". These are read-only mirrors of external data and cannot be published to.'
-            : 'Notion database properties not found. Your database might be a "Wiki" or a private view.';
-
-          throw new Error(`${errorMsg} Please create a standard "Table" database in Notion and ensure your Integration is "connected" to it. Details: ${blindError.message}`);
-        }
-      }
-
       const dbProperties = database.properties;
-
-      // 2. Build properties object dynamically based on what's available
       const properties: any = {};
 
-      // Match properties case-insensitively or by common names
       const findProp = (name: string) => {
         if (!dbProperties) return null;
         const exact = Object.keys(dbProperties).find(k => k.toLowerCase() === name.toLowerCase());
         return exact || null;
       };
 
-      // Title is usually "Title" or "Name" and is required to be a title type
       const titleKey = Object.keys(dbProperties).find(k => dbProperties[k].type === 'title') || 'Title';
       properties[titleKey] = { title: [{ text: { content: article.title } }] };
 
-      // Optional properties - only add if they exist in the DB
       const slugKey = findProp('Slug');
       if (slugKey && dbProperties[slugKey].type === 'rich_text') {
         properties[slugKey] = { rich_text: [{ text: { content: article.slug } }] };
@@ -213,7 +231,7 @@ export class NotionClient {
 
       const statusKey = findProp('Status');
       if (statusKey && dbProperties[statusKey].type === 'select') {
-        properties[statusKey] = { select: { name: 'Draft' } };
+        properties[statusKey] = { select: { name: 'Published' } };
       }
 
       const blocks = this.htmlToBlocks(article.content);
@@ -238,13 +256,10 @@ export class NotionClient {
 
   private htmlToBlocks(html: string): any[] {
     const blocks: any[] = [];
-
-    // Simple regex-based parser for common tags
-    // In a production app, use a proper HTML parser like node-html-parser or cheerio
     const parts = html.split(/(<h[123]>.*?<\/h[123]>|<p>.*?<\/p>|<ul>.*?<\/ul>|<ol>.*?<\/ol>|<img.*?>|<iframe.*?>.*?<\/iframe>|<iframe.*?\/>)/i);
 
     for (const part of parts) {
-      if (!part.trim()) continue;
+      if (!part || !part.trim()) continue;
 
       if (part.match(/<h1/i)) {
         blocks.push({
@@ -279,17 +294,6 @@ export class NotionClient {
             image: { type: 'external', external: { url: srcMatch[1] } },
           });
         }
-      } else if (part.match(/<iframe/i)) {
-        const srcMatch = part.match(/src="([^"]+)"/i);
-        if (srcMatch) {
-          let videoUrl = srcMatch[1];
-          // Handle YouTube shortcode style or relative URLs if any, but mostly external
-          blocks.push({
-            object: 'block',
-            type: 'video',
-            video: { type: 'external', external: { url: videoUrl } },
-          });
-        }
       } else if (part.match(/<li/i)) {
         blocks.push({
           object: 'block',
@@ -299,7 +303,6 @@ export class NotionClient {
       }
     }
 
-    // fallback for plain text if no tags found or split failed to catch everything
     if (blocks.length === 0 && html.trim()) {
       blocks.push({
         object: 'block',
@@ -308,31 +311,31 @@ export class NotionClient {
       });
     }
 
-    return blocks.slice(0, 100); // Notion limit is usually 100 children per request
+    return blocks.slice(0, 100);
   }
 
   private transformPageToPost(page: any): BlogPost {
     const properties = page.properties;
 
-    const title = properties.Title?.title[0]?.plain_text || 'Untitled';
+    const title = properties.Title?.title[0]?.plain_text || 
+                  properties.Name?.title[0]?.plain_text || 
+                  'Untitled';
     const slug = properties.Slug?.rich_text[0]?.plain_text || '';
-    const excerpt = properties.Excerpt?.rich_text[0]?.plain_text || '';
-    const date = properties['Published Date']?.date?.start || new Date().toISOString();
+    const excerpt = properties.Excerpt?.rich_text[0]?.plain_text || 
+                    properties['Meta Description']?.rich_text[0]?.plain_text || '';
+    const date = properties['Published Date']?.date?.start || 
+                 properties.Date?.date?.start || 
+                 page.created_time;
     const status = properties.Status?.select?.name || 'Draft';
     const category = properties.Category?.select?.name || 'General';
     const seoTitle = properties['SEO Title']?.rich_text[0]?.plain_text || '';
     const seoDescription = properties['Meta Description']?.rich_text[0]?.plain_text || '';
 
-    // Handle cover image
     let coverImage = undefined;
     if (properties['Cover Image']?.files?.length > 0) {
       const file = properties['Cover Image'].files[0];
       coverImage = file.type === 'file' ? file.file.url : file.external.url;
     }
-
-    // Estimate read time (very rough approximation)
-    const wordCount = 1000; // Placeholder, would need to fetch content to be accurate
-    const readTime = `${Math.ceil(wordCount / 200)} min read`;
 
     return {
       id: page.id,
@@ -345,7 +348,7 @@ export class NotionClient {
       coverImage,
       seoTitle,
       seoDescription,
-      readTime,
+      readTime: '5 min read',
     };
   }
 }
