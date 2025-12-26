@@ -7,13 +7,41 @@ import { WebflowService } from '@/lib/cms/webflow';
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const body = await request.json();
+    const authHeader = request.headers.get("authorization");
+    let user;
+
+    if (authHeader === `Bearer ${process.env.CRON_SECRET}`) {
+      const articleId = body.articleId;
+      if (articleId) {
+        const { data: art } = await supabase.from("articles").select("user_id").eq("id", articleId).single();
+        if (art) user = { id: art.user_id };
+      }
+    }
+
+    if (!user) {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      user = authUser;
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { integration_id, title, content, excerpt, status, blog_id, seo_title, seo_description, cover_image, collection_id } = await request.json();
+    let { integration_id, title, content, excerpt, status, blog_id, seo_title, seo_description, cover_image, collection_id, articleId, platform, integrationId } = body;
+
+    // Support cron job payload
+    if (articleId) {
+      const { data: article } = await supabase.from("articles").select("*").eq("id", articleId).single();
+      if (article) {
+        title = article.title;
+        content = article.html_content || article.content;
+        excerpt = article.excerpt || article.meta_description;
+        seo_title = article.title;
+        seo_description = article.meta_description;
+        integration_id = integrationId;
+      }
+    }
 
     if (!integration_id || !title || !content) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
