@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, Check, Info, ChevronDown } from "lucide-react";
+import { Zap, Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type GrowthMode = "Safe Growth" | "Balanced Growth" | "Authority Growth";
@@ -12,53 +12,26 @@ type Plan = {
   price: number;
   growthMode: GrowthMode;
   features: string[];
-  color: "green" | "blue" | "purple";
   isActive: boolean;
 };
 
 const PLANS: Plan[] = [
   {
-    id: "starter",
-    name: "Starter",
-    price: 49,
-    growthMode: "Safe Growth",
-    features: [
-      "AI content generation",
-      "Automated publishing",
-      "Gradual backlink building",
-      "Built-in SEO safety controls",
-    ],
-    color: "green",
-    isActive: false,
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    price: 99,
-    growthMode: "Balanced Growth",
-    features: [
-      "Full 30-day AI content plan",
-      "Daily blog publishing",
-      "Automated backlink generator",
-      "QA validation & indexing checks",
-      "Natural, penalty-safe growth",
-    ],
-    color: "blue",
-    isActive: true,
-  },
-  {
-    id: "authority",
-    name: "Authority",
-    price: 199,
+    id: "pro",
+    name: "Pro Tier",
+    price: 59,
     growthMode: "Authority Growth",
     features: [
-      "Accelerated content publishing",
-      "Higher backlink capacity",
-      "Priority QA validation",
-      "Optimized for established sites",
+      "30 SEO articles per month",
+      "AI-generated images included",
+      "Auto-publishing to WordPress/Wix/Webflow",
+      "Full keyword research & optimization",
+      "Performance dashboard access",
+      "High-quality backlink starter pack",
+      "Optional light human QA",
+      "3-day trial ($1 activation fee)",
     ],
-    color: "purple",
-    isActive: false,
+    isActive: true,
   },
 ];
 
@@ -68,14 +41,6 @@ export default function BillingPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-
-  const toggleRow = (planId: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [planId]: !prev[planId],
-    }));
-  };
 
   const handleUpgradeClick = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -118,14 +83,14 @@ export default function BillingPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
-            Upgrade your plan
+            Your Subscription
           </h1>
           <p className="text-sm text-[#6B7280]">
-            Hands-off SEO growth, safely automated
+            Manage your SEO automation plan and billing
           </p>
         </div>
 
@@ -136,124 +101,105 @@ export default function BillingPage() {
           </p>
         </div>
 
-        {/* Plans Table */}
-        <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-[#F9FAFB] border-b border-[#E5E5E5]">
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    Plan
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    <div className="flex items-center gap-1.5">
-                      Growth Mode
-                      <div className="group relative">
-                        <Info className="h-3.5 w-3.5 text-[#9CA3AF] cursor-help" />
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 p-2 bg-[#1F2937] text-white text-xs rounded-lg shadow-lg z-10">
-                          Ranklite automatically adjusts publishing and link building to keep your SEO natural and penalty-safe.
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#1F2937]" />
-                        </div>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
+        {/* Single Plan Card */}
+        {plans.map((plan) => (
+          <div
+            key={plan.id}
+            className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm overflow-hidden"
+          >
+            <div className="p-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-xl font-bold text-[#1A1A1A]">
+                      {plan.name}
+                    </h2>
+                    {getStatusBadge(plan.isActive)}
+                  </div>
+                  <p className="text-sm text-[#6B7280]">
+                    Ranklite Authority Growth Mode enabled
+                  </p>
+                </div>
+                <div className="text-left md:text-right">
+                  <div className="text-3xl font-bold text-[#10B981]">
+                    ${plan.price}
+                    <span className="text-sm font-normal text-[#6B7280]">
+                      /month
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#6B7280] mt-1">
+                    Next billing date: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-sm font-semibold text-[#1A1A1A] mb-4 uppercase tracking-wider">
                     What&apos;s included
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E5E5]">
-                {plans.map((plan) => (
-                  <tr
-                    key={plan.id}
-                    className={cn(
-                      "transition-colors",
-                      plan.isActive ? "bg-[#F0FDF4]" : "hover:bg-[#F9FAFB]"
-                    )}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-sm text-[#1A1A1A]">
-                        {plan.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-[#1A1A1A]">
-                        <span className="font-semibold">${plan.price}</span>
-                        <span className="text-[#6B7280]"> / month</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
-                          plan.color === "green" && "bg-[#DCFCE7] text-[#166534]",
-                          plan.color === "blue" && "bg-[#DBEAFE] text-[#1E40AF]",
-                          plan.color === "purple" && "bg-[#F3E8FF] text-[#6B21A8]"
-                        )}
+                  </h3>
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-3 text-sm text-[#4B5563]"
                       >
-                        {plan.growthMode}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => toggleRow(plan.id)}
-                        className="flex items-center gap-2 text-xs font-medium text-[#6B7280] hover:text-[#1A1A1A] transition-colors"
-                      >
-                        <span>{expandedRows[plan.id] ? "Hide" : "Show"} features</span>
-                        <ChevronDown
-                          className={cn(
-                            "h-4 w-4 transition-transform",
-                            expandedRows[plan.id] && "rotate-180"
-                          )}
-                        />
-                      </button>
-                      {expandedRows[plan.id] && (
-                        <ul className="space-y-1.5 mt-3">
-                          {plan.features.map((feature, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-start gap-2 text-xs text-[#4B5563]"
-                            >
-                              <Check className="h-3.5 w-3.5 text-[#10B981] mt-0.5 flex-shrink-0" />
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">{getStatusBadge(plan.isActive)}</td>
-                    <td className="px-6 py-4 text-right">
-                      {plan.isActive ? (
+                        <div className="mt-1 h-4 w-4 rounded-full bg-[#DCFCE7] flex items-center justify-center flex-shrink-0">
+                          <Check className="h-2.5 w-2.5 text-[#16A34A]" />
+                        </div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-[#F9FAFB] rounded-lg p-6 border border-[#E5E5E5]">
+                  <h3 className="text-sm font-semibold text-[#1A1A1A] mb-4">
+                    Subscription Actions
+                  </h3>
+                  <div className="space-y-3">
+                    {plan.isActive ? (
+                      <>
                         <button
                           disabled
-                          className="px-4 py-2 text-xs font-medium text-[#9CA3AF] bg-[#F3F4F6] rounded-md cursor-not-allowed"
+                          className="w-full px-4 py-2.5 text-sm font-medium text-[#9CA3AF] bg-[#F3F4F6] rounded-md cursor-not-allowed border border-[#E5E5E5]"
                         >
-                          Current Plan
+                          Plan is Active
                         </button>
-                      ) : (
                         <button
-                          onClick={() => handleUpgradeClick(plan)}
-                          className="px-4 py-2 text-xs font-medium text-white bg-[#10B981] hover:bg-[#059669] rounded-md transition-colors shadow-sm"
+                          onClick={() => {
+                            setToastMessage("Billing portal is coming soon");
+                            setShowToast(true);
+                            setTimeout(() => setShowToast(false), 3000);
+                          }}
+                          className="w-full px-4 py-2.5 text-sm font-medium text-[#4B5563] bg-white border border-[#E5E5E5] rounded-md hover:bg-[#F9FAFB] transition-colors"
                         >
-                          Upgrade
+                          Manage Payment Method
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleUpgradeClick(plan)}
+                        className="w-full px-4 py-2.5 text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] rounded-md transition-colors shadow-sm"
+                      >
+                        Activate Plan
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-4 p-3 rounded bg-blue-50 border border-blue-100">
+                    <div className="flex gap-2">
+                      <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                        Ranklite automatically adjusts publishing and link
+                        building to keep your SEO natural and penalty-safe.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
 
       {/* Upgrade Modal */}
