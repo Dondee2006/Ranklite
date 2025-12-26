@@ -71,7 +71,7 @@ export default function DashboardOverviewPage() {
           <WelcomeBanner />
         </div>
         
-        <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
+        <div className="rounded-2xl border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-[#6B7280]" />

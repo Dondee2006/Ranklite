@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Sparkles, Activity, Target, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function WelcomeBanner() {
   const [userName, setUserName] = useState<string | null>(null);
@@ -30,49 +31,55 @@ export function WelcomeBanner() {
 
   if (loading) {
     return (
-      <div className="h-[180px] w-full bg-white border border-[#E5E5E5] rounded-xl animate-pulse" />
+      <div className="h-[220px] w-full bg-white border border-[#E5E5E5] rounded-2xl animate-pulse" />
     );
   }
 
   return (
-    <div className="relative overflow-hidden bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm">
+    <div className="relative overflow-hidden bg-white border border-emerald-100 rounded-2xl p-6 sm:p-10 shadow-sm transition-all hover:shadow-md">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 -mt-16 -mr-16 h-80 w-80 rounded-full bg-emerald-50 blur-3xl opacity-60 animate-blob" />
+      <div className="absolute bottom-0 right-0 mb-8 mr-24 h-40 w-40 rounded-full bg-emerald-100/40 blur-2xl opacity-50 animate-blob animation-delay-2000" />
+      
       <div className="relative z-10">
-        <div className="flex items-center gap-2 text-[#2563EB] mb-3">
-          <Sparkles className="h-5 w-5 fill-[#2563EB]/20" />
-          <span className="text-sm font-semibold uppercase tracking-wider">Welcome Back</span>
+        <div className="flex items-center gap-2 text-emerald-600 mb-4">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100/80">
+            <Sparkles className="h-4 w-4 fill-emerald-600/20" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-[0.1em]">Dashboard Overview</span>
         </div>
-        <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">
-          Good to see you, {userName}! 👋
+        
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#1A1A1A] mb-4 tracking-tight">
+          Welcome back, <span className="text-emerald-600">{userName}</span>! 👋
         </h2>
-        <p className="text-[#6B7280] max-w-2xl text-lg">
-          Your SEO engine is humming. We've optimized your recent content and processed new backlink opportunities.
+        
+        <p className="text-[#6B7280] max-w-2xl text-base sm:text-lg leading-relaxed mb-8">
+          Your SEO strategy is in full swing. We've identified new ranking opportunities and updated your performance metrics.
         </p>
         
-        <div className="flex flex-wrap gap-6 mt-8">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#F0FDF4] rounded-lg">
-              <TrendingUp className="h-4 w-4 text-[#16A34A]" />
+        <div className="flex flex-wrap gap-4 sm:gap-8 mt-4">
+          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100/50 transition-colors hover:bg-emerald-50">
+            <div className="p-1.5 bg-white rounded-lg shadow-sm">
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
             </div>
-            <span className="text-sm font-medium text-[#374151]">Traffic Growing</span>
+            <span className="text-sm font-semibold text-emerald-900">Growth Tracking</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#EFF6FF] rounded-lg">
-              <Target className="h-4 w-4 text-[#2563EB]" />
+          
+          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100/50 transition-colors hover:bg-emerald-50">
+            <div className="p-1.5 bg-white rounded-lg shadow-sm">
+              <Target className="h-4 w-4 text-emerald-600" />
             </div>
-            <span className="text-sm font-medium text-[#374151]">Keywords Tracking</span>
+            <span className="text-sm font-semibold text-emerald-900">Active Goals</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#FAF5FF] rounded-lg">
-              <Activity className="h-4 w-4 text-[#9333EA]" />
+          
+          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50/50 rounded-xl border border-emerald-100/50 transition-colors hover:bg-emerald-50">
+            <div className="p-1.5 bg-white rounded-lg shadow-sm">
+              <Activity className="h-4 w-4 text-emerald-600" />
             </div>
-            <span className="text-sm font-medium text-[#374151]">Active SEO Cycle</span>
+            <span className="text-sm font-semibold text-emerald-900">Health Score: 98%</span>
           </div>
         </div>
       </div>
-
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-[#2563EB]/5 blur-3xl" />
-      <div className="absolute bottom-0 right-0 mb-10 mr-20 h-32 w-32 rounded-full bg-[#2563EB]/10 blur-2xl" />
     </div>
   );
 }
