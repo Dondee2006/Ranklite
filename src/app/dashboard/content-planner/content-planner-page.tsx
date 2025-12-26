@@ -609,28 +609,22 @@ export default function ContentPlannerPage() {
                                                                             </div>
                                                                         </div>
 
-                                                                            {isPastOrToday && (
-                                                                                <div className="flex flex-col gap-2 mt-4">
-                                                                                    {dayArticles[0].status === 'published' ? (
-                                                                                        <Button
-                                                                                            size="sm"
-                                                                                            variant="outline"
-                                                                                            className="w-full h-8 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50 shadow-sm gap-2"
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                const exports = dayArticles[0].cms_exports as any;
-                                                                                                const publishedUrl = exports?.notion?.published_url || exports?.shopify?.published_url || exports?.wordpress?.published_url;
-                                                                                                if (publishedUrl) {
-                                                                                                    window.open(publishedUrl, '_blank');
-                                                                                                } else {
-                                                                                                    router.push(`/dashboard/content/${dayArticles[0].id}`);
-                                                                                                }
-                                                                                            }}
-                                                                                        >
-                                                                                            <ExternalLink className="h-3 w-3" />
-                                                                                            Visit Live
-                                                                                        </Button>
-                                                                                    ) : (
+                                                                                {isPastOrToday && (
+                                                                                  <div className="flex flex-col gap-2 mt-4">
+                                                                                      {dayArticles[0].status === 'published' ? (
+                                                                                          <Button
+                                                                                              size="sm"
+                                                                                              variant="outline"
+                                                                                              className="w-full h-8 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50 shadow-sm gap-2"
+                                                                                              onClick={(e) => {
+                                                                                                  e.stopPropagation();
+                                                                                                  router.push(`/dashboard/content/${dayArticles[0].id}`);
+                                                                                              }}
+                                                                                          >
+                                                                                              <ExternalLink className="h-3 w-3" />
+                                                                                              Visit Article
+                                                                                          </Button>
+                                                                                      ) : (
                                                                                         <Button
                                                                                             size="sm"
                                                                                             variant="secondary"
