@@ -59,15 +59,16 @@ const NAV_SECTIONS = [
       { id: "integrations", label: "Integrations", href: "/dashboard/integrations", icon: Plug },
     ],
   },
-  {
-    id: "configuration",
-    label: "CONFIGURATION",
-    items: [
-      { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
-      { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
-      { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
-    ],
-  },
+    {
+      id: "configuration",
+      label: "CONFIGURATION",
+      items: [
+        { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
+        { id: "article-settings", label: "Article Settings", href: "/dashboard/articles-settings", icon: FileText },
+        { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
+        { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
+      ],
+    },
   {
     id: "audit",
     label: "AUDIT",

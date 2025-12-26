@@ -11,7 +11,7 @@ export async function GET() {
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, url")
+    .select("*")
     .eq("user_id", user.id)
     .single();
 
@@ -19,15 +19,21 @@ export async function GET() {
     return NextResponse.json({ settings: null });
   }
 
-  const { data } = await supabase
-    .from("article_settings")
-    .select("*")
-    .eq("site_id", site.id)
-    .single();
+  const [
+    { data: articleSettings },
+    { data: audiences },
+    { data: competitors }
+  ] = await Promise.all([
+    supabase.from("article_settings").select("*").eq("site_id", site.id).single(),
+    supabase.from("target_audiences").select("*").eq("site_id", site.id),
+    supabase.from("competitors").select("*").eq("site_id", site.id)
+  ]);
 
   return NextResponse.json({ 
-    settings: data,
-    siteUrl: site.url 
+    site,
+    articleSettings,
+    audiences,
+    competitors
   });
 }
 
@@ -51,54 +57,84 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "No site found" }, { status: 404 });
   }
 
-  const { data: existing } = await supabase
-    .from("article_settings")
-    .select("id")
-    .eq("site_id", site.id)
-    .single();
-
-  if (existing) {
-    const { error } = await supabase
-      .from("article_settings")
+  // Update site info
+  if (body.site) {
+    await supabase
+      .from("sites")
       .update({
-        style: body.style,
-        length: body.length,
-        ai_images: body.ai_images,
-        image_style: body.image_style,
-        internal_links: body.internal_links,
-        cta_enabled: body.cta_enabled,
-        cta_text: body.cta_text,
-        cta_url: body.cta_url,
-        custom_instructions: body.custom_instructions,
-        sitemap_url: body.sitemap_url,
-        blog_address: body.blog_address,
-        example_urls: body.example_urls,
+        name: body.site.name,
+        url: body.site.url,
+        website_url: body.site.url,
+        language: body.site.language,
+        country: body.site.country,
+        description: body.site.description,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", existing.id);
+      .eq("id", site.id);
+  }
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+  // Update audiences
+  if (body.audiences && Array.isArray(body.audiences)) {
+    // Delete existing and insert new for simplicity
+    await supabase.from("target_audiences").delete().eq("site_id", site.id);
+    if (body.audiences.length > 0) {
+      await supabase.from("target_audiences").insert(
+        body.audiences.map((a: any) => ({
+          site_id: site.id,
+          name: typeof a === "string" ? a : a.name,
+          description: typeof a === "string" ? a : a.description,
+        }))
+      );
     }
-  } else {
-    const { error } = await supabase.from("article_settings").insert({
-      site_id: site.id,
-      style: body.style,
-      length: body.length,
-      ai_images: body.ai_images,
-      image_style: body.image_style,
-      internal_links: body.internal_links,
-      cta_enabled: body.cta_enabled,
-      cta_text: body.cta_text,
-      cta_url: body.cta_url,
-      custom_instructions: body.custom_instructions,
-      sitemap_url: body.sitemap_url,
-      blog_address: body.blog_address,
-      example_urls: body.example_urls,
-    });
+  }
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+  // Update competitors
+  if (body.competitors && Array.isArray(body.competitors)) {
+    await supabase.from("competitors").delete().eq("site_id", site.id);
+    if (body.competitors.length > 0) {
+      await supabase.from("competitors").insert(
+        body.competitors.map((c: any) => ({
+          site_id: site.id,
+          url: typeof c === "string" ? c : c.url,
+        }))
+      );
+    }
+  }
+
+  // Update article settings
+  if (body.articleSettings) {
+    const { data: existing } = await supabase
+      .from("article_settings")
+      .select("id")
+      .eq("site_id", site.id)
+      .single();
+
+    const settingsData = {
+      site_id: site.id,
+      article_style: body.articleSettings.article_style,
+      internal_links: body.articleSettings.internal_links,
+      global_instructions: body.articleSettings.global_instructions,
+      brand_color: body.articleSettings.brand_color,
+      image_style: body.articleSettings.image_style,
+      title_based_image: body.articleSettings.title_based_image,
+      youtube_video: body.articleSettings.youtube_video,
+      call_to_action: body.articleSettings.call_to_action,
+      include_infographics: body.articleSettings.include_infographics,
+      include_emojis: body.articleSettings.include_emojis,
+      auto_publish: body.articleSettings.auto_publish,
+      sitemap_url: body.articleSettings.sitemap_url,
+      blog_address: body.articleSettings.blog_address,
+      example_urls: body.articleSettings.example_urls,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existing) {
+      await supabase
+        .from("article_settings")
+        .update(settingsData)
+        .eq("id", existing.id);
+    } else {
+      await supabase.from("article_settings").insert(settingsData);
     }
   }
 
