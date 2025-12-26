@@ -63,6 +63,15 @@ export class ArticleEngine {
                 tags: (article.tags || []).join(", "),
                 image: images[0] || null,
             },
+            notion: {
+                title: article.title,
+                slug,
+                content: htmlContent,
+                meta_description: metaDescription,
+                status: "draft",
+                category: article.category || "General",
+                tags: article.tags || [],
+            },
         };
 
         return {

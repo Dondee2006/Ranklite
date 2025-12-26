@@ -191,7 +191,22 @@ export class NotionClient {
         database_id: this.databaseId,
       });
 
-      const dbProperties = database.properties;
+      let dbProperties = database?.properties;
+      
+      if (!dbProperties) {
+        console.log('Properties not found in retrieve, attempting to get from query results...');
+        const queryRes = await this.queryDatabase(this.databaseId);
+        if (queryRes.results.length > 0) {
+          dbProperties = (queryRes.results[0] as any).properties;
+          console.log('Found properties in query results:', Object.keys(dbProperties));
+        }
+      }
+
+      if (!dbProperties) {
+        console.error('Notion database retrieval failed or has no properties:', database);
+        throw new Error('Notion database properties not found. Please check if the integration has access to the database.');
+      }
+
       const properties: any = {};
 
       const findProp = (name: string) => {

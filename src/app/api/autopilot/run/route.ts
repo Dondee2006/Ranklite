@@ -224,14 +224,25 @@ async function processSiteAutopilot(site: any) {
       const publishResult = await CMSEngine.publishArticleToCMS(site.user_id, currentArticle);
 
       if (publishResult.success) {
+        const now = new Date().toISOString();
+        const cmsExports = currentArticle.cms_exports || {};
+        const platform = "notion"; // Default for now, but should ideally be from settings
+        
         await supabaseAdmin
           .from("articles")
           .update({
             status: "published",
-            published_at: new Date().toISOString(),
-            published_url: publishResult.publishedUrl,
-            cms_post_id: publishResult.cmsPostId,
-            updated_at: new Date().toISOString()
+            published_at: now,
+            updated_at: now,
+            cms_exports: {
+              ...cmsExports,
+              [platform]: {
+                ...cmsExports[platform],
+                published_url: publishResult.publishedUrl,
+                cms_post_id: publishResult.cmsPostId,
+                published_at: now
+              }
+            }
           })
           .eq("id", currentArticle.id);
         results.push({ id: article.id, status: 'published' });

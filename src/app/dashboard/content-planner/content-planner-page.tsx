@@ -609,28 +609,54 @@ export default function ContentPlannerPage() {
                                                                             </div>
                                                                         </div>
 
-                                                                        {isPastOrToday && (
-                                                                            <Button
-                                                                                size="sm"
-                                                                                variant="secondary"
-                                                                                disabled={generatingArticle === dayArticles[0].id}
-                                                                                className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    if (dayArticles[0].status === 'planned') {
-                                                                                        generateArticleContent(dayArticles[0].id);
-                                                                                    } else {
-                                                                                        router.push(`/dashboard/content/${dayArticles[0].id}`);
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                {generatingArticle === dayArticles[0].id ? (
-                                                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                                                ) : (
-                                                                                    dayArticles[0].status === 'planned' ? "Create and Publish" : "Visit Article"
-                                                                                )}
-                                                                            </Button>
-                                                                        )}
+                                                                            {isPastOrToday && (
+                                                                                <div className="flex flex-col gap-2 mt-4">
+                                                                                    {dayArticles[0].status === 'published' ? (
+                                                                                        <Button
+                                                                                            size="sm"
+                                                                                            variant="outline"
+                                                                                            className="w-full h-8 text-[10px] font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50 shadow-sm gap-2"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                const exports = dayArticles[0].cms_exports as any;
+                                                                                                const publishedUrl = exports?.notion?.published_url || exports?.shopify?.published_url || exports?.wordpress?.published_url;
+                                                                                                if (publishedUrl) {
+                                                                                                    window.open(publishedUrl, '_blank');
+                                                                                                } else {
+                                                                                                    router.push(`/dashboard/content/${dayArticles[0].id}`);
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            <ExternalLink className="h-3 w-3" />
+                                                                                            Visit Live
+                                                                                        </Button>
+                                                                                    ) : (
+                                                                                        <Button
+                                                                                            size="sm"
+                                                                                            variant="secondary"
+                                                                                            disabled={generatingArticle === dayArticles[0].id}
+                                                                                            className={cn(
+                                                                                                "w-full h-8 text-[10px] font-bold shadow-sm",
+                                                                                                dayArticles[0].status === 'planned' ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-purple-600 text-white hover:bg-purple-700"
+                                                                                            )}
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                if (dayArticles[0].status === 'planned') {
+                                                                                                    generateArticleContent(dayArticles[0].id);
+                                                                                                } else {
+                                                                                                    router.push(`/dashboard/content/${dayArticles[0].id}`);
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            {generatingArticle === dayArticles[0].id ? (
+                                                                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                                                                            ) : (
+                                                                                                dayArticles[0].status === 'planned' ? "Create and Publish" : "View & Publish"
+                                                                                            )}
+                                                                                        </Button>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="flex-1" />
