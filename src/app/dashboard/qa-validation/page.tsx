@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
 interface ValidationRecord {
   id: string;
   source: string;
-  http_status: number;
+  http_status: number | null;
   anchor_found: boolean;
-  link_type: "Dofollow" | "Nofollow";
+  link_type: "Dofollow" | "Nofollow" | "Unknown";
   indexing_status: "Indexed" | "Pending" | "Not Indexed";
-  verification_status: "Verified" | "Warning" | "Failed";
+  verification_status: "Verified" | "Warning" | "Failed" | "Pending";
   last_checked: string;
 }
 
@@ -20,12 +20,14 @@ const VERIFICATION_COLORS = {
   Verified: "bg-[#D1FAE5] text-[#065F46]",
   Warning: "bg-[#FEF3C7] text-[#92400E]",
   Failed: "bg-[#FEE2E2] text-[#991B1B]",
+  Pending: "bg-[#F3F4F6] text-[#6B7280]",
 };
 
 const VERIFICATION_ICONS = {
   Verified: CheckCircle,
   Warning: AlertTriangle,
   Failed: AlertCircle,
+  Pending: Loader2,
 };
 
 export default function QAValidationPage() {
@@ -59,6 +61,7 @@ export default function QAValidationPage() {
     verified: records.filter(r => r.verification_status === "Verified").length,
     warning: records.filter(r => r.verification_status === "Warning").length,
     failed: records.filter(r => r.verification_status === "Failed").length,
+    pending: records.filter(r => r.verification_status === "Pending").length,
   };
 
   return (
@@ -75,12 +78,13 @@ export default function QAValidationPage() {
             <option value="Verified">Verified</option>
             <option value="Warning">Warning</option>
             <option value="Failed">Failed</option>
+            <option value="Pending">Pending</option>
           </select>
         </div>
       </header>
 
       <div className="p-8">
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="rounded-lg border border-[#D1FAE5] bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -106,6 +110,15 @@ export default function QAValidationPage() {
                 <p className="text-2xl font-bold text-[#991B1B]">{stats.failed}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-[#F87171]" />
+            </div>
+          </div>
+          <div className="rounded-lg border border-[#E5E7EB] bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-[#6B7280]">Pending</p>
+                <p className="text-2xl font-bold text-[#374151]">{stats.pending}</p>
+              </div>
+              <Loader2 className="h-8 w-8 text-[#9CA3AF]" />
             </div>
           </div>
         </div>
@@ -155,7 +168,7 @@ export default function QAValidationPage() {
                     </tr>
                   ) : (
                     filteredRecords.map((record) => {
-                      const Icon = VERIFICATION_ICONS[record.verification_status];
+                      const Icon = VERIFICATION_ICONS[record.verification_status] || AlertCircle;
                       return (
                         <tr key={record.id} className="hover:bg-[#F9FAFB] transition-colors">
                           <td className="px-6 py-4">
@@ -164,9 +177,11 @@ export default function QAValidationPage() {
                           <td className="px-6 py-4">
                             <span className={cn(
                               "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              record.http_status === 200 ? "bg-[#D1FAE5] text-[#065F46]" : "bg-[#FEE2E2] text-[#991B1B]"
+                              record.http_status === 200 ? "bg-[#D1FAE5] text-[#065F46]" : 
+                              !record.http_status ? "bg-[#F3F4F6] text-[#6B7280]" :
+                              "bg-[#FEE2E2] text-[#991B1B]"
                             )}>
-                              {record.http_status}
+                              {record.http_status || "N/A"}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -198,9 +213,9 @@ export default function QAValidationPage() {
                           <td className="px-6 py-4">
                             <span className={cn(
                               "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              VERIFICATION_COLORS[record.verification_status]
+                              VERIFICATION_COLORS[record.verification_status] || "bg-[#F3F4F6] text-[#6B7280]"
                             )}>
-                              <Icon className="h-3.5 w-3.5" />
+                              <Icon className={cn("h-3.5 w-3.5", record.verification_status === "Pending" && "animate-spin")} />
                               {record.verification_status}
                             </span>
                           </td>
