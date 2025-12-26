@@ -2,9 +2,15 @@ import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { v4 as uuidv4 } from "uuid";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAIClient = () => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        return null;
+    }
+    return new OpenAI({
+        apiKey: apiKey,
+    });
+};
 
 export type ImageStyle = "brand-text" | "watercolor" | "cinematic" | "illustration" | "sketch";
 
@@ -17,6 +23,12 @@ interface GenerateImageOptions {
 
 export async function generateAndUploadImage(options: GenerateImageOptions) {
     const { prompt, style, brandColor = "#22C55E", size = "1792x1024" } = options;
+
+    const openai = getOpenAIClient();
+    if (!openai) {
+        console.warn("OPENAI_API_KEY is missing, skipping image generation.");
+        return null;
+    }
 
     // 1. Refine prompt based on style
     let refinedPrompt = prompt;
