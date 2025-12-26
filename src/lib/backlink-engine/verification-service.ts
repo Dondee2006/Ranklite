@@ -79,23 +79,24 @@ export async function runVerificationCycle(): Promise<{
   not_found: number;
   errors: number;
 }> {
-  const { data: pendingVerifications } = await supabaseAdmin
+  const { data: dueVerifications } = await supabaseAdmin
     .from("backlink_verifications")
     .select("*, backlink:backlinks(*)")
-    .eq("verification_status", "pending")
+    .in("verification_status", ["pending", "verified", "error"])
     .lte("next_verification_at", new Date().toISOString())
     .limit(20);
 
   const results = { verified: 0, not_found: 0, errors: 0 };
 
-  if (!pendingVerifications?.length) {
+  if (!dueVerifications?.length) {
     return results;
   }
 
-  for (const verification of pendingVerifications as Array<
-    BacklinkVerification & { backlink: { user_id: string; source_domain: string } }
+  for (const verification of dueVerifications as Array<
+    BacklinkVerification & { backlink: { user_id: string; source_domain: string; website_url?: string } }
   >) {
     const websiteUrl =
+      verification.backlink?.website_url ||
       verification.expected_anchor_text ||
       verification.backlink?.source_domain ||
       "";

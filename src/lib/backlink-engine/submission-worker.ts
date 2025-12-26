@@ -186,6 +186,33 @@ export async function processTask(task: BacklinkTask): Promise<WorkerResult> {
     };
   }
 
+  // Get campaign settings for quality filtering
+  const { data: campaign } = await supabaseAdmin
+    .from("backlink_campaigns")
+    .select("min_domain_rating")
+    .eq("user_id", task.user_id)
+    .single();
+
+  const minDR = campaign?.min_domain_rating || 40;
+
+  if (platform.domain_rating !== null && platform.domain_rating < minDR) {
+    await updateTaskStatus(task.id, "blocked", {
+      error_message: `Quality policy: Platform DR (${platform.domain_rating}) is below minimum (${minDR})`,
+    });
+    await logAction(task.user_id, "task_blocked_by_quality_policy", {
+      task_id: task.id,
+      platform: platform.site_name,
+      domain_rating: platform.domain_rating,
+      min_required: minDR,
+    });
+    return {
+      success: false,
+      task_id: task.id,
+      status: "blocked",
+      error_message: `Quality policy: Platform DR (${platform.domain_rating}) is below minimum (${minDR})`,
+    };
+  }
+
   if (!platform.automation_allowed) {
     await markForManualReview(task.id, "Platform does not allow automation");
     return {
