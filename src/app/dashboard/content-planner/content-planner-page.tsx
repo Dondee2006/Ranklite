@@ -87,8 +87,6 @@ interface Article {
     backlinks_count?: number;
     cluster_name?: string;
     is_pillar?: boolean;
-    volume?: number;
-    difficulty?: number;
 }
 
 interface AutopilotSettings {
@@ -118,17 +116,6 @@ function getStatusBadgeStyle(status: string) {
     return styles[status] || styles.planned;
 }
 
-function getStatusIndicator(status: string) {
-    const indicators: Record<string, { bg: string; text: string; label: string }> = {
-        planned: { bg: "bg-blue-100", text: "text-blue-700", label: "Planned" },
-        generated: { bg: "bg-purple-100", text: "text-purple-700", label: "Generated" },
-        qa_validated: { bg: "bg-amber-100", text: "text-amber-700", label: "QA Validated" },
-        published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Published" },
-        backlinks_queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Backlinks Queued" },
-    };
-    return indicators[status] || indicators.planned;
-}
-
 function getBacklinksStatusBadge(status?: string) {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
         pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pending" },
@@ -139,32 +126,11 @@ function getBacklinksStatusBadge(status?: string) {
     return styles[status || 'pending'] || styles.pending;
 }
 
-function getInitials(title: string) {
-    const words = title.trim().split(" ");
-    if (words.length >= 2) {
-        return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return title.slice(0, 2).toUpperCase();
-}
-
 function formatDateLocal(date: Date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
-}
-
-function formatRelativeDate(dateStr: string) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return "today";
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 30) return `${diffDays} days ago`;
-    if (diffDays < 60) return "about 1 month ago";
-    return `${Math.floor(diffDays / 30)} months ago`;
 }
 
 function getArticleTypeIcon(type: string) {
@@ -234,11 +200,7 @@ export default function ContentPlannerPage() {
     }, [searchParams]);
 
     useEffect(() => {
-        // Auto-generate the initial 30 articles after onboarding *once the user is subscribed*
-        // (so the user never needs to click "Generate 30 Articles").
-        // Only auto-run on the first post-onboarding visit
         if (searchParams.get("welcome") !== "true") return;
-
         if (loading) return;
         if (generating) return;
         if (autoGenerateLock.current) return;
@@ -252,13 +214,10 @@ export default function ContentPlannerPage() {
             try {
                 const planRes = await fetch("/api/billing/current-plan");
                 const planData = await planRes.json();
-
                 const postsPerMonth = planData?.plan?.posts_per_month ?? 0;
                 const planStatus = planData?.status;
 
-                // Only auto-generate after the paid tier (30 posts/month) is active
                 if (planStatus !== "active" || postsPerMonth < 30) return;
-
                 await generateMonthlyCalendar();
             } catch (error) {
                 console.error("Failed to auto-generate initial articles:", error);
@@ -274,7 +233,6 @@ export default function ContentPlannerPage() {
     const loadArticles = useCallback(async () => {
         setLoading(true);
         try {
-            // Fetch all articles to display in chronological order
             const response = await fetch('/api/articles');
             const data = await response.json();
             setArticles(data.articles || []);
@@ -314,10 +272,8 @@ export default function ContentPlannerPage() {
         loadAutopilotSettings();
     }, [loadArticles, loadAutopilotSettings]);
 
-    // Parse YouTube HTML comments in content
     const parseYouTubeShortcodes = (content: string): string => {
         if (!content) return content;
-        // Parse HTML comments: <!-- YOUTUBE:id -->
         return content.replace(/<!--\s*YOUTUBE:([a-zA-Z0-9_-]+)\s*-->/g, (match, videoId) => {
             return `<div class="video-container" style="margin: 2rem 0; aspect-ratio: 16/9; border-radius: 0.75rem; overflow: hidden; max-width: 100%;">
                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
@@ -352,25 +308,13 @@ export default function ContentPlannerPage() {
             const data = await startResponse.json();
 
             if (!startResponse.ok || !data.jobId) {
-                console.error("Generation failed:", data.error || "No job ID returned");
-                const errorMsg = data.error || "Failed to start generation. Please try again.";
-
-                if (startResponse.status === 403) {
-                    toast.error(errorMsg, {
-                        duration: 5000,
-                        id: 'monthly-limit-error'
-                    });
-                } else {
-                    toast.error(errorMsg);
-                }
-
+                toast.error(data.error || "Failed to start generation. Please try again.");
                 setGenerating(false);
                 return;
             }
             toast.info("Generating 30 articles. This may take a moment...");
 
             const { jobId } = data;
-
             const pollInterval = setInterval(async () => {
                 const statusResponse = await fetch(`/api/content-calendar/generate-bulk/status/${jobId}`);
                 const status = await statusResponse.json();
@@ -382,7 +326,6 @@ export default function ContentPlannerPage() {
                     setGenerating(false);
                 } else if (status.status === "failed") {
                     clearInterval(pollInterval);
-                    console.error("Generation failed:", status.error);
                     toast.error(`Generation failed: ${status.error}`);
                     setGenerating(false);
                 }
@@ -412,12 +355,11 @@ export default function ContentPlannerPage() {
                     toast.success("Article content generated!");
                 }
             } else {
-                const errorMsg = data.error || data.message || "Failed to generate article content";
-                toast.error(`Error: ${errorMsg}`);
+                toast.error(`Error: ${data.error || data.message || "Failed to generate article content"}`);
             }
         } catch (error) {
             console.error("Failed to generate article:", error);
-            toast.error("A network error occurred. Please check your connection and try again.");
+            toast.error("A network error occurred. Please try again.");
         }
         finally {
             setGeneratingArticle(null);
@@ -487,25 +429,6 @@ export default function ContentPlannerPage() {
         }
     }
 
-    const handleAddArticle = (date: Date) => {
-        const dateStr = formatDateLocal(date);
-        setSelectedDate(dateStr);
-        setNewArticle({
-            title: "",
-            keyword: "",
-            secondary_keywords: "",
-            article_type: "guide",
-            search_intent: "informational",
-            word_count: "1500",
-            cta_placement: "end",
-        });
-        setShowAddModal(true);
-    }
-
-    const clearFilters = () => {
-        setSearchQuery("");
-    };
-
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
@@ -516,13 +439,6 @@ export default function ContentPlannerPage() {
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.keyword?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-    const stats = {
-        total: articles.length,
-        planned: articles.filter(a => a.status === "planned").length,
-        generated: articles.filter(a => a.status === "generated").length,
-        published: articles.filter(a => a.status === "published").length,
-    };
 
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
@@ -557,15 +473,12 @@ export default function ContentPlannerPage() {
             <div className="p-8">
                 <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
                     <div className="space-y-12">
-                        {/* Month Sections */}
                         {(() => {
                             const now = new Date();
-                            now.setHours(0, 0, 0, 0); // Normalize 'now' to start of day
+                            now.setHours(0, 0, 0, 0);
                             const currentMonthIdx = now.getMonth();
                             const currentYearIdx = now.getFullYear();
 
-                            // Generate a list of months to show: from current month to 3 months ahead, 
-                            // plus any months actually containing articles.
                             const monthsToShow: { month: number; year: number }[] = [];
                             const articleMonths = new Set(articles.map(a => {
                                 const d = new Date(a.scheduled_date);
@@ -578,21 +491,17 @@ export default function ContentPlannerPage() {
                                 articleMonths.delete(`${d.getMonth()}-${d.getFullYear()}`);
                             }
 
-                            // Add remaining months that have articles
                             Array.from(articleMonths).forEach(key => {
                                 const [m, y] = key.split('-').map(Number);
                                 monthsToShow.push({ month: m, year: y });
                             });
 
-                            // Sort months chronologically
                             monthsToShow.sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
 
                             return monthsToShow.map(({ month, year }) => {
                                 const firstDayOfMonth = new Date(year, month, 1).getDay();
                                 const startingPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
                                 const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                                // Create all days for the month, including padding for the grid
                                 const totalCells = Math.ceil((startingPadding + daysInMonth) / 7) * 7;
                                 const days = Array.from({ length: totalCells }, (_, i) => {
                                     const dayOfMonth = i - startingPadding + 1;
@@ -601,13 +510,11 @@ export default function ContentPlannerPage() {
                                     return { date, dayOfMonth, isValidDay };
                                 });
 
-                                // Break into weeks (chunks of 7)
                                 const weeks = [];
                                 for (let i = 0; i < days.length; i += 7) {
                                     weeks.push(days.slice(i, i + 7));
                                 }
 
-                                // Filter weeks: Keep if it has an article OR if it's not entirely in the past
                                 const visibleWeeks = weeks.filter(week => {
                                     const hasArticle = week.some(d => {
                                         if (!d.isValidDay || !d.date) return false;
@@ -615,8 +522,6 @@ export default function ContentPlannerPage() {
                                         return articles.some(a => a.scheduled_date === dateStr);
                                     });
                                     if (hasArticle) return true;
-
-                                    // Check if any day in the week is today or in the future
                                     const hasFutureDay = week.some(d => {
                                         if (!d.isValidDay || !d.date) return false;
                                         const cellDate = new Date(d.date);
@@ -630,7 +535,7 @@ export default function ContentPlannerPage() {
 
                                 return (
                                     <div key={`${month}-${year}`} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-8">
-                                        <h2 className="text-xl font-bold text-gray-900 mb-8 font-display">
+                                        <h2 className="text-xl font-bold text-gray-900 mb-8">
                                             {MONTHS[month]} {year}
                                         </h2>
 
@@ -658,15 +563,9 @@ export default function ContentPlannerPage() {
                                                                     : "bg-white border-gray-50 cursor-default"
                                                                 : "bg-gray-50/10 border-transparent"
                                                         )}
-                                                        onClick={() => {
-                                                            // Disabled: User wants interaction only via buttons
-                                                            // if (!d.isValidDay || !d.date || dayArticles.length === 0) return;
-                                                            // setSelectedArticle(dayArticles[0]);
-                                                            // setShowArticleDetail(true);
-                                                        }}
                                                     >
                                                         {d.isValidDay && d.date && (
-                                                            <div className="flex flex-col h-full" style={{ fontFamily: 'Inter, sans-serif' }}>
+                                                            <div className="flex flex-col h-full">
                                                                 <div className="flex items-center justify-between mb-4">
                                                                     <div className="flex items-baseline gap-1.5">
                                                                         <span className="text-[15px] font-bold text-gray-900 leading-none">{d.dayOfMonth}</span>
@@ -698,60 +597,37 @@ export default function ContentPlannerPage() {
 
                                                                         <div className="flex items-center gap-4 mt-auto pb-1">
                                                                             <div className="flex flex-col">
-                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">Volume</span>
+                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">Vol</span>
                                                                                 <span className="text-[11px] font-bold text-gray-700 leading-none tracking-tight">{dayArticles[0].volume || 0}</span>
                                                                             </div>
                                                                             <div className="flex flex-col">
-                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">Difficulty</span>
+                                                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">KD</span>
                                                                                 <span className="text-[11px] font-bold text-gray-700 leading-none tracking-tight">{dayArticles[0].difficulty || 0}</span>
                                                                             </div>
                                                                         </div>
 
-                                                                        {isPastOrToday ? (
-                                                                            (dayArticles[0].status === 'generated' || dayArticles[0].status === 'published') ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        router.push(`/dashboard/content/${dayArticles[0].id}`);
-                                                                                    }}
-                                                                                >
-                                                                                    Visit Article
-                                                                                </Button>
-                                                                            ) : dayArticles[0].status === 'planned' ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    disabled={generatingArticle === dayArticles[0].id}
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
+                                                                        {isPastOrToday && (
+                                                                            <Button
+                                                                                size="sm"
+                                                                                variant="secondary"
+                                                                                disabled={generatingArticle === dayArticles[0].id}
+                                                                                className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    if (dayArticles[0].status === 'planned') {
                                                                                         generateArticleContent(dayArticles[0].id);
-                                                                                    }}
-                                                                                >
-                                                                                    {generatingArticle === dayArticles[0].id ? (
-                                                                                        <>
-                                                                                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                                                                            Generating...
-                                                                                        </>
-                                                                                    ) : (
-                                                                                        "Create and Publish"
-                                                                                    )}
-                                                                                </Button>
-                                                                            ) : dayArticles[0].status === 'generating' ? (
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="secondary"
-                                                                                    disabled
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 transition-all tracking-normal"
-                                                                                >
-                                                                                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                                                                    Generating...
-                                                                                </Button>
-                                                                            ) : null
-                                                                        ) : null}
+                                                                                    } else {
+                                                                                        router.push(`/dashboard/content/${dayArticles[0].id}`);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {generatingArticle === dayArticles[0].id ? (
+                                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                                ) : (
+                                                                                    dayArticles[0].status === 'planned' ? "Create and Publish" : "Visit Article"
+                                                                                )}
+                                                                            </Button>
+                                                                        )}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="flex-1" />
@@ -781,12 +657,6 @@ export default function ContentPlannerPage() {
                                     className="pl-9 h-10"
                                 />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" className="gap-2">
-                                    <Filter className="h-4 w-4" />
-                                    Filter
-                                </Button>
-                            </div>
                         </div>
                     </div>
 
@@ -799,95 +669,47 @@ export default function ContentPlannerPage() {
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Title
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Keyword
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Publish Date
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Backlinks Status
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            CMS Export / Edit
-                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keyword</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publish Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Backlinks</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {filteredArticles.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <FileText className="h-12 w-12 text-gray-300 mb-3" />
-                                                    <p className="text-gray-500 font-medium">No articles found</p>
-                                                    <p className="text-sm text-gray-400 mt-1">Create your first content plan to get started</p>
-                                                </div>
-                                            </td>
+                                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500">No articles found</td>
                                         </tr>
                                     ) : (
                                         filteredArticles.map((article) => {
                                             const statusBadge = getStatusBadgeStyle(article.status);
                                             const backlinksStatusBadge = getBacklinksStatusBadge(article.backlinks_status);
-
                                             return (
                                                 <tr key={article.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4">
-                                                        <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                                                            {article.title}
-                                                        </p>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-sm text-teal-600 font-medium">
-                                                            {article.keyword || "—"}
-                                                        </span>
-                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{article.title}</td>
+                                                    <td className="px-6 py-4 text-sm text-teal-600 font-medium">{article.keyword || "—"}</td>
                                                     <td className="px-6 py-4">
                                                         <span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusBadge.bg, statusBadge.text)}>
                                                             {statusBadge.label}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-sm text-gray-500">
-                                                        {new Date(article.scheduled_date).toLocaleDateString()}
-                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500">{new Date(article.scheduled_date).toLocaleDateString()}</td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={cn("px-3 py-1 rounded-full text-xs font-medium", backlinksStatusBadge.bg, backlinksStatusBadge.text)}>
-                                                                {backlinksStatusBadge.label}
-                                                            </span>
-                                                            {article.backlinks_count ? (
-                                                                <span className="text-xs text-gray-500">({article.backlinks_count})</span>
-                                                            ) : null}
-                                                        </div>
+                                                        <span className={cn("px-3 py-1 rounded-full text-xs font-medium", backlinksStatusBadge.bg, backlinksStatusBadge.text)}>
+                                                            {backlinksStatusBadge.label}
+                                                        </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            {article.cms_exports && (
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                                                >
-                                                                    <Download className="h-4 w-4" />
-                                                                </Button>
-                                                            )}
-                                                            <Button
-                                                                onClick={() => {
-                                                                    setSelectedArticle(article);
-                                                                    setShowArticleDetail(true);
-                                                                }}
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
-                                                            >
-                                                                <Edit3 className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
+                                                        <Button
+                                                            onClick={() => { setSelectedArticle(article); setShowArticleDetail(true); }}
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-teal-600 hover:text-teal-700"
+                                                        >
+                                                            <Edit3 className="h-4 w-4" />
+                                                        </Button>
                                                     </td>
                                                 </tr>
                                             );
@@ -897,16 +719,6 @@ export default function ContentPlannerPage() {
                             </table>
                         </div>
                     )}
-
-                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        <div className="flex items-center justify-between text-sm text-gray-500">
-                            <p>Showing {filteredArticles.length} of {articles.length} articles</p>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" disabled>Previous</Button>
-                                <Button variant="outline" size="sm" disabled>Next</Button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -914,109 +726,18 @@ export default function ContentPlannerPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 className="text-lg font-bold text-slate-900">Schedule Article</h3>
-                                <p className="text-sm text-slate-500">For {selectedDate}</p>
-                            </div>
+                            <h3 className="text-lg font-bold text-slate-900">Schedule Article</h3>
                             <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Article Title *</label>
-                                <Input
-                                    value={newArticle.title}
-                                    onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
-                                    placeholder="e.g., 10 Best SEO Tips for 2025"
-                                    className="h-11"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Primary Keyword *</label>
-                                <Input
-                                    value={newArticle.keyword}
-                                    onChange={(e) => setNewArticle({ ...newArticle, keyword: e.target.value })}
-                                    placeholder="e.g., SEO tips"
-                                    className="h-11"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Secondary Keywords</label>
-                                <Input
-                                    value={newArticle.secondary_keywords}
-                                    onChange={(e) => setNewArticle({ ...newArticle, secondary_keywords: e.target.value })}
-                                    placeholder="Comma separated: SEO strategies, SEO guide, SEO best practices"
-                                    className="h-11"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Article Type</label>
-                                    <select
-                                        value={newArticle.article_type}
-                                        onChange={(e) => setNewArticle({ ...newArticle, article_type: e.target.value })}
-                                        className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500"
-                                    >
-                                        {ARTICLE_TYPES.map(type => (
-                                            <option key={type.value} value={type.value}>{type.icon} {type.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Search Intent</label>
-                                    <select
-                                        value={newArticle.search_intent}
-                                        onChange={(e) => setNewArticle({ ...newArticle, search_intent: e.target.value })}
-                                        className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500"
-                                    >
-                                        {SEARCH_INTENTS.map(intent => (
-                                            <option key={intent.value} value={intent.value}>{intent.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Word Count Target</label>
-                                    <Input
-                                        type="number"
-                                        value={newArticle.word_count}
-                                        onChange={(e) => setNewArticle({ ...newArticle, word_count: e.target.value })}
-                                        placeholder="1500"
-                                        className="h-11"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">CTA Placement</label>
-                                    <select
-                                        value={newArticle.cta_placement}
-                                        onChange={(e) => setNewArticle({ ...newArticle, cta_placement: e.target.value })}
-                                        className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500"
-                                    >
-                                        <option value="beginning">Beginning</option>
-                                        <option value="middle">Middle</option>
-                                        <option value="end">End</option>
-                                        <option value="both">Beginning & End</option>
-                                    </select>
-                                </div>
-                            </div>
-
+                            <Input value={newArticle.title} onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })} placeholder="Article Title" />
+                            <Input value={newArticle.keyword} onChange={(e) => setNewArticle({ ...newArticle, keyword: e.target.value })} placeholder="Primary Keyword" />
                             <div className="flex gap-3 pt-4">
-                                <Button variant="outline" onClick={() => setShowAddModal(false)} className="flex-1 h-11">
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={saveArticle}
-                                    disabled={!newArticle.title || !newArticle.keyword || saving}
-                                    className="flex-1 h-11 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700"
-                                >
-                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule Article"}
+                                <Button variant="outline" onClick={() => setShowAddModal(false)} className="flex-1">Cancel</Button>
+                                <Button onClick={saveArticle} disabled={!newArticle.title || !newArticle.keyword || saving} className="flex-1 bg-emerald-600 text-white">
+                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule"}
                                 </Button>
                             </div>
                         </div>
@@ -1024,417 +745,43 @@ export default function ContentPlannerPage() {
                 </div>
             )}
 
-<<<<<<< HEAD
-              {showArticleDetail && selectedArticle && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                      <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
-                          <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                              <div className="flex items-center gap-3">
-                                  <span className="text-2xl">{getArticleTypeIcon(selectedArticle.article_type)}</span>
-                                  <div>
-                                      <Input
-                                          value={selectedArticle.title}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, title: e.target.value})}
-                                          className="text-lg font-bold mb-1"
-                                      />
-                                      <p className="text-sm text-slate-500">
-                                          Scheduled: {new Date(selectedArticle.scheduled_date).toLocaleDateString()} • {selectedArticle.word_count || 1500} words
-                                      </p>
-                                  </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                  <span className={cn("px-3 py-1 rounded-full text-xs font-medium", getStatusColor(selectedArticle.status))}>
-                                      {selectedArticle.status}
-                                  </span>
-                                  <button onClick={() => { setShowArticleDetail(false); setSelectedArticle(null); }} className="text-slate-400 hover:text-slate-600 ml-2">
-                                      <X className="h-5 w-5" />
-                                  </button>
-                            </div>
-                        </div>
-
-                          <div className="flex-1 overflow-y-auto p-6">
-                              <div className="grid grid-cols-3 gap-6 mb-6">
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Primary Keyword</p>
-                                      <Input
-                                          value={selectedArticle.keyword || ""}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, keyword: e.target.value})}
-                                          className="h-9 text-sm"
-                                      />
-                                  </div>
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Search Intent</p>
-                                      <select
-                                          value={selectedArticle.search_intent || "informational"}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, search_intent: e.target.value})}
-                                          className="w-full h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                                      >
-                                          {SEARCH_INTENTS.map(intent => (
-                                              <option key={intent.value} value={intent.value}>{intent.label}</option>
-                                          ))}
-                                      </select>
-                                  </div>
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Scheduled Date</p>
-                                      <Input
-                                          type="date"
-                                          value={selectedArticle.scheduled_date}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, scheduled_date: e.target.value})}
-                                          className="h-9 text-sm"
-                                      />
-                                  </div>
-                              </div>
-=======
             {showArticleDetail && selectedArticle && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
-                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">{getArticleTypeIcon(selectedArticle.article_type)}</span>
-                                <div>
-                                    <Input
-                                        value={selectedArticle.title}
-                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })}
-                                        className="text-lg font-bold mb-1"
-                                    />
-                                    <p className="text-sm text-slate-500">
-                                        Scheduled: {new Date(selectedArticle.scheduled_date).toLocaleDateString()} • {selectedArticle.word_count || 1500} words
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className={cn("px-3 py-1 rounded-full text-xs font-medium", getStatusColor(selectedArticle.status))}>
-                                    {selectedArticle.status}
-                                </span>
-                                <button onClick={() => { setShowArticleDetail(false); setSelectedArticle(null); }} className="text-slate-400 hover:text-slate-600 ml-2">
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <div className="grid grid-cols-3 gap-6 mb-6">
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <p className="text-xs text-slate-500 mb-2">Primary Keyword</p>
-                                    <Input
-                                        value={selectedArticle.keyword || ""}
-                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, keyword: e.target.value })}
-                                        className="h-9 text-sm"
-                                    />
-                                </div>
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <p className="text-xs text-slate-500 mb-2">Search Intent</p>
-                                    <select
-                                        value={selectedArticle.search_intent || "informational"}
-                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, search_intent: e.target.value })}
-                                        className="w-full h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                                    >
-                                        {SEARCH_INTENTS.map(intent => (
-                                            <option key={intent.value} value={intent.value}>{intent.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <p className="text-xs text-slate-500 mb-2">Scheduled Date</p>
-                                    <Input
-                                        type="date"
-                                        value={selectedArticle.scheduled_date}
-                                        onChange={(e) => setSelectedArticle({ ...selectedArticle, scheduled_date: e.target.value })}
-                                        className="h-9 text-sm"
-                                    />
-                                </div>
-                            </div>
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
-
-                            {selectedArticle.secondary_keywords?.length > 0 && (
-                                <div className="mb-6">
-                                    <p className="text-sm font-medium text-slate-700 mb-2">Secondary Keywords</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedArticle.secondary_keywords.map((kw, i) => (
-                                            <span key={i} className="px-3 py-1 rounded-full bg-slate-100 text-sm text-slate-600">{kw}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {selectedArticle.content ? (
-                                <div className="space-y-6">
-                                    <div className="rounded-xl border border-slate-200 p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <p className="text-sm font-medium text-slate-700">Meta Description</p>
-                                            <button
-                                                onClick={() => copyToClipboard(selectedArticle.meta_description, "meta")}
-                                                className="text-slate-400 hover:text-emerald-500"
-                                            >
-                                                {copiedId === "meta" ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                                            </button>
-                                        </div>
-                                        <p className="text-sm text-slate-600">{selectedArticle.meta_description}</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="rounded-xl border border-slate-200 p-4">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <LucideLink className="h-4 w-4 text-blue-500" />
-                                                <p className="text-sm font-medium text-slate-700">Internal Links ({(selectedArticle.internal_links as { title: string; url: string }[])?.length || 0})</p>
-                                            </div>
-                                            <div className="space-y-2">
-                                                {(selectedArticle.internal_links as { title: string; url: string }[])?.slice(0, 3).map((link, i) => (
-                                                    <p key={i} className="text-xs text-slate-500 truncate">{link.title}</p>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="rounded-xl border border-slate-200 p-4">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <ExternalLink className="h-4 w-4 text-purple-500" />
-                                                <p className="text-sm font-medium text-slate-700">External Links ({(selectedArticle.external_links as { source: string }[])?.length || 0})</p>
-                                            </div>
-                                            <div className="space-y-2">
-                                                {(selectedArticle.external_links as { source: string }[])?.slice(0, 3).map((link, i) => (
-                                                    <p key={i} className="text-xs text-slate-500 truncate">{link.source}</p>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-xl border border-slate-200 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <LucideImage className="h-4 w-4 text-amber-500" />
-                                            <p className="text-sm font-medium text-slate-700">Images ({(selectedArticle.images as object[])?.length || 0})</p>
-                                        </div>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {(selectedArticle.images as { url: string; alt: string }[])?.map((img, i) => (
-                                                <img key={i} src={img.url} alt={img.alt} className="rounded-lg w-full h-16 object-cover bg-slate-100" />
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-xl border border-slate-200 p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <p className="text-sm font-medium text-slate-700">Article Content Preview</p>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => copyToClipboard(selectedArticle.markdown_content, "markdown")}
-                                                    className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
-                                                >
-                                                    {copiedId === "markdown" ? "Copied!" : "Copy Markdown"}
-                                                </button>
-                                                <button
-                                                    onClick={() => copyToClipboard(selectedArticle.html_content, "html")}
-                                                    className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200"
-                                                >
-                                                    {copiedId === "html" ? "Copied!" : "Copy HTML"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="max-h-80 overflow-y-auto rounded-lg bg-white border border-slate-100 p-6 shadow-inner">
-                                            <div className="article-preview-rendered prose prose-sm max-w-none" style={{ maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word', overflow: 'hidden' }}>
-                                                {selectedArticle.html_content ? (
-                                                    <div dangerouslySetInnerHTML={{ __html: parseYouTubeShortcodes(selectedArticle.html_content) }} />
-                                                ) : selectedArticle.content ? (
-                                                    <div className="whitespace-pre-wrap font-sans text-sm text-slate-600" style={{ maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                                                        {selectedArticle.content}
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-slate-400 italic">No content available.</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <style jsx global>{`
-                                            .article-preview-rendered { max-width: 100%; overflow-x: hidden; }
-                                            .article-preview-rendered * { max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; }
-                                            .article-preview-rendered h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
-                                            .article-preview-rendered h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #0f172a; }
-                                            .article-preview-rendered h3 { font-size: 1.125rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #0f172a; }
-                                            .article-preview-rendered p { font-size: 0.875rem; line-height: 1.6; color: #475569; margin-bottom: 1rem; }
-                                            .article-preview-rendered ul, .article-preview-rendered ol { margin-bottom: 1rem; padding-left: 1.25rem; font-size: 0.875rem; color: #475569; }
-                                            .article-preview-rendered li { margin-bottom: 0.25rem; }
-                                            .article-preview-rendered img { border-radius: 0.5rem; margin: 1rem 0; max-width: 100%; height: auto; }
-                                            .article-preview-rendered a { color: #2563eb; text-decoration: underline; word-break: break-all; }
-                                            .article-preview-rendered iframe { max-width: 100%; }
-                                            .article-preview-rendered .video-container { max-width: 100%; }
-                                        `}</style>
-                                    </div>
-
-                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Download className="h-4 w-4 text-emerald-600" />
-                                            <p className="text-sm font-medium text-emerald-700">CMS Export Ready</p>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => copyToClipboard(JSON.stringify((selectedArticle.cms_exports as { wordpress: object })?.wordpress, null, 2), "wp")}
-                                                className="flex-1 rounded-lg bg-white border border-emerald-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-emerald-100"
-                                            >
-                                                {copiedId === "wp" ? "Copied!" : "WordPress Export"}
-                                            </button>
-                                            <button
-                                                onClick={() => copyToClipboard(JSON.stringify((selectedArticle.cms_exports as { shopify: object })?.shopify, null, 2), "shopify")}
-                                                className="flex-1 rounded-lg bg-white border border-emerald-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-emerald-100"
-                                            >
-                                                {copiedId === "shopify" ? "Copied!" : "Shopify Export"}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200">
-                                    <Sparkles className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                                    <p className="text-slate-600 font-medium mb-2">Content not generated yet</p>
-                                    <p className="text-sm text-slate-500 mb-6">Generate SEO-optimized content with internal links, images, and CMS exports</p>
-                                    <Button
-                                        onClick={() => generateArticleContent(selectedArticle.id)}
-                                        disabled={generatingArticle === selectedArticle.id}
-                                        className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                    >
-                                        {generatingArticle === selectedArticle.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Sparkles className="h-4 w-4" />
-                                        )}
-                                        Generate Article Content
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-
-<<<<<<< HEAD
-                          <div className="p-6 border-t border-slate-100 flex items-center justify-between">
-                              <button
-                                  onClick={() => deleteArticle(selectedArticle.id)}
-                                  className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm"
-                              >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete
-                              </button>
-                              <div className="flex gap-3">
-                                  <Button
-                                      onClick={async () => {
-                                          try {
-                                              const response = await fetch(`/api/articles/${selectedArticle.id}`, {
-                                                  method: "PATCH",
-                                                  headers: { "Content-Type": "application/json" },
-                                                  body: JSON.stringify({
-                                                      title: selectedArticle.title,
-                                                      keyword: selectedArticle.keyword,
-                                                      search_intent: selectedArticle.search_intent,
-                                                      scheduled_date: selectedArticle.scheduled_date,
-                                                  }),
-                                              });
-                                              if (response.ok) {
-                                                  await loadArticles();
-                                                  setShowArticleDetail(false);
-                                              }
-                                          } catch (error) {
-                                              console.error("Failed to save article:", error);
-                                          }
-                                      }}
-                                      variant="outline"
-                                      className="gap-2"
-                                  >
-                                      <Check className="h-4 w-4" />
-                                      Save Changes
-                                  </Button>
-                                  {!selectedArticle.content && (
-                                      <Button
-                                          onClick={() => generateArticleContent(selectedArticle.id)}
-                                          disabled={generatingArticle === selectedArticle.id}
-                                          className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                      >
-                                          {generatingArticle === selectedArticle.id ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                          ) : (
-                                              <Sparkles className="h-4 w-4" />
-                                          )}
-                                          Generate Content
-                                      </Button>
-                                  )}
-                                  {selectedArticle.content && (
-                                      <Button
-                                          onClick={() => generateArticleContent(selectedArticle.id)}
-                                          disabled={generatingArticle === selectedArticle.id}
-                                          variant="outline"
-                                          className="gap-2"
-                                      >
-                                          {generatingArticle === selectedArticle.id ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                          ) : (
-                                              <RefreshCw className="h-4 w-4" />
-                                          )}
-                                          Regenerate
-                                      </Button>
-                                  )}
-                              </div>
-                          </div>
-=======
-                        <div className="p-6 border-t border-slate-100 flex items-center justify-between">
-                            <button
-                                onClick={() => deleteArticle(selectedArticle.id)}
-                                className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                                Delete
+                        <div className="flex items-center justify-between p-6 border-b">
+                            <h3 className="text-lg font-bold">{selectedArticle.title}</h3>
+                            <button onClick={() => { setShowArticleDetail(false); setSelectedArticle(null); }} className="text-slate-400 hover:text-slate-600">
+                                <X className="h-5 w-5" />
                             </button>
-                            <div className="flex gap-3">
-                                <Button
-                                    onClick={async () => {
-                                        try {
-                                            const response = await fetch(`/api/articles/${selectedArticle.id}`, {
-                                                method: "PATCH",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({
-                                                    title: selectedArticle.title,
-                                                    keyword: selectedArticle.keyword,
-                                                    search_intent: selectedArticle.search_intent,
-                                                    scheduled_date: selectedArticle.scheduled_date,
-                                                }),
-                                            });
-                                            if (response.ok) {
-                                                await loadArticles();
-                                                setShowArticleDetail(false);
-                                            }
-                                        } catch (error) {
-                                            console.error("Failed to save article:", error);
-                                        }
-                                    }}
-                                    variant="outline"
-                                    className="gap-2"
-                                >
-                                    <Check className="h-4 w-4" />
-                                    Save Changes
-                                </Button>
-                                {!selectedArticle.content && (
-                                    <Button
-                                        onClick={() => generateArticleContent(selectedArticle.id)}
-                                        disabled={generatingArticle === selectedArticle.id}
-                                        className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                    >
-                                        {generatingArticle === selectedArticle.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Sparkles className="h-4 w-4" />
-                                        )}
-                                        Generate Content
-                                    </Button>
-                                )}
-                                {selectedArticle.content && (
-                                    <Button
-                                        onClick={() => generateArticleContent(selectedArticle.id)}
-                                        disabled={generatingArticle === selectedArticle.id}
-                                        variant="outline"
-                                        className="gap-2"
-                                    >
-                                        {generatingArticle === selectedArticle.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <RefreshCw className="h-4 w-4" />
-                                        )}
-                                        Regenerate
-                                    </Button>
-                                )}
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <div className="grid grid-cols-2 gap-6 mb-6">
+                                <Input value={selectedArticle.title} onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })} placeholder="Title" />
+                                <Input value={selectedArticle.keyword} onChange={(e) => setSelectedArticle({ ...selectedArticle, keyword: e.target.value })} placeholder="Keyword" />
+                            </div>
+                            <div className="max-h-80 overflow-y-auto border p-4 rounded-lg bg-slate-50">
+                                <div dangerouslySetInnerHTML={{ __html: parseYouTubeShortcodes(selectedArticle.html_content || selectedArticle.content || "") }} />
                             </div>
                         </div>
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
+                        <div className="p-6 border-t flex items-center justify-between">
+                            <Button variant="ghost" className="text-red-500" onClick={() => deleteArticle(selectedArticle.id)}>Delete</Button>
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => setShowArticleDetail(false)}>Cancel</Button>
+                                <Button className="bg-emerald-600 text-white" onClick={async () => {
+                                    try {
+                                        const response = await fetch(`/api/articles/${selectedArticle.id}`, {
+                                            method: "PATCH",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(selectedArticle),
+                                        });
+                                        if (response.ok) {
+                                            await loadArticles();
+                                            setShowArticleDetail(false);
+                                        }
+                                    } catch (e) { console.error(e); }
+                                }}>Save Changes</Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1443,139 +790,19 @@ export default function ContentPlannerPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
                         <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-                                    <Zap className="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-900">Autopilot Settings</h3>
-                                    <p className="text-sm text-slate-500">Configure automatic content generation</p>
-                                </div>
-                            </div>
+                            <h3 className="text-lg font-bold">Autopilot Settings</h3>
                             <button onClick={() => setShowAutopilotModal(false)} className="text-slate-400 hover:text-slate-600">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-
                         <div className="space-y-5">
-                            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
-                                <div>
-                                    <p className="font-medium text-slate-900">Enable Autopilot</p>
-                                    <p className="text-sm text-slate-500">Automatically generate content daily</p>
-                                </div>
-                                <button
-                                    onClick={() => setAutopilotSettings({ ...autopilotSettings, enabled: !autopilotSettings.enabled })}
-                                    className={cn(
-                                        "relative w-12 h-6 rounded-full transition-colors",
-                                        autopilotSettings.enabled ? "bg-emerald-500" : "bg-slate-300"
-                                    )}
-                                >
-                                    <span className={cn(
-                                        "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
-                                        autopilotSettings.enabled ? "translate-x-7" : "translate-x-1"
-                                    )} />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time Start</label>
-                                    <select
-                                        value={autopilotSettings.publish_time_start}
-                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_start: parseInt(e.target.value) })}
-                                        className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                    >
-                                        {Array.from({ length: 24 }, (_, i) => (
-                                            <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time End</label>
-                                    <select
-                                        value={autopilotSettings.publish_time_end}
-                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_end: parseInt(e.target.value) })}
-                                        className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                    >
-                                        {Array.from({ length: 24 }, (_, i) => (
-                                            <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Articles Per Day</label>
-                                <select
-                                    value={autopilotSettings.articles_per_day}
-                                    onChange={(e) => setAutopilotSettings({ ...autopilotSettings, articles_per_day: parseInt(e.target.value) })}
-                                    className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                >
-                                    <option value={1}>1 article per day</option>
-                                    <option value={2}>2 articles per day</option>
-                                    <option value={3}>3 articles per day</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Writing Tone</label>
-                                <select
-                                    value={autopilotSettings.tone}
-                                    onChange={(e) => setAutopilotSettings({ ...autopilotSettings, tone: e.target.value })}
-                                    className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                >
-                                    <option value="natural">Natural & Human</option>
-                                    <option value="professional">Professional</option>
-                                    <option value="casual">Casual & Friendly</option>
-                                    <option value="authoritative">Authoritative</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">CMS Targets</label>
-                                <div className="flex gap-3">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={autopilotSettings.cms_targets.includes("wordpress")}
-                                            onChange={(e) => {
-                                                const targets = e.target.checked
-                                                    ? [...autopilotSettings.cms_targets, "wordpress"]
-                                                    : autopilotSettings.cms_targets.filter(t => t !== "wordpress");
-                                                setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
-                                            }}
-                                            className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
-                                        />
-                                        <span className="text-sm text-slate-700">WordPress</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={autopilotSettings.cms_targets.includes("shopify")}
-                                            onChange={(e) => {
-                                                const targets = e.target.checked
-                                                    ? [...autopilotSettings.cms_targets, "shopify"]
-                                                    : autopilotSettings.cms_targets.filter(t => t !== "shopify");
-                                                setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
-                                            }}
-                                            className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
-                                        />
-                                        <span className="text-sm text-slate-700">Shopify</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <Button variant="outline" onClick={() => setShowAutopilotModal(false)} className="flex-1 h-11">
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={saveAutopilotSettings}
-                                    className="flex-1 h-11 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                >
-                                    Save Settings
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                <span>Enable Autopilot</span>
+                                <Button variant={autopilotSettings.enabled ? "default" : "outline"} onClick={() => setAutopilotSettings({ ...autopilotSettings, enabled: !autopilotSettings.enabled })}>
+                                    {autopilotSettings.enabled ? "On" : "Off"}
                                 </Button>
                             </div>
+                            <Button className="w-full bg-emerald-600 text-white" onClick={saveAutopilotSettings}>Save Settings</Button>
                         </div>
                     </div>
                 </div>
@@ -1583,64 +810,23 @@ export default function ContentPlannerPage() {
 
             {showWelcomeModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    {welcomeStep === "loading" ? (
-                        <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
-                            <Loader2 className="h-12 w-12 animate-spin text-emerald-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Creating Content Strategy</h3>
-                            <p className="text-sm text-slate-500">Analyzing your niche and generating a 30-day plan...</p>
-                        </div>
-                    ) : (
-                        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-                            <div className="text-center mb-6">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mx-auto mb-4">
-                                    <Sparkles className="h-8 w-8 text-emerald-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Your 1-month Content Strategy is ready!</h3>
-                                <p className="text-sm text-slate-500">We&apos;ve generated high-impact article ideas for you.</p>
-                            </div>
-                            <div className="space-y-4 mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">30 SEO-optimized article topics</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">Autopilot enabled for daily publishing</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">Keywords and search intent analysis</p>
-                                </div>
-                            </div>
-                            <Button onClick={handleCloseWelcome} className="w-full h-12 text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-                                Let&apos;s Go!
-                            </Button>
-                        </div>
-                    )}
+                    <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+                        {welcomeStep === "loading" ? (
+                            <>
+                                <Loader2 className="h-12 w-12 animate-spin text-emerald-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold">Creating Content Strategy</h3>
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold mb-4">Your Content Strategy is ready!</h3>
+                                <Button onClick={handleCloseWelcome} className="w-full bg-emerald-600 text-white">Let's Go!</Button>
+                            </>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
     );
 }
 
-function getClusterColorClass(clusterName: string | null | undefined): string {
-    if (!clusterName) return "bg-slate-200";
-
-    const colors = [
-        "bg-blue-500",
-        "bg-purple-500",
-        "bg-emerald-500",
-        "bg-amber-500",
-        "bg-rose-500",
-        "bg-indigo-500",
-        "bg-teal-500",
-    ];
-
-    // Hash function to pick a stable color for a cluster name
-    let hash = 0;
-    for (let i = 0; i < clusterName.length; i++) {
-        hash = clusterName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return colors[Math.abs(hash) % colors.length];
-}
