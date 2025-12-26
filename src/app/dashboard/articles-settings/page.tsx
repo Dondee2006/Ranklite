@@ -6,10 +6,8 @@ import {
   ChevronRight, 
   HelpCircle, 
   Loader2, 
-  RefreshCw, 
   Plus, 
   X, 
-  Globe, 
   Sparkles,
   Search,
   Layout,
@@ -41,29 +39,6 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const COUNTRIES = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-  "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
-  "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
-  "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (DRC)", "Congo (Republic)",
-  "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador",
-  "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France",
-  "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
-  "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-  "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo",
-  "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania",
-  "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius",
-  "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia",
-  "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
-  "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland",
-  "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
-  "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands",
-  "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland",
-  "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia",
-  "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
-  "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-];
-
 const IMAGE_STYLES = [
   { id: "brand-text", label: "Brand & Text" },
   { id: "watercolor", label: "Watercolor" },
@@ -84,19 +59,9 @@ function getCompetitorDomain(competitor: string): string {
 export default function ArticlesSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const [newAudience, setNewAudience] = useState("");
   const [newCompetitor, setNewCompetitor] = useState("");
 
   const [formData, setFormData] = useState({
-    site: {
-      name: "",
-      url: "",
-      language: "English",
-      country: "United States",
-      description: "",
-    },
-    audiences: [] as string[],
     competitors: [] as string[],
     articleSettings: {
       article_style: "Informative",
@@ -125,17 +90,9 @@ export default function ArticlesSettingsPage() {
       const response = await fetch("/api/article-settings");
       const data = await response.json();
       
-      if (data.site) {
+      if (data.articleSettings) {
         setFormData(prev => ({
           ...prev,
-          site: {
-            name: data.site.name || "",
-            url: data.site.url || "",
-            language: data.site.language || "English",
-            country: data.site.country || "United States",
-            description: data.site.description || "",
-          },
-          audiences: data.audiences?.map((a: any) => a.name) || [],
           competitors: data.competitors?.map((c: any) => c.url) || [],
           articleSettings: {
             ...prev.articleSettings,
@@ -170,7 +127,10 @@ export default function ArticlesSettingsPage() {
       const response = await fetch("/api/article-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          competitors: formData.competitors,
+          articleSettings: formData.articleSettings
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to save settings");
@@ -184,34 +144,10 @@ export default function ArticlesSettingsPage() {
     }
   }
 
-  const updateSite = (key: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      site: { ...prev.site, [key]: value }
-    }));
-  };
-
   const updateArticleSettings = (key: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       articleSettings: { ...prev.articleSettings, [key]: value }
-    }));
-  };
-
-  const addAudience = () => {
-    if (newAudience.trim() && formData.audiences.length < 7) {
-      setFormData(prev => ({
-        ...prev,
-        audiences: [...prev.audiences, newAudience.trim()]
-      }));
-      setNewAudience("");
-    }
-  };
-
-  const removeAudience = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      audiences: prev.audiences.filter((_, i) => i !== index)
     }));
   };
 
@@ -230,45 +166,6 @@ export default function ArticlesSettingsPage() {
       ...prev,
       competitors: prev.competitors.filter((_, i) => i !== index)
     }));
-  };
-
-  const fetchBusinessInfo = async () => {
-    if (!formData.site.url.trim()) return;
-    setFetching(true);
-    try {
-      const response = await fetch("/api/scrape-website", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: formData.site.url }),
-      });
-      const data = await response.json();
-      if (data.success && data.data) {
-        setFormData(prev => ({
-          ...prev,
-          site: {
-            ...prev.site,
-            name: data.data.businessName || prev.site.name,
-            description: data.data.description || prev.site.description,
-            language: data.data.language || prev.site.language,
-            country: data.data.country || prev.site.country,
-          },
-          audiences: data.data.suggestedAudiences?.length > 0
-            ? data.data.suggestedAudiences
-            : prev.audiences,
-          articleSettings: {
-            ...prev.articleSettings,
-            sitemap_url: data.data.sitemapUrl || prev.articleSettings.sitemap_url,
-            blog_address: data.data.blogUrl || prev.articleSettings.blog_address,
-          }
-        }));
-        toast.success("Website information updated from URL");
-      }
-    } catch (error) {
-      console.error("Failed to fetch website info:", error);
-      toast.error("Failed to fetch website info");
-    } finally {
-      setFetching(false);
-    }
   };
 
   if (loading) {
@@ -298,128 +195,16 @@ export default function ArticlesSettingsPage() {
 
         <div className="p-8 pb-20">
           <div className="mx-auto max-w-4xl space-y-8">
-            {/* Section 1: Business Info */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-[#22C55E]">
-                  <Globe className="h-4 w-4" />
-                </div>
-                <h2 className="text-lg font-bold text-foreground">Business Details</h2>
-              </div>
-              <div className="rounded-2xl border border-border bg-white p-6 shadow-sm space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Website URL</label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={formData.site.url}
-                        onChange={(e) => updateSite("url", e.target.value)}
-                        placeholder="https://yourbusiness.com"
-                        className="rounded-xl"
-                      />
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={fetchBusinessInfo}
-                        disabled={fetching || !formData.site.url}
-                        className="rounded-xl shrink-0"
-                      >
-                        <RefreshCw className={cn("h-4 w-4", fetching && "animate-spin")} />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Business Name</label>
-                    <Input
-                      value={formData.site.name}
-                      onChange={(e) => updateSite("name", e.target.value)}
-                      placeholder="Your Business Name"
-                      className="rounded-xl"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Language</label>
-                    <Select value={formData.site.language} onValueChange={(v) => updateSite("language", v)}>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="Spanish">Spanish</SelectItem>
-                        <SelectItem value="French">French</SelectItem>
-                        <SelectItem value="German">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Country</label>
-                    <Select value={formData.site.country} onValueChange={(v) => updateSite("country", v)}>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {COUNTRIES.map((country) => (
-                          <SelectItem key={country} value={country}>{country}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Business Description</label>
-                  <Textarea
-                    value={formData.site.description}
-                    onChange={(e) => updateSite("description", e.target.value)}
-                    placeholder="Describe your business..."
-                    className="min-h-[100px] rounded-xl resize-none"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Section 2: Audience & Competitors */}
+            {/* Section 1: Competitors */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-[#22C55E]">
                   <Search className="h-4 w-4" />
                 </div>
-                <h2 className="text-lg font-bold text-foreground">Audience & Competitors</h2>
+                <h2 className="text-lg font-bold text-foreground">Competitors</h2>
               </div>
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm space-y-8">
                 <div>
-                  <div className="mb-3 flex items-center justify-between">
-                    <h3 className="font-semibold text-foreground">Target Audiences</h3>
-                    <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-[#22C55E]">
-                      {formData.audiences.length}/7
-                    </span>
-                  </div>
-                  <div className="mb-4 flex gap-2">
-                    <Input
-                      value={newAudience}
-                      onChange={(e) => setNewAudience(e.target.value)}
-                      placeholder="e.g., Developers, Project Managers"
-                      className="rounded-xl"
-                      onKeyDown={(e) => e.key === "Enter" && addAudience()}
-                    />
-                    <Button onClick={addAudience} variant="outline" className="rounded-xl shrink-0">Add</Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.audiences.map((audience, index) => (
-                      <div key={index} className="flex items-center gap-2 rounded-lg border border-border bg-gray-50 px-3 py-1.5 text-sm">
-                        <span>{audience}</span>
-                        <button onClick={() => removeAudience(index)} className="text-muted-foreground hover:text-red-500">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-border">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="font-semibold text-foreground">Competitors</h3>
                     <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-[#22C55E]">
@@ -451,7 +236,7 @@ export default function ArticlesSettingsPage() {
               </div>
             </section>
 
-            {/* Section 3: Content & SEO */}
+            {/* Section 2: Content & SEO */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-[#22C55E]">
