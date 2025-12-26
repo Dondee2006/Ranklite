@@ -1,81 +1,78 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-
-type Site = {
-    name: string;
-    url: string;
-};
+import { Sparkles, Activity, Target, TrendingUp } from "lucide-react";
 
 export function WelcomeBanner() {
-    const [site, setSite] = useState<Site | null>(null);
-    const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function loadSite() {
-            try {
-                const supabase = createClient();
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
-
-                const { data: sites } = await supabase
-                    .from("sites")
-                    .select("name, url")
-                    .eq("user_id", user.id)
-                    .order("created_at", { ascending: true })
-                    .limit(1);
-
-                if (sites && sites.length > 0) {
-                    setSite(sites[0]);
-                }
-            } catch (error) {
-                console.error("Failed to load site for welcome banner:", error);
-            } finally {
-                setLoading(false);
-            }
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const name = user.user_metadata?.full_name || user.email?.split('@')[0] || "there";
+          // Capitalize first letter
+          const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
+          setUserName(capitalized);
         }
-        loadSite();
-    }, []);
+      } catch (error) {
+        console.error("Failed to load user:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUser();
+  }, []);
 
-    if (loading) return (
-        <div className="h-32 w-full animate-pulse bg-slate-100 rounded-lg" />
-    );
-
+  if (loading) {
     return (
-        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-8 text-white shadow-lg">
-            {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-900/10 rounded-full blur-3xl" />
-
-            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold tracking-wider uppercase">
-                        <Sparkles className="h-3 w-3" />
-                        Autopilot Active
-                    </div>
-                    <h2 className="text-3xl font-bold tracking-tight">
-                        Welcome back to Ranklite!
-                    </h2>
-                    <p className="text-emerald-50 text-lg max-w-2xl">
-                        {site
-                            ? `Your SEO autopilot is actively growing ${site.name}.`
-                            : "Your SEO autopilot is working on your organic growth."
-                        }
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                    <div className="h-12 w-12 rounded-lg bg-white/20 flex items-center justify-center">
-                        <LayoutDashboard className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-emerald-100 font-medium uppercase tracking-wider">Active Site</div>
-                        <div className="font-bold text-lg">{site?.name || "Initializing..."}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="h-[180px] w-full bg-white border border-[#E5E5E5] rounded-xl animate-pulse" />
     );
+  }
+
+  return (
+    <div className="relative overflow-hidden bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm">
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 text-[#2563EB] mb-3">
+          <Sparkles className="h-5 w-5 fill-[#2563EB]/20" />
+          <span className="text-sm font-semibold uppercase tracking-wider">Welcome Back</span>
+        </div>
+        <h2 className="text-3xl font-bold text-[#1A1A1A] mb-3">
+          Good to see you, {userName}! 👋
+        </h2>
+        <p className="text-[#6B7280] max-w-2xl text-lg">
+          Your SEO engine is humming. We've optimized your recent content and processed new backlink opportunities.
+        </p>
+        
+        <div className="flex flex-wrap gap-6 mt-8">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-[#F0FDF4] rounded-lg">
+              <TrendingUp className="h-4 w-4 text-[#16A34A]" />
+            </div>
+            <span className="text-sm font-medium text-[#374151]">Traffic Growing</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-[#EFF6FF] rounded-lg">
+              <Target className="h-4 w-4 text-[#2563EB]" />
+            </div>
+            <span className="text-sm font-medium text-[#374151]">Keywords Tracking</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-[#FAF5FF] rounded-lg">
+              <Activity className="h-4 w-4 text-[#9333EA]" />
+            </div>
+            <span className="text-sm font-medium text-[#374151]">Active SEO Cycle</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-[#2563EB]/5 blur-3xl" />
+      <div className="absolute bottom-0 right-0 mb-10 mr-20 h-32 w-32 rounded-full bg-[#2563EB]/10 blur-2xl" />
+    </div>
+  );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Eye, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { UpgradeCTA } from "@/components/dashboard/upgrade-cta";
+import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
 
 interface Activity {
   id: string;
@@ -68,7 +68,7 @@ export default function DashboardOverviewPage() {
 
       <div className="p-4 sm:p-8">
         <div className="mb-6">
-          <UpgradeCTA />
+          <WelcomeBanner />
         </div>
         
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
