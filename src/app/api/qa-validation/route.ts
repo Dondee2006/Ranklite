@@ -11,10 +11,10 @@ export async function GET() {
     }
 
     const { data: verifications } = await supabase
-      .from("backlink_verification")
+      .from("backlink_verifications")
       .select(`
         *,
-        backlinks!backlink_verification_backlink_id_fkey (
+        backlinks!backlink_verifications_backlink_id_fkey (
           source_name, 
           linking_url
         )
