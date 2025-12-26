@@ -134,10 +134,24 @@ export async function GET(req: NextRequest) {
 
     const campaign = campaignRes.data;
 
+    // Calculate total backlinks as sum of verified/live backlinks + active/processing tasks
+    // This ensures consistency with the Backlinks page
+    const { data: backlinksData } = await supabase
+      .from("backlinks")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    
+    const liveBacklinksCount = backlinksData?.length || 0;
+    const activeTasksCount = (tasksRes.data || []).filter(t => 
+      t.status === "processing" || t.status === "require_manual"
+    ).length;
+
+    const totalBacklinks = liveBacklinksCount + activeTasksCount;
+
     return NextResponse.json({
       stageCounts,
       metrics: {
-        totalBacklinks: campaign?.total_backlinks || 0,
+        totalBacklinks: totalBacklinks,
         foundationLinks,
         growthLinks,
         uniqueSources: campaign?.unique_sources || 0,

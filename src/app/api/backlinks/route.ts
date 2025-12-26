@@ -51,6 +51,30 @@ export async function GET() {
       return NextResponse.json({ error: backlinksError.message }, { status: 500 });
     }
 
+    // Fetch active tasks that aren't yet in the backlinks table but are being worked on
+    const { data: activeTasks } = await supabase
+      .from("backlink_tasks")
+      .select("*, platform:backlink_platforms(*)")
+      .eq("user_id", user.id)
+      .in("status", ["processing", "require_manual"])
+      .order("updated_at", { ascending: false });
+
+    // Map active tasks to a similar format as backlinks
+    const taskBacklinks = (activeTasks || []).map((task: any) => ({
+      id: `task-${task.id}`,
+      source_name: task.platform?.site_name || "Pending Platform",
+      source_domain: task.platform?.site_domain || "",
+      linking_url: task.backlink_url || "",
+      anchor_text: task.submission_data?.business_name || "-",
+      domain_rating: task.platform?.domain_rating || 0,
+      status: task.status === "require_manual" ? "Failed" : "pending_verification",
+      date_added: task.created_at,
+      is_task: true,
+    }));
+
+    // Combine them
+    const allBacklinks = [...(backlinks || []), ...taskBacklinks];
+
     // Get current pending tasks count if campaign exists
     let pendingTasksCount = campaign.pending_tasks || 0;
     if (campaign.id) {
@@ -63,7 +87,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      backlinks: backlinks || [],
+      backlinks: allBacklinks,
       campaign: {
         ...campaign,
         pending_tasks: pendingTasksCount
