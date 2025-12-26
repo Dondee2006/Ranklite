@@ -1,4 +1,4 @@
-import { createClient as createServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export interface PlanLimits {
   posts_per_month: number;
@@ -31,7 +31,7 @@ export async function getUserPlanAndUsage(userId: string): Promise<{
   status: string;
   periodEnd: string | null;
 }> {
-  const supabase = await createServerClient();
+  const supabase = supabaseAdmin;
 
   const { data: userPlan } = await supabase
     .from("user_plans")
@@ -219,7 +219,7 @@ export async function checkIntegrationLimit(
   userId: string
 ): Promise<{ allowed: boolean; current: number; limit: number; message?: string }> {
   const { plan } = await getUserPlanAndUsage(userId);
-  const supabase = await createServerClient();
+  const supabase = supabaseAdmin;
 
   if (!plan) {
     return { allowed: false, current: 0, limit: 0, message: "No active plan found." };
@@ -249,7 +249,7 @@ export async function checkIntegrationLimit(
 }
 
 export async function incrementPostUsage(userId: string): Promise<void> {
-  const supabase = await createServerClient();
+  const supabase = supabaseAdmin;
   const { usage } = await getUserPlanAndUsage(userId);
 
   if (!usage) {
@@ -280,7 +280,7 @@ export async function incrementBacklinkUsage(
   userId: string,
   count: number
 ): Promise<void> {
-  const supabase = await createServerClient();
+  const supabase = supabaseAdmin;
   const { usage } = await getUserPlanAndUsage(userId);
 
   if (!usage) {
