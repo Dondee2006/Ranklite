@@ -40,7 +40,10 @@ export class NotionClient {
 
   constructor(config: NotionConfig) {
     this.config = config;
-    this.client = new Client({ auth: config.accessToken });
+    this.client = new Client({ 
+      auth: config.accessToken,
+      timeoutMs: 15000 
+    });
     this.databaseId = config.databaseId;
   }
 
@@ -75,25 +78,16 @@ export class NotionClient {
   async getBlogPosts(preview = false): Promise<BlogPost[]> {
     if (!this.databaseId) throw new Error('Database ID is required');
     try {
-      const response = await this.client.databases.query({
-        database_id: this.databaseId,
-        filter: preview
-          ? undefined
-          : {
-            property: 'Status',
-            select: {
-              equals: 'Published',
-            },
+      const response = await this.queryDatabase(this.databaseId, preview
+        ? undefined
+        : {
+          property: 'Status',
+          select: {
+            equals: 'Published',
           },
-        sorts: [
-          {
-            property: 'Published Date',
-            direction: 'descending',
-          },
-        ],
-      });
+        });
 
-      return response.results.map(page => this.transformPageToPost(page));
+      return response.results.map((page: any) => this.transformPageToPost(page));
     } catch (error) {
       console.error('Error fetching blog posts from Notion:', error);
       throw error;
@@ -103,13 +97,10 @@ export class NotionClient {
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     if (!this.databaseId) throw new Error('Database ID is required');
     try {
-      const response = await this.client.databases.query({
-        database_id: this.databaseId,
-        filter: {
-          property: 'Slug',
-          rich_text: {
-            equals: slug,
-          },
+      const response = await this.queryDatabase(this.databaseId, {
+        property: 'Slug',
+        rich_text: {
+          equals: slug,
         },
       });
 

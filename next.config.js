@@ -2,7 +2,7 @@
 const path = require('path');
 
 const nextConfig = {
-  outputFileTracingRoot: path.join(__dirname),
+  outputFileTracingRoot: __dirname,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
@@ -11,9 +11,6 @@ const nextConfig = {
   },
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-  experimental: {
-    allowedDevOrigins: ['192.168.18.146', 'localhost:3000'],
-  },
 };
 
 module.exports = nextConfig;
