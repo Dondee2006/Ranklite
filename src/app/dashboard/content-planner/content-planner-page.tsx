@@ -70,6 +70,7 @@ interface Article {
     cta_placement: string;
     status: string;
     scheduled_date: string;
+    scheduled_time?: string;
     volume: number;
     difficulty: number;
     content: string;
@@ -166,6 +167,7 @@ export default function ContentPlannerPage() {
         search_intent: "informational",
         word_count: "1500",
         cta_placement: "end",
+        scheduled_time: "09:00",
     });
     const [saving, setSaving] = useState(false);
     const [generatingArticle, setGeneratingArticle] = useState<string | null>(null);
@@ -373,17 +375,18 @@ export default function ContentPlannerPage() {
             const response = await fetch("/api/articles", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    title: newArticle.title,
-                    keyword: newArticle.keyword,
-                    secondary_keywords: newArticle.secondary_keywords.split(",").map(k => k.trim()).filter(Boolean),
-                    article_type: newArticle.article_type,
-                    search_intent: newArticle.search_intent,
-                    word_count: parseInt(newArticle.word_count) || 1500,
-                    cta_placement: newArticle.cta_placement,
-                    scheduled_date: selectedDate,
-                    status: "planned",
-                }),
+                    body: JSON.stringify({
+                        title: newArticle.title,
+                        keyword: newArticle.keyword,
+                        secondary_keywords: newArticle.secondary_keywords.split(",").map(k => k.trim()).filter(Boolean),
+                        article_type: newArticle.article_type,
+                        search_intent: newArticle.search_intent,
+                        word_count: parseInt(newArticle.word_count) || 1500,
+                        cta_placement: newArticle.cta_placement,
+                        scheduled_date: selectedDate,
+                        scheduled_time: newArticle.scheduled_time,
+                        status: "planned",
+                    }),
             });
             if (response.ok) {
                 setShowAddModal(false);
@@ -580,16 +583,16 @@ export default function ContentPlannerPage() {
 
                                                                 {dayArticles.length > 0 ? (
                                                                     <div className="flex-1 flex flex-col min-w-0">
-                                                                        <div className="flex items-center gap-2 mb-2">
-                                                                            <div className={cn(
-                                                                                "h-1.5 w-1.5 rounded-full shrink-0",
-                                                                                dayArticles[0].status === 'published' ? "bg-emerald-500" :
-                                                                                    dayArticles[0].status === 'generated' ? "bg-purple-500" : "bg-blue-500"
-                                                                            )} />
-                                                                            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-normal truncate">
-                                                                                {getArticleTypeLabel(dayArticles[0].article_type)}: {dayArticles[0].search_intent.charAt(0).toUpperCase() + dayArticles[0].search_intent.slice(1)}
-                                                                            </span>
-                                                                        </div>
+                                                                          <div className="flex items-center gap-2 mb-2">
+                                                                              <div className={cn(
+                                                                                  "h-1.5 w-1.5 rounded-full shrink-0",
+                                                                                  dayArticles[0].status === 'published' ? "bg-emerald-500" :
+                                                                                      dayArticles[0].status === 'generated' ? "bg-purple-500" : "bg-blue-500"
+                                                                              )} />
+                                                                              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-normal truncate">
+                                                                                  {dayArticles[0].scheduled_time ? `${dayArticles[0].scheduled_time.slice(0, 5)} • ` : ""}{getArticleTypeLabel(dayArticles[0].article_type)}
+                                                                              </span>
+                                                                          </div>
 
                                                                         <h3 className="text-[12px] font-semibold text-gray-900 leading-[1.4] mb-3 line-clamp-2 min-h-[2.8em] tracking-tight">
                                                                             {dayArticles[0].title}
@@ -732,8 +735,24 @@ export default function ContentPlannerPage() {
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <Input value={newArticle.title} onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })} placeholder="Article Title" />
-                            <Input value={newArticle.keyword} onChange={(e) => setNewArticle({ ...newArticle, keyword: e.target.value })} placeholder="Primary Keyword" />
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Title</label>
+                                <Input value={newArticle.title} onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })} placeholder="Article Title" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Primary Keyword</label>
+                                <Input value={newArticle.keyword} onChange={(e) => setNewArticle({ ...newArticle, keyword: e.target.value })} placeholder="Primary Keyword" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Scheduled Time</label>
+                                <Input 
+                                    type="time" 
+                                    value={newArticle.scheduled_time} 
+                                    onChange={(e) => setNewArticle({ ...newArticle, scheduled_time: e.target.value })} 
+                                    className="cursor-pointer"
+                                />
+                                <p className="text-[10px] text-slate-400">Specify when the article should be published on {selectedDate}.</p>
+                            </div>
                             <div className="flex gap-3 pt-4">
                                 <Button variant="outline" onClick={() => setShowAddModal(false)} className="flex-1">Cancel</Button>
                                 <Button onClick={saveArticle} disabled={!newArticle.title || !newArticle.keyword || saving} className="flex-1 bg-emerald-600 text-white">
@@ -754,11 +773,25 @@ export default function ContentPlannerPage() {
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <div className="grid grid-cols-2 gap-6 mb-6">
-                                <Input value={selectedArticle.title} onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })} placeholder="Title" />
-                                <Input value={selectedArticle.keyword} onChange={(e) => setSelectedArticle({ ...selectedArticle, keyword: e.target.value })} placeholder="Keyword" />
-                            </div>
+                          <div className="flex-1 overflow-y-auto p-6">
+                              <div className="grid grid-cols-3 gap-6 mb-6">
+                                  <div className="space-y-1">
+                                      <label className="text-xs font-semibold text-slate-500 uppercase">Title</label>
+                                      <Input value={selectedArticle.title} onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })} placeholder="Title" />
+                                  </div>
+                                  <div className="space-y-1">
+                                      <label className="text-xs font-semibold text-slate-500 uppercase">Keyword</label>
+                                      <Input value={selectedArticle.keyword} onChange={(e) => setSelectedArticle({ ...selectedArticle, keyword: e.target.value })} placeholder="Keyword" />
+                                  </div>
+                                  <div className="space-y-1">
+                                      <label className="text-xs font-semibold text-slate-500 uppercase">Publish Time</label>
+                                      <Input 
+                                          type="time" 
+                                          value={selectedArticle.scheduled_time || "09:00"} 
+                                          onChange={(e) => setSelectedArticle({ ...selectedArticle, scheduled_time: e.target.value })} 
+                                      />
+                                  </div>
+                              </div>
                             <div className="max-h-80 overflow-y-auto border p-4 rounded-lg bg-slate-50">
                                 <div dangerouslySetInnerHTML={{ __html: parseYouTubeShortcodes(selectedArticle.html_content || selectedArticle.content || "") }} />
                             </div>

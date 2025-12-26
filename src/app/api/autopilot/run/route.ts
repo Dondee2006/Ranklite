@@ -107,16 +107,7 @@ async function processSiteAutopilot(site: any) {
   }
 
   const today = now.toISOString().split("T")[0];
-
-  const { data: publishedToday } = await supabaseAdmin
-    .from("articles")
-    .select("id")
-    .eq("site_id", site.id)
-    .eq("scheduled_date", today)
-    .eq("status", "published");
-
-  const alreadyPublished = publishedToday?.length || 0;
-  const targetCount = Math.max(settings.articles_per_day || 1, 1);
+  const currentTimeStr = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
 
   // 1. First, find all articles manually scheduled for today that aren't published yet
   let { data: candidates } = await supabaseAdmin
@@ -125,11 +116,16 @@ async function processSiteAutopilot(site: any) {
     .eq("site_id", site.id)
     .eq("scheduled_date", today)
     .in("status", ["planned", "generated", "draft"])
-    .order('created_at', { ascending: true });
+    .or(`scheduled_time.is.null,scheduled_time.lte.${currentTimeStr}`)
+    .order('scheduled_time', { ascending: true, nullsFirst: true });
 
   // 2. If we don't have enough articles for today's quota, and we have remaining posts in plan, create seeds
+  // Note: Only create seeds if we are within the autopilot window
+  const alreadyPublished = publishedToday?.length || 0;
+  const targetCount = Math.max(settings.articles_per_day || 1, 1);
   const currentCount = (candidates?.length || 0) + alreadyPublished;
-  if (currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
+  
+  if (withinWindow && currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
     const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
     for (let i = 0; i < seedsToCreate; i++) {
       const articleType = pickArticleType(settings.preferred_article_types);
