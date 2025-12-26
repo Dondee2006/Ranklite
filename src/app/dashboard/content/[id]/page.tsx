@@ -31,7 +31,10 @@ import {
     CheckCircle2,
     Clock,
     AlertCircle,
-    Link2
+    Link2,
+    Zap,
+    Layers,
+    Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +72,19 @@ interface Article {
     word_count: number;
     featured_image?: string;
     featured_image_url?: string;
+    content_amplification_enabled?: boolean;
+    backlinks_count?: number;
+    backlinks_status?: string;
+}
+
+interface AmplificationStatus {
+    derivatives: any[];
+    tier2Tasks: number;
+    tier3Tasks: number;
+    completedTasks: number;
+    pendingTasks: number;
+    backlinksCreated: number;
+    indexedBacklinks: number;
 }
 
 export default function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -90,6 +106,8 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
     const [isEditingContent, setIsEditingContent] = useState(false);
     const [integrations, setIntegrations] = useState<any[]>([]);
     const [isPublishing, setIsPublishing] = useState<string | null>(null);
+    const [amplificationStatus, setAmplificationStatus] = useState<AmplificationStatus | null>(null);
+    const [isAmplifying, setIsAmplifying] = useState(false);
 
     const parseYouTubeShortcodes = (content: string): string => {
         if (!content) return content;
@@ -134,7 +152,48 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
         }
         loadArticle();
         fetchIntegrations();
+        fetchAmplificationStatus();
     }, [id]);
+
+    const fetchAmplificationStatus = async () => {
+        try {
+            const res = await fetch(`/api/backlinks/distribute?articleId=${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setAmplificationStatus(data.status);
+            }
+        } catch (error) {
+            console.error("Failed to fetch amplification status:", error);
+        }
+    };
+
+    const handleEnableAmplification = async () => {
+        setIsAmplifying(true);
+        try {
+            const res = await fetch("/api/backlinks/distribute", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ articleId: id })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to enable amplification");
+
+            toast.success(data.message || "Content amplification enabled!");
+            
+            const refreshRes = await fetch(`/api/articles/${id}`);
+            if (refreshRes.ok) {
+                const refreshData = await refreshRes.json();
+                setArticle(refreshData.article);
+            }
+            
+            fetchAmplificationStatus();
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsAmplifying(false);
+        }
+    };
 
     const fetchIntegrations = async () => {
         try {
@@ -600,6 +659,109 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         );
                                     })}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Content Amplification Section */}
+                        {article.content && (
+                            <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/30 rounded-[2rem] border border-blue-100/50 shadow-sm p-8 space-y-7 transition-all duration-500 hover:shadow-xl hover:border-blue-200">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-black text-blue-700/60 uppercase tracking-[0.25em] flex items-center gap-2">
+                                        <Zap className="h-3.5 w-3.5" />
+                                        Content Amplification
+                                    </p>
+                                    {article.content_amplification_enabled && (
+                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                            Active
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                {article.content_amplification_enabled ? (
+                                    <div className="space-y-5">
+                                        <p className="text-sm text-slate-600">
+                                            This article is being distributed across multiple platforms to build backlinks.
+                                        </p>
+                                        
+                                        {amplificationStatus && (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-white rounded-xl p-4 border border-slate-100">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Layers className="h-4 w-4 text-purple-500" />
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Tier 2</span>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-slate-900">{amplificationStatus.tier2Tasks}</p>
+                                                </div>
+                                                <div className="bg-white rounded-xl p-4 border border-slate-100">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Layers className="h-4 w-4 text-gray-400" />
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Tier 3</span>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-slate-900">{amplificationStatus.tier3Tasks}</p>
+                                                </div>
+                                                <div className="bg-white rounded-xl p-4 border border-slate-100">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Link2 className="h-4 w-4 text-blue-500" />
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Backlinks</span>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-slate-900">{amplificationStatus.backlinksCreated}</p>
+                                                </div>
+                                                <div className="bg-white rounded-xl p-4 border border-slate-100">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <Eye className="h-4 w-4 text-green-500" />
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Indexed</span>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-slate-900">{amplificationStatus.indexedBacklinks}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        <Link href="/dashboard/backlinks" className="flex items-center justify-center gap-2 text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                                            View Distribution Dashboard
+                                            <ExternalLink className="h-3 w-3" />
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-5">
+                                        <p className="text-sm text-slate-600">
+                                            Enable content amplification to automatically create derivative content and build backlinks from this article.
+                                        </p>
+                                        <div className="bg-white/80 rounded-xl p-4 border border-blue-100/50">
+                                            <ul className="text-xs text-slate-500 space-y-2">
+                                                <li className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    Tier 2: Syndication & parasite posts
+                                                </li>
+                                                <li className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    Tier 3: Summaries, snippets & abstracts
+                                                </li>
+                                                <li className="flex items-center gap-2">
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    Auto anchor text rotation
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <Button
+                                            onClick={handleEnableAmplification}
+                                            disabled={isAmplifying}
+                                            className="w-full h-12 text-[12px] font-black bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:bg-blue-700 transition-all duration-300 uppercase tracking-[0.2em] rounded-xl active:scale-95"
+                                        >
+                                            {isAmplifying ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                    Generating Derivatives...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Zap className="h-4 w-4 mr-2" />
+                                                    Enable Amplification
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

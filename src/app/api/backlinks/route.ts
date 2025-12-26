@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { TieredDistributionEngine } from "@/lib/services/tiered-distribution";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch the user's backlink campaign
     const { data: campaigns, error: campaignError } = await supabase
       .from("backlink_campaigns")
       .select("*")
@@ -39,10 +39,12 @@ export async function GET() {
       next_scan_at: null,
     };
 
-    // Fetch the user's backlinks
     const { data: backlinks, error: backlinksError } = await supabase
       .from("backlinks")
-      .select("*")
+      .select(`
+        *,
+        article:articles(id, title, keyword, slug)
+      `)
       .eq("user_id", user.id)
       .order("date_added", { ascending: false });
 
@@ -75,7 +77,6 @@ export async function GET() {
     // Combine them
     const allBacklinks = [...(backlinks || []), ...taskBacklinks];
 
-    // Get current pending tasks count if campaign exists
     let pendingTasksCount = campaign.pending_tasks || 0;
     if (campaign.id) {
       const { count } = await supabase
@@ -86,12 +87,22 @@ export async function GET() {
       pendingTasksCount = count || 0;
     }
 
+    const distributionStats = await TieredDistributionEngine.getDistributionStats(user.id);
+
+    const { data: articleStats } = await supabase
+      .from("articles")
+      .select("id, title, keyword, content_amplification_enabled, backlinks_count, backlinks_status")
+      .eq("site_id", campaign.site_id || "")
+      .eq("content_amplification_enabled", true);
+
     return NextResponse.json({
       backlinks: allBacklinks,
       campaign: {
         ...campaign,
         pending_tasks: pendingTasksCount
       },
+      distribution: distributionStats,
+      amplifiedArticles: articleStats || [],
     });
   } catch (error) {
     console.error("Failed to fetch backlinks:", error);
