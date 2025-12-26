@@ -4,6 +4,9 @@ import { runPolicyCheck, shouldRequireManualReview } from "./policy-engine";
 import { checkBacklinkGenerationLimit, incrementBacklinkUsage } from "@/lib/usage-limits";
 
 const FOUNDATION_CATEGORIES = ["Business Directory", "Local Directory", "Review Platform"];
+const MAX_DAILY_SUBMISSIONS = 50;
+const MIN_DELAY_BETWEEN_SUBMISSIONS_MS = 5 * 60 * 1000; // 5 minutes
+const EXPONENTIAL_BACKOFF_BASE = 2;
 
 export async function createTasksForUser(
   userId: string,
