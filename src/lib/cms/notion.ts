@@ -46,22 +46,30 @@ export class NotionClient {
 
   private async request(path: string, options: any = {}) {
     const url = `https://api.notion.com/v1${path}`;
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${this.config.accessToken}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Notion API error: ${response.status} ${errorText}`);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Authorization': `Bearer ${this.config.accessToken}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Notion API error: ${response.status} ${errorText}`);
+      }
+
+      return response.json();
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json();
   }
 
   async getBlogPosts(preview = false): Promise<BlogPost[]> {
