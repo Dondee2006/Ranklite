@@ -15,7 +15,8 @@ import {
   ChevronRight,
   ExternalLink,
   BarChart3,
-  Zap
+  Zap,
+  Coins
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -143,10 +144,17 @@ export default function BacklinksPage() {
             <h1 className="text-2xl font-semibold text-[#1A1A1A]">Content Distribution</h1>
             <p className="text-sm text-[#6B7280] mt-1">Backlinks generated from your content amplification</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/backlink-generator"
-              className="px-4 py-2 text-sm font-medium text-white bg-[#2563EB] rounded-md hover:bg-[#1E40AF] transition-colors shadow-sm flex items-center gap-2"
+<div className="flex items-center gap-3">
+              <Link
+                href="/dashboard/authority-exchange"
+                className="px-4 py-2 text-sm font-medium text-[#6B7280] border border-[#E5E5E5] rounded-md hover:bg-[#F3F4F6] transition-colors flex items-center gap-2"
+              >
+                <Coins className="h-4 w-4" />
+                Authority Exchange
+              </Link>
+              <Link
+                href="/dashboard/backlink-generator"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#2563EB] rounded-md hover:bg-[#1E40AF] transition-colors shadow-sm flex items-center gap-2"
             >
               <Zap className={cn("h-4 w-4", campaign?.agent_status === "scanning" && "animate-pulse")} />
               {campaign?.agent_status === "scanning" ? "Agent Running" : "Open Autopilot"}
