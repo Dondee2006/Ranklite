@@ -270,7 +270,7 @@ export class NotionClient {
 
   private htmlToBlocks(html: string): any[] {
     const blocks: any[] = [];
-    const parts = html.split(/(<h[123]>.*?<\/h[123]>|<p>.*?<\/p>|<ul>.*?<\/ul>|<ol>.*?<\/ol>|<img.*?>|<iframe.*?>.*?<\/iframe>|<iframe.*?\/>)/i);
+    const parts = html.split(/(<h[123]>.*?<\/h[123]>|<p>.*?<\/p>|<ul>.*?<\/ul>|<ol>.*?<\/ol>|<img.*?>|<video.*?>.*?<\/video>|<video.*?\/>|<iframe.*?>.*?<\/iframe>|<iframe.*?\/>)/i);
 
     for (const part of parts) {
       if (!part || !part.trim()) continue;
@@ -306,6 +306,15 @@ export class NotionClient {
             object: 'block',
             type: 'image',
             image: { type: 'external', external: { url: srcMatch[1] } },
+          });
+        }
+      } else if (part.match(/<iframe/i) || part.match(/<video/i)) {
+        const srcMatch = part.match(/src="([^"]+)"/i);
+        if (srcMatch) {
+          blocks.push({
+            object: 'block',
+            type: 'video',
+            video: { type: 'external', external: { url: srcMatch[1] } },
           });
         }
       } else if (part.match(/<li/i)) {
