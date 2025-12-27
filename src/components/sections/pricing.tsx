@@ -1,68 +1,6 @@
-"use client";
-
-import Link from "next/link";
-import { Check, X, ArrowRight, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
-import { toast } from "sonner";
+import { Check, X, ArrowRight } from "lucide-react";
 
 export default function Pricing() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setUser(user);
-    };
-    checkAuth();
-  }, []);
-
-  const handlePlanClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isAuthenticated && user) {
-      e.preventDefault();
-      setLoading(true);
-
-      try {
-        const response = await fetch('/api/pesapal/create-order', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            email: user.email,
-            name: user.user_metadata?.full_name || user.email?.split('@')[0],
-            amount: 1.00,
-            description: "Ranklite 3-Day Trial Activation"
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create payment order');
-        }
-
-        const data = await response.json();
-
-        if (data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          toast.error("Failed to initiate payment. Please try again.");
-          setLoading(false);
-        }
-
-      } catch (error) {
-        console.error("Payment Error:", error);
-        toast.error("Something went wrong. Please try again.");
-        setLoading(false);
-      }
-    }
-  };
-
   const plans = [
     {
       name: "Pro Tier",
@@ -147,20 +85,13 @@ export default function Pricing() {
               </ul>
 
               {/* CTA Button */}
-              <Link
-                href={plan.ctaLink}
-                onClick={handlePlanClick}
+              <a
+                href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
               >
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    {plan.cta}
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </Link>
+                {plan.cta}
+                <ArrowRight className="h-5 w-5" />
+              </a>
               <p className="mt-4 text-center text-[13px] text-[#718096]">
                 * A one-time <strong>$1.00 USD</strong> activation fee applies to start the trial.
               </p>
@@ -222,7 +153,7 @@ export default function Pricing() {
         {/* MVP Note */}
         <div className="mx-auto mt-12 max-w-[600px] text-center">
           <p className="text-[13px] text-[#A0AEC0]">
-            🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Pesapal.
+            🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Whop.
           </p>
         </div>
       </div>

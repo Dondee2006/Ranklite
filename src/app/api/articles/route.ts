@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    
+
     // Get user's site
     const { data: sites } = await supabase
       .from("sites")

@@ -1,5 +1,7 @@
 import { notion } from '@/lib/cms/notion';
 
+export const dynamic = 'force-dynamic';
+
 export default function DebugNotion() {
     // Access the private property via any cast for debugging
     const dbId = (notion as any).databaseId;

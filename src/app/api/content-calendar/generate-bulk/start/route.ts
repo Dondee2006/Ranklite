@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const { month, year } = body;
 
     // Try to get existing site
-    const { data: site, error: siteQueryError } = await supabase
+    let { data: site, error: siteQueryError } = await supabase
       .from("sites")
       .select("id")
       .eq("user_id", user.id)
@@ -122,4 +122,5 @@ export async function POST(request: Request) {
       error: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
+
 }

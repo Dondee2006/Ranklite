@@ -80,7 +80,9 @@ export async function POST(request: NextRequest) {
                                 user_id: userId,
                                 plan_id: 'free_trial',
                                 status: 'active',
-                                start_date: trialStart.toISOString(),
+                                current_period_start: trialStart.toISOString(),
+                                current_period_end: trialEnd.toISOString(),
+                                // valid_until: trialEnd.toISOString() // if needed
                             }, { onConflict: 'user_id' });
 
                         if (error) {

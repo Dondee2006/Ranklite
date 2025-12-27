@@ -13,10 +13,10 @@ export async function POST(request: Request) {
   }
 
   const limitCheck = await checkPostGenerationLimit(user.id);
-    if (!limitCheck.allowed) {
-      return NextResponse.json(
-        {
-          error: limitCheck.message,
+  if (!limitCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: limitCheck.message,
         usage: limitCheck.usage,
         limits: limitCheck.limits,
         percentUsed: limitCheck.percentUsed

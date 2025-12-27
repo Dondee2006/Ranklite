@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
   const { data: site, error: siteError } = await supabase
     .from("sites")
-    .select("id, domain, name")
+    .select("id, domain, name, niche")
     .eq("id", job.site_id)
     .single();
 
@@ -178,7 +178,8 @@ export async function POST(request: Request) {
       }
     }
 
-    const articlesToInsert = [];
+    const articlesToInsert: any[] = [];
+    const currentProgress = job.progress || 0;
 
     for (let i = 0; i < totalToGenerate; i++) {
       const dateStr = formatDate(currentDate);
@@ -208,7 +209,7 @@ export async function POST(request: Request) {
         is_pillar,
         volume,
         difficulty
-      });
+      };
 
       try {
         const content = await generateArticleWithRetry({

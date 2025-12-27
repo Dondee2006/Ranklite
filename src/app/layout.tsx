@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
@@ -60,14 +60,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
         {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
         )}
