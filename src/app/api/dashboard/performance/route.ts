@@ -28,11 +28,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: site } = await supabase
-      .from("sites")
-      .select("id, site_url")
-      .eq("user_id", user.id)
-      .single();
+      const { data: site } = await supabase
+        .from("sites")
+        .select("id, website_url")
+        .eq("user_id", user.id)
+        .single();
 
     if (!site) {
       return NextResponse.json({ error: "Site not found" }, { status: 404 });
@@ -80,11 +80,11 @@ export async function GET() {
       avgDR: s.count > 0 ? Math.round(s.totalDR / s.count) : 0
     }));
 
-    return NextResponse.json({
-      gsc: gscData || [],
-      backlinks: processedBacklinks,
-      siteUrl: site.site_url
-    });
+      return NextResponse.json({
+        gsc: gscData || [],
+        backlinks: processedBacklinks,
+        siteUrl: site.website_url
+      });
   } catch (error) {
     console.error("Error fetching performance data:", error);
     return NextResponse.json({ error: "Failed to load performance data" }, { status: 500 });
