@@ -32,7 +32,7 @@ export async function GET() {
       .from("activity_logs")
       .select(`
         *,
-        user:user_profiles(email, full_name)
+        user:user_profiles!fk_activity_logs_user_profiles(email, full_name)
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
