@@ -22,6 +22,8 @@ export default function AuditLogsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -140,7 +142,7 @@ export default function AuditLogsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button 
-                            onClick={() => console.log(log.metadata)}
+                            onClick={() => setSelectedLog(log)}
                             className="text-xs font-medium text-blue-600 hover:text-blue-800"
                           >
                             View Metadata
@@ -155,6 +157,35 @@ export default function AuditLogsPage() {
           )}
         </div>
       </div>
+
+      {selectedLog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-[#E5E5E5] flex items-center justify-between">
+              <h3 className="font-semibold text-[#1A1A1A]">Event Metadata</h3>
+              <button 
+                onClick={() => setSelectedLog(null)}
+                className="text-[#6B7280] hover:text-[#1A1A1A]"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="bg-[#F9FAFB] rounded-lg p-4 font-mono text-sm overflow-auto max-h-[400px]">
+                <pre>{JSON.stringify(selectedLog.metadata, null, 2)}</pre>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E5E5] flex justify-end">
+              <button 
+                onClick={() => setSelectedLog(null)}
+                className="px-4 py-2 bg-white border border-[#E5E5E5] rounded-lg text-sm font-medium hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
