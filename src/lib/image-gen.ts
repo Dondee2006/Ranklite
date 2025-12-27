@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { v4 as uuidv4 } from "uuid";
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY || "dummy-key-for-build",
 });
 
 export type ImageStyle = "brand-text" | "watercolor" | "cinematic" | "illustration" | "sketch";

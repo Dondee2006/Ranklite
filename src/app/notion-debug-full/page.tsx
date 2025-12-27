@@ -1,5 +1,7 @@
 import { notion } from '@/lib/cms/notion';
 
+export const dynamic = 'force-dynamic';
+
 export default async function NotionDebugPage() {
     let posts = [];
     let error = null;

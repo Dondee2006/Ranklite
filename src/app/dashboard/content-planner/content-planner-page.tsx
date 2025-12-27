@@ -1024,67 +1024,6 @@ export default function ContentPlannerPage() {
                 </div>
             )}
 
-<<<<<<< HEAD
-              {showArticleDetail && selectedArticle && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                      <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
-                          <div className="flex items-center justify-between p-6 border-b border-slate-100">
-                              <div className="flex items-center gap-3">
-                                  <span className="text-2xl">{getArticleTypeIcon(selectedArticle.article_type)}</span>
-                                  <div>
-                                      <Input
-                                          value={selectedArticle.title}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, title: e.target.value})}
-                                          className="text-lg font-bold mb-1"
-                                      />
-                                      <p className="text-sm text-slate-500">
-                                          Scheduled: {new Date(selectedArticle.scheduled_date).toLocaleDateString()} • {selectedArticle.word_count || 1500} words
-                                      </p>
-                                  </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                  <span className={cn("px-3 py-1 rounded-full text-xs font-medium", getStatusColor(selectedArticle.status))}>
-                                      {selectedArticle.status}
-                                  </span>
-                                  <button onClick={() => { setShowArticleDetail(false); setSelectedArticle(null); }} className="text-slate-400 hover:text-slate-600 ml-2">
-                                      <X className="h-5 w-5" />
-                                  </button>
-                            </div>
-                        </div>
-
-                          <div className="flex-1 overflow-y-auto p-6">
-                              <div className="grid grid-cols-3 gap-6 mb-6">
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Primary Keyword</p>
-                                      <Input
-                                          value={selectedArticle.keyword || ""}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, keyword: e.target.value})}
-                                          className="h-9 text-sm"
-                                      />
-                                  </div>
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Search Intent</p>
-                                      <select
-                                          value={selectedArticle.search_intent || "informational"}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, search_intent: e.target.value})}
-                                          className="w-full h-9 rounded-lg border border-slate-200 px-3 text-sm"
-                                      >
-                                          {SEARCH_INTENTS.map(intent => (
-                                              <option key={intent.value} value={intent.value}>{intent.label}</option>
-                                          ))}
-                                      </select>
-                                  </div>
-                                  <div className="rounded-xl bg-slate-50 p-4">
-                                      <p className="text-xs text-slate-500 mb-2">Scheduled Date</p>
-                                      <Input
-                                          type="date"
-                                          value={selectedArticle.scheduled_date}
-                                          onChange={(e) => setSelectedArticle({...selectedArticle, scheduled_date: e.target.value})}
-                                          className="h-9 text-sm"
-                                      />
-                                  </div>
-                              </div>
-=======
             {showArticleDetail && selectedArticle && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -1144,7 +1083,6 @@ export default function ContentPlannerPage() {
                                     />
                                 </div>
                             </div>
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
 
                             {selectedArticle.secondary_keywords?.length > 0 && (
                                 <div className="mb-6">
@@ -1298,75 +1236,6 @@ export default function ContentPlannerPage() {
                             )}
                         </div>
 
-<<<<<<< HEAD
-                          <div className="p-6 border-t border-slate-100 flex items-center justify-between">
-                              <button
-                                  onClick={() => deleteArticle(selectedArticle.id)}
-                                  className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm"
-                              >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete
-                              </button>
-                              <div className="flex gap-3">
-                                  <Button
-                                      onClick={async () => {
-                                          try {
-                                              const response = await fetch(`/api/articles/${selectedArticle.id}`, {
-                                                  method: "PATCH",
-                                                  headers: { "Content-Type": "application/json" },
-                                                  body: JSON.stringify({
-                                                      title: selectedArticle.title,
-                                                      keyword: selectedArticle.keyword,
-                                                      search_intent: selectedArticle.search_intent,
-                                                      scheduled_date: selectedArticle.scheduled_date,
-                                                  }),
-                                              });
-                                              if (response.ok) {
-                                                  await loadArticles();
-                                                  setShowArticleDetail(false);
-                                              }
-                                          } catch (error) {
-                                              console.error("Failed to save article:", error);
-                                          }
-                                      }}
-                                      variant="outline"
-                                      className="gap-2"
-                                  >
-                                      <Check className="h-4 w-4" />
-                                      Save Changes
-                                  </Button>
-                                  {!selectedArticle.content && (
-                                      <Button
-                                          onClick={() => generateArticleContent(selectedArticle.id)}
-                                          disabled={generatingArticle === selectedArticle.id}
-                                          className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                      >
-                                          {generatingArticle === selectedArticle.id ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                          ) : (
-                                              <Sparkles className="h-4 w-4" />
-                                          )}
-                                          Generate Content
-                                      </Button>
-                                  )}
-                                  {selectedArticle.content && (
-                                      <Button
-                                          onClick={() => generateArticleContent(selectedArticle.id)}
-                                          disabled={generatingArticle === selectedArticle.id}
-                                          variant="outline"
-                                          className="gap-2"
-                                      >
-                                          {generatingArticle === selectedArticle.id ? (
-                                              <Loader2 className="h-4 w-4 animate-spin" />
-                                          ) : (
-                                              <RefreshCw className="h-4 w-4" />
-                                          )}
-                                          Regenerate
-                                      </Button>
-                                  )}
-                              </div>
-                          </div>
-=======
                         <div className="p-6 border-t border-slate-100 flex items-center justify-between">
                             <button
                                 onClick={() => deleteArticle(selectedArticle.id)}
@@ -1434,192 +1303,196 @@ export default function ContentPlannerPage() {
                                 )}
                             </div>
                         </div>
->>>>>>> fc887e15397d1fac37f6e9ee1a57a550e2f70dbb
-                    </div>
-                </div>
-            )}
+                    </div >
+                </div >
+            )
+            }
 
-            {showAutopilotModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-                                    <Zap className="h-5 w-5 text-white" />
+            {
+                showAutopilotModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                                        <Zap className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900">Autopilot Settings</h3>
+                                        <p className="text-sm text-slate-500">Configure automatic content generation</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-900">Autopilot Settings</h3>
-                                    <p className="text-sm text-slate-500">Configure automatic content generation</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setShowAutopilotModal(false)} className="text-slate-400 hover:text-slate-600">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-5">
-                            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
-                                <div>
-                                    <p className="font-medium text-slate-900">Enable Autopilot</p>
-                                    <p className="text-sm text-slate-500">Automatically generate content daily</p>
-                                </div>
-                                <button
-                                    onClick={() => setAutopilotSettings({ ...autopilotSettings, enabled: !autopilotSettings.enabled })}
-                                    className={cn(
-                                        "relative w-12 h-6 rounded-full transition-colors",
-                                        autopilotSettings.enabled ? "bg-emerald-500" : "bg-slate-300"
-                                    )}
-                                >
-                                    <span className={cn(
-                                        "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
-                                        autopilotSettings.enabled ? "translate-x-7" : "translate-x-1"
-                                    )} />
+                                <button onClick={() => setShowAutopilotModal(false)} className="text-slate-400 hover:text-slate-600">
+                                    <X className="h-5 w-5" />
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-5">
+                                <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
+                                    <div>
+                                        <p className="font-medium text-slate-900">Enable Autopilot</p>
+                                        <p className="text-sm text-slate-500">Automatically generate content daily</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setAutopilotSettings({ ...autopilotSettings, enabled: !autopilotSettings.enabled })}
+                                        className={cn(
+                                            "relative w-12 h-6 rounded-full transition-colors",
+                                            autopilotSettings.enabled ? "bg-emerald-500" : "bg-slate-300"
+                                        )}
+                                    >
+                                        <span className={cn(
+                                            "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                                            autopilotSettings.enabled ? "translate-x-7" : "translate-x-1"
+                                        )} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time Start</label>
+                                        <select
+                                            value={autopilotSettings.publish_time_start}
+                                            onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_start: parseInt(e.target.value) })}
+                                            className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
+                                        >
+                                            {Array.from({ length: 24 }, (_, i) => (
+                                                <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time End</label>
+                                        <select
+                                            value={autopilotSettings.publish_time_end}
+                                            onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_end: parseInt(e.target.value) })}
+                                            className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
+                                        >
+                                            {Array.from({ length: 24 }, (_, i) => (
+                                                <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time Start</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Articles Per Day</label>
                                     <select
-                                        value={autopilotSettings.publish_time_start}
-                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_start: parseInt(e.target.value) })}
+                                        value={autopilotSettings.articles_per_day}
+                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, articles_per_day: parseInt(e.target.value) })}
                                         className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
                                     >
-                                        {Array.from({ length: 24 }, (_, i) => (
-                                            <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
-                                        ))}
+                                        <option value={1}>1 article per day</option>
+                                        <option value={2}>2 articles per day</option>
+                                        <option value={3}>3 articles per day</option>
                                     </select>
                                 </div>
+
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Publish Time End</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Writing Tone</label>
                                     <select
-                                        value={autopilotSettings.publish_time_end}
-                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, publish_time_end: parseInt(e.target.value) })}
+                                        value={autopilotSettings.tone}
+                                        onChange={(e) => setAutopilotSettings({ ...autopilotSettings, tone: e.target.value })}
                                         className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
                                     >
-                                        {Array.from({ length: 24 }, (_, i) => (
-                                            <option key={i} value={i}>{i.toString().padStart(2, "0")}:00 UTC</option>
-                                        ))}
+                                        <option value="natural">Natural & Human</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="casual">Casual & Friendly</option>
+                                        <option value="authoritative">Authoritative</option>
                                     </select>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Articles Per Day</label>
-                                <select
-                                    value={autopilotSettings.articles_per_day}
-                                    onChange={(e) => setAutopilotSettings({ ...autopilotSettings, articles_per_day: parseInt(e.target.value) })}
-                                    className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                >
-                                    <option value={1}>1 article per day</option>
-                                    <option value={2}>2 articles per day</option>
-                                    <option value={3}>3 articles per day</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">Writing Tone</label>
-                                <select
-                                    value={autopilotSettings.tone}
-                                    onChange={(e) => setAutopilotSettings({ ...autopilotSettings, tone: e.target.value })}
-                                    className="w-full h-11 rounded-lg border border-slate-200 px-3 text-sm"
-                                >
-                                    <option value="natural">Natural & Human</option>
-                                    <option value="professional">Professional</option>
-                                    <option value="casual">Casual & Friendly</option>
-                                    <option value="authoritative">Authoritative</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">CMS Targets</label>
-                                <div className="flex gap-3">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={autopilotSettings.cms_targets.includes("wordpress")}
-                                            onChange={(e) => {
-                                                const targets = e.target.checked
-                                                    ? [...autopilotSettings.cms_targets, "wordpress"]
-                                                    : autopilotSettings.cms_targets.filter(t => t !== "wordpress");
-                                                setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
-                                            }}
-                                            className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
-                                        />
-                                        <span className="text-sm text-slate-700">WordPress</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={autopilotSettings.cms_targets.includes("shopify")}
-                                            onChange={(e) => {
-                                                const targets = e.target.checked
-                                                    ? [...autopilotSettings.cms_targets, "shopify"]
-                                                    : autopilotSettings.cms_targets.filter(t => t !== "shopify");
-                                                setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
-                                            }}
-                                            className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
-                                        />
-                                        <span className="text-sm text-slate-700">Shopify</span>
-                                    </label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">CMS Targets</label>
+                                    <div className="flex gap-3">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={autopilotSettings.cms_targets.includes("wordpress")}
+                                                onChange={(e) => {
+                                                    const targets = e.target.checked
+                                                        ? [...autopilotSettings.cms_targets, "wordpress"]
+                                                        : autopilotSettings.cms_targets.filter(t => t !== "wordpress");
+                                                    setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
+                                                }}
+                                                className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                                            />
+                                            <span className="text-sm text-slate-700">WordPress</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={autopilotSettings.cms_targets.includes("shopify")}
+                                                onChange={(e) => {
+                                                    const targets = e.target.checked
+                                                        ? [...autopilotSettings.cms_targets, "shopify"]
+                                                        : autopilotSettings.cms_targets.filter(t => t !== "shopify");
+                                                    setAutopilotSettings({ ...autopilotSettings, cms_targets: targets });
+                                                }}
+                                                className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                                            />
+                                            <span className="text-sm text-slate-700">Shopify</span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex gap-3 pt-4">
-                                <Button variant="outline" onClick={() => setShowAutopilotModal(false)} className="flex-1 h-11">
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={saveAutopilotSettings}
-                                    className="flex-1 h-11 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
-                                >
-                                    Save Settings
-                                </Button>
+                                <div className="flex gap-3 pt-4">
+                                    <Button variant="outline" onClick={() => setShowAutopilotModal(false)} className="flex-1 h-11">
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={saveAutopilotSettings}
+                                        className="flex-1 h-11 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                                    >
+                                        Save Settings
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {showWelcomeModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    {welcomeStep === "loading" ? (
-                        <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
-                            <Loader2 className="h-12 w-12 animate-spin text-emerald-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Creating Content Strategy</h3>
-                            <p className="text-sm text-slate-500">Analyzing your niche and generating a 30-day plan...</p>
-                        </div>
-                    ) : (
-                        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-                            <div className="text-center mb-6">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mx-auto mb-4">
-                                    <Sparkles className="h-8 w-8 text-emerald-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">Your 1-month Content Strategy is ready!</h3>
-                                <p className="text-sm text-slate-500">We&apos;ve generated high-impact article ideas for you.</p>
+            {
+                showWelcomeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                        {welcomeStep === "loading" ? (
+                            <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-2xl">
+                                <Loader2 className="h-12 w-12 animate-spin text-emerald-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Creating Content Strategy</h3>
+                                <p className="text-sm text-slate-500">Analyzing your niche and generating a 30-day plan...</p>
                             </div>
-                            <div className="space-y-4 mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">30 SEO-optimized article topics</p>
+                        ) : (
+                            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+                                <div className="text-center mb-6">
+                                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mx-auto mb-4">
+                                        <Sparkles className="h-8 w-8 text-emerald-600" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-2">Your 1-month Content Strategy is ready!</h3>
+                                    <p className="text-sm text-slate-500">We&apos;ve generated high-impact article ideas for you.</p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">Autopilot enabled for daily publishing</p>
+                                <div className="space-y-4 mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                                        <p className="text-sm text-slate-700">30 SEO-optimized article topics</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                                        <p className="text-sm text-slate-700">Autopilot enabled for daily publishing</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                                        <p className="text-sm text-slate-700">Keywords and search intent analysis</p>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    <p className="text-sm text-slate-700">Keywords and search intent analysis</p>
-                                </div>
+                                <Button onClick={handleCloseWelcome} className="w-full h-12 text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+                                    Let&apos;s Go!
+                                </Button>
                             </div>
-                            <Button onClick={handleCloseWelcome} className="w-full h-12 text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
-                                Let&apos;s Go!
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
+                        )}
+                    </div>
+                )
+            }
+        </div >
     );
 }
 
