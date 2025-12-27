@@ -43,18 +43,18 @@ export default function Header() {
             </Link>
 
             <nav className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
-              <ul className="flex items-center gap-1">
-                {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
-                  <li key={item}>
-                    <Link
-                      href={`/#${item.toLowerCase().replace(/\s+/g, "")}`}
-                      className="rounded-full px-5 py-2.5 text-[15px] font-medium text-foreground/80 transition-all hover:bg-[#F0FDF4] hover:text-foreground"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                <ul className="flex items-center gap-1">
+                  {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
+                    <li key={item}>
+                      <Link
+                        href={item === "Blog" ? "/blog" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
+                        className="rounded-full px-5 py-2.5 text-[15px] font-medium text-foreground/80 transition-all hover:bg-[#F0FDF4] hover:text-foreground"
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
             </nav>
 
             <div className="flex items-center gap-3">
@@ -92,19 +92,19 @@ export default function Header() {
             }`}
           >
             <nav className="p-4">
-              <ul className="space-y-1">
-                {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
-                  <li key={item}>
-                    <Link
-                      href={`/#${item.toLowerCase().replace(/\s+/g, "")}`}
-                      className="block rounded-xl px-4 py-3 text-center text-[15px] font-medium text-foreground transition-colors hover:bg-[#F0FDF4]"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                <ul className="space-y-1">
+                  {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
+                    <li key={item}>
+                      <Link
+                        href={item === "Blog" ? "/blog" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
+                        className="block rounded-xl px-4 py-3 text-center text-[15px] font-medium text-foreground transition-colors hover:bg-[#F0FDF4]"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               <div className="mt-4 border-t border-border pt-4">
                 <Link
                   href="/login"

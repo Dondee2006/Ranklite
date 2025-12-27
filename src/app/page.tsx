@@ -25,7 +25,7 @@ export default function Home() {
         <HeroSection />
         <ProblemsSolution />
         <HowItWorks />
-        <section className="container mx-auto max-w-[1320px] px-5 md:px-8">
+        <section id="features" className="container mx-auto max-w-[1320px] px-5 md:px-8">
           <FeaturesSeoAnalysis />
           <FeaturesNaturalRanking />
           <FeaturesArticleStyle />
