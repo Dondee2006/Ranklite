@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
-import { notion } from "@/lib/cms/notion";
 import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Facebook, Linkedin, Share2, Twitter } from "lucide-react";
+import { getArticleBySlug } from "@/lib/cms/supabase-articles";
 
 // Revalidate every hour
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-    const post = await notion.getBlogPostBySlug(params.slug);
+    const post = await getArticleBySlug(params.slug);
     if (!post) {
         return {
             title: "Blog Post Not Found | Ranklite",
@@ -28,106 +28,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
 }
 
-// Helper to render Notion blocks
-function NotionRenderer({ blocks }: { blocks: any[] }) {
-    if (!blocks) return null;
+// Helper to render HTML content safely
+function HtmlRenderer({ html }: { html: string }) {
+    if (!html) return null;
 
     return (
-        <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
-            {blocks.map((block) => {
-                const { type } = block;
-                const value = block[type];
-                const text = value.rich_text?.map((t: any) => t.plain_text).join("") || "";
-
-                switch (type) {
-                    case "paragraph":
-                        return <p key={block.id}>{text}</p>;
-                    case "heading_1":
-                        return (
-                            <h1 key={block.id} className="mt-10 mb-4 font-display text-4xl font-bold text-foreground">
-                                {text}
-                            </h1>
-                        );
-                    case "heading_2":
-                        return (
-                            <h2 key={block.id} className="mt-8 mb-4 font-display text-3xl font-bold text-foreground">
-                                {text}
-                            </h2>
-                        );
-                    case "heading_3":
-                        return (
-                            <h3 key={block.id} className="mt-6 mb-3 font-display text-2xl font-bold text-foreground">
-                                {text}
-                            </h3>
-                        );
-                    case "bulleted_list_item":
-                        return (
-                            <ul key={block.id} className="list-disc pl-6 space-y-2">
-                                <li>{text}</li>
-                            </ul>
-                        );
-                    case "numbered_list_item":
-                        return (
-                            <ol key={block.id} className="list-decimal pl-6 space-y-2">
-                                <li>{text}</li>
-                            </ol>
-                        );
-                    case "image":
-                        const imageUrl = value.type === "file" ? value.file.url : value.external.url;
-                        return (
-                            <figure key={block.id} className="my-8 overflow-hidden rounded-xl border border-border bg-muted">
-                                <img src={imageUrl} alt="" className="w-full object-cover" />
-                                {value.caption?.length > 0 && (
-                                    <figcaption className="p-3 text-center text-sm text-muted-foreground">
-                                        {value.caption[0].plain_text}
-                                    </figcaption>
-                                )}
-                            </figure>
-                        );
-                    case "code":
-                        return (
-                            <pre key={block.id} className="my-6 overflow-x-auto rounded-lg bg-slate-900 p-4 text-sm text-white">
-                                <code>{text}</code>
-                            </pre>
-                        );
-                    case "quote":
-                        return (
-                            <blockquote key={block.id} className="my-6 border-l-4 border-[#22C55E] bg-muted/30 pl-6 py-2 italic text-foreground">
-                                {text}
-                            </blockquote>
-                        );
-                    case "video":
-                    case "embed":
-                        const videoUrl = value.type === "external" ? value.external.url : value.file?.url;
-                        if (!videoUrl) return null;
-
-                        return (
-                            <div key={block.id} className="my-8 aspect-video w-full overflow-hidden rounded-xl border border-border bg-slate-100">
-                                <iframe
-                                    src={videoUrl.replace("watch?v=", "embed/")}
-                                    title="Video player"
-                                    className="h-full w-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                            </div>
-                        );
-                    default:
-                        return null;
-                }
-            })}
-        </div>
+        <div 
+            className="prose prose-lg prose-green max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
     );
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-    const post = await notion.getBlogPostBySlug(params.slug);
+    const post = await getArticleBySlug(params.slug);
 
     if (!post) {
         notFound();
     }
-
-    const blocks = await notion.getPageBlocks(post.id);
 
     return (
         <div className="min-h-screen bg-background">
@@ -180,7 +98,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                     )}
 
                     <div className="mx-auto max-w-3xl">
-                        <NotionRenderer blocks={blocks} />
+                        <HtmlRenderer html={post.content || ""} />
                     </div>
 
                     <div className="mt-16 border-t border-border pt-8">
@@ -210,3 +128,4 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </div>
     );
 }
+
