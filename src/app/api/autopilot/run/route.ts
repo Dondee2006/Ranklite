@@ -134,36 +134,40 @@ async function processSiteAutopilot(site: any) {
   const targetCount = Math.max(settings.articles_per_day || 1, 1);
   const currentCount = (candidates?.length || 0) + alreadyPublished;
   
-  if (withinWindow && currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
-    const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
-    for (let i = 0; i < seedsToCreate; i++) {
-      const articleType = pickArticleType(settings.preferred_article_types);
-      const keyword = `${site.name} ${articleType} guide ${Math.floor(Math.random() * 1000)}`;
-      const title = `The Ultimate Guide to ${keyword}`;
+    if (withinWindow && currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
+      const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
+      for (let i = 0; i < seedsToCreate; i++) {
+        const articleType = pickArticleType(settings.preferred_article_types);
+        const keyword = `${site.name} ${articleType} guide ${Math.floor(Math.random() * 1000)}`;
+        const title = `The Ultimate Guide to ${keyword}`;
 
-      const { data: inserted } = await supabaseAdmin
-        .from("articles")
-        .insert({
-          site_id: site.id,
-          user_id: site.user_id,
-          title,
-          slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''),
-          keyword,
-          article_type: articleType,
-          status: "planned",
-          scheduled_date: today,
-          volume: 500,
-          difficulty: 20
-        })
-        .select()
-        .single();
+        // Assign a random time within the window for the seeds
+        const randomHour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
+        const randomMinute = Math.floor(Math.random() * 60);
+        const scheduledTime = `${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}:00`;
 
-      if (inserted) {
-        if (!candidates) candidates = [];
-        candidates.push(inserted);
+        const { data: inserted } = await supabaseAdmin
+          .from("articles")
+          .insert({
+            site_id: site.id,
+            user_id: site.user_id,
+            title,
+            slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''),
+            keyword,
+            article_type: articleType,
+            status: "planned",
+            scheduled_date: today,
+            scheduled_time: scheduledTime,
+            volume: 500,
+            difficulty: 20
+          })
+          .select()
+          .single();
+
+        // We don't push to candidates anymore so they are processed on their specific scheduled time
+        // in future cron runs, avoiding bulk generation and wasting credits.
       }
     }
-  }
 
   if (!candidates || candidates.length === 0) {
     return { success: false, message: "No candidates" };
