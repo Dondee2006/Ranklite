@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { Suspense, useEffect, useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plug, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -87,6 +87,14 @@ const INTEGRATIONS: Integration[] = [
 type Feedback = { type: "success" | "error"; text: string } | null;
 
 export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={<div className="p-8"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>}>
+      <IntegrationsPageContent />
+    </Suspense>
+  );
+}
+
+function IntegrationsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);

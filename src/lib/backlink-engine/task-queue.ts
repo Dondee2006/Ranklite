@@ -291,3 +291,16 @@ export async function resetDailySubmissionCounts(): Promise<void> {
     .update({ daily_submission_count: 0 })
     .neq("daily_submission_count", 0);
 }
+
+export async function cleanupStuckTasks(userId: string) {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  await supabaseAdmin
+    .from("backlink_tasks")
+    .update({
+      status: "pending",
+      updated_at: new Date().toISOString()
+    })
+    .eq("user_id", userId)
+    .eq("status", "processing")
+    .lt("updated_at", oneHourAgo);
+}
