@@ -43,7 +43,7 @@ interface Stats {
 
 const REVIEW_REASONS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   CAPTCHA_DETECTED: { label: "CAPTCHA Required", icon: <ShieldAlert className="h-4 w-4" />, color: "text-orange-600" },
-  LOGIN_REQUIRED: { label: "Login Required", icon: <Lock className="h-4 w-4" />, color: "text-blue-600" },
+  LOGIN_REQUIRED: { label: "Login Required", icon: <Lock className="h-4 w-4" />, color: "text-[#22C55E]" },
   JS_CHALLENGE_DETECTED: { label: "Bot Protection", icon: <ShieldAlert className="h-4 w-4" />, color: "text-red-600" },
   ROBOTS_TXT_BLOCKED: { label: "Blocked by robots.txt", icon: <AlertCircle className="h-4 w-4" />, color: "text-gray-600" },
 };
@@ -90,7 +90,7 @@ export default function ManualReviewPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFFFE] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#8B5CF6]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
       </div>
     );
   }
@@ -182,7 +182,7 @@ export default function ManualReviewPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 rounded-lg bg-[#8B5CF6]/10 text-[#8B5CF6] text-xs font-medium">
+                        <span className="px-2 py-1 rounded-lg bg-green-50 text-[#22C55E] text-xs font-medium">
                           DR {task.platform?.domain_rating || 0}
                         </span>
                       </div>
@@ -213,7 +213,7 @@ export default function ManualReviewPage() {
                             href={task.platform.submission_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#8B5CF6] text-white text-sm font-medium hover:bg-[#7C3AED] transition-colors"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#22C55E] text-white text-sm font-medium hover:bg-[#16A34A] transition-all duration-300"
                           >
                             <ExternalLink className="h-4 w-4" />
                             Open Submission Form

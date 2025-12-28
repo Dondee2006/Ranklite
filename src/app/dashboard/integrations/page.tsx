@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plug, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,8 @@ interface Integration {
   icon: string;
   integration_id?: string;
 }
+
+const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix", "framer", "gsc", "ga"];
 
 const INTEGRATIONS: Integration[] = [
   {
@@ -81,11 +84,11 @@ const INTEGRATIONS: Integration[] = [
   { id: "ga", name: "Google Analytics", status: "Not connected", last_sync: null, icon: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/_google_analytics_icon-1765807972111.png?width=8000&height=8000&resize=contain" },
 ];
 
-const SUPPORTED_PLATFORMS = ["wordpress", "webflow", "shopify", "notion", "wix", "framer"];
-
 type Feedback = { type: "success" | "error"; text: string } | null;
 
 export default function IntegrationsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [loading, setLoading] = useState<string | null>(null);
   const [connectOpen, setConnectOpen] = useState(false);
@@ -105,6 +108,24 @@ export default function IntegrationsPage() {
   useEffect(() => {
     fetchIntegrations();
   }, []);
+
+  // Handle URL params for feedback (success/error from callbacks)
+  useEffect(() => {
+    const error = searchParams.get("error");
+    const success = searchParams.get("success");
+    const integration = searchParams.get("integration");
+
+    if (error) {
+      setFeedback({ type: "error", text: `Connection failed: ${error}` });
+      // Clean up URL
+      router.replace("/dashboard/integrations");
+    } else if (success && integration) {
+      const name = INTEGRATIONS.find(i => i.id === integration)?.name || integration;
+      setFeedback({ type: "success", text: `${name} connected successfully.` });
+      // Clean up URL
+      router.replace("/dashboard/integrations");
+    }
+  }, [searchParams, router]);
 
   const currentPlatform = selectedIntegration?.id;
   const requiresSiteUrl = currentPlatform === "wordpress";
@@ -137,11 +158,38 @@ export default function IntegrationsPage() {
     }
   };
 
-  const openConnectDialog = (integration: Integration) => {
+  const openConnectDialog = async (integration: Integration) => {
     if (!SUPPORTED_PLATFORMS.includes(integration.id)) {
       setFeedback({ type: "error", text: `${integration.name} integration is coming soon.` });
       return;
     }
+
+    // Special handling for Google services (OAuth redirect)
+    if (integration.id === "gsc" || integration.id === "ga") {
+      setLoading(integration.id);
+      try {
+        const endpoint = integration.id === "gsc" ? "/api/gsc/auth" : "/api/ga/auth";
+        const res = await fetch(endpoint);
+        const data = await res.json();
+
+        if (data.error) {
+          setFeedback({ type: "error", text: data.error });
+          setLoading(null);
+          return;
+        }
+
+        if (data.authUrl) {
+          window.location.href = data.authUrl;
+          return; // Redirecting, so don't reset loading immediately
+        }
+      } catch (error) {
+        console.error("Auth init failed:", error);
+        setFeedback({ type: "error", text: "Failed to initiate connection." });
+        setLoading(null);
+      }
+      return;
+    }
+
     setSelectedIntegration(integration);
     setForm({
       siteUrl: "",

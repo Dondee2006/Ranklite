@@ -180,13 +180,13 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
             if (!res.ok) throw new Error(data.error || "Failed to enable amplification");
 
             toast.success(data.message || "Content amplification enabled!");
-            
+
             const refreshRes = await fetch(`/api/articles/${id}`);
             if (refreshRes.ok) {
                 const refreshData = await refreshRes.json();
                 setArticle(refreshData.article);
             }
-            
+
             fetchAmplificationStatus();
         } catch (error: any) {
             toast.error(error.message);
@@ -507,10 +507,10 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
 
                         <div className="space-y-3 pt-8 border-t border-slate-100/80">
                             <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Tag className="h-3.5 w-3.5 text-blue-500/60" />
+                                <Tag className="h-3.5 w-3.5 text-emerald-500/60" />
                                 Article Type
                             </p>
-                            <Badge variant="secondary" className="bg-blue-50/50 text-blue-600 border-blue-100/50 hover:bg-blue-100/50 font-bold px-4 py-2 text-[13px] rounded-xl transition-all tracking-tight">
+                            <Badge variant="secondary" className="bg-green-50/50 text-[#22C55E] border-green-100/50 hover:bg-green-100/50 font-bold px-4 py-2 text-[13px] rounded-xl transition-all tracking-tight">
                                 {article.article_type || "Standard Post"}
                             </Badge>
                         </div>
@@ -664,9 +664,9 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
 
                         {/* Content Amplification Section */}
                         {article.content && (
-                            <div className="bg-gradient-to-br from-blue-50/50 to-purple-50/30 rounded-[2rem] border border-blue-100/50 shadow-sm p-8 space-y-7 transition-all duration-500 hover:shadow-xl hover:border-blue-200">
+                            <div className="bg-gradient-to-br from-green-50/50 to-emerald-50/30 rounded-[2rem] border border-green-100/50 shadow-sm p-8 space-y-7 transition-all duration-500 hover:shadow-xl hover:border-green-200">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-black text-blue-700/60 uppercase tracking-[0.25em] flex items-center gap-2">
+                                    <p className="text-[11px] font-black text-green-700/60 uppercase tracking-[0.25em] flex items-center gap-2">
                                         <Zap className="h-3.5 w-3.5" />
                                         Content Amplification
                                     </p>
@@ -677,18 +677,18 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         </span>
                                     )}
                                 </div>
-                                
+
                                 {article.content_amplification_enabled ? (
                                     <div className="space-y-5">
                                         <p className="text-sm text-slate-600">
                                             This article is being distributed across multiple platforms to build backlinks.
                                         </p>
-                                        
+
                                         {amplificationStatus && (
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="bg-white rounded-xl p-4 border border-slate-100">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <Layers className="h-4 w-4 text-purple-500" />
+                                                        <Layers className="h-4 w-4 text-emerald-500" />
                                                         <span className="text-[10px] font-bold text-slate-400 uppercase">Tier 2</span>
                                                     </div>
                                                     <p className="text-xl font-bold text-slate-900">{amplificationStatus.tier2Tasks}</p>
@@ -702,7 +702,7 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                                 </div>
                                                 <div className="bg-white rounded-xl p-4 border border-slate-100">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <Link2 className="h-4 w-4 text-blue-500" />
+                                                        <Link2 className="h-4 w-4 text-[#22C55E]" />
                                                         <span className="text-[10px] font-bold text-slate-400 uppercase">Backlinks</span>
                                                     </div>
                                                     <p className="text-xl font-bold text-slate-900">{amplificationStatus.backlinksCreated}</p>
@@ -716,8 +716,8 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                                 </div>
                                             </div>
                                         )}
-                                        
-                                        <Link href="/dashboard/backlinks" className="flex items-center justify-center gap-2 text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors">
+
+                                        <Link href="/dashboard/backlinks" className="flex items-center justify-center gap-2 text-[11px] font-bold text-[#22C55E] hover:text-[#16A34A] transition-colors">
                                             View Distribution Dashboard
                                             <ExternalLink className="h-3 w-3" />
                                         </Link>
@@ -727,18 +727,18 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         <p className="text-sm text-slate-600">
                                             Enable content amplification to automatically create derivative content and build backlinks from this article.
                                         </p>
-                                        <div className="bg-white/80 rounded-xl p-4 border border-blue-100/50">
+                                        <div className="bg-white/80 rounded-xl p-4 border border-green-100/50">
                                             <ul className="text-xs text-slate-500 space-y-2">
                                                 <li className="flex items-center gap-2">
-                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-[#22C55E]" />
                                                     Tier 2: Syndication & parasite posts
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-[#22C55E]" />
                                                     Tier 3: Summaries, snippets & abstracts
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
+                                                    <CheckCircle2 className="h-3.5 w-3.5 text-[#22C55E]" />
                                                     Auto anchor text rotation
                                                 </li>
                                             </ul>
@@ -746,7 +746,7 @@ export default function ArticleDetailPage({ params }: { params: Promise<{ id: st
                                         <Button
                                             onClick={handleEnableAmplification}
                                             disabled={isAmplifying}
-                                            className="w-full h-12 text-[12px] font-black bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/20 hover:shadow-2xl hover:bg-blue-700 transition-all duration-300 uppercase tracking-[0.2em] rounded-xl active:scale-95"
+                                            className="w-full h-12 text-[12px] font-black bg-[#22C55E] border-[#22C55E] text-white shadow-xl shadow-green-600/20 hover:shadow-2xl hover:bg-[#16A34A] transition-all duration-300 uppercase tracking-[0.2em] rounded-xl active:scale-95"
                                         >
                                             {isAmplifying ? (
                                                 <>

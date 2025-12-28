@@ -299,8 +299,7 @@ export function SettingsContent() {
                     type="text"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full bg-white border-gray-200 h-11"
-                    placeholder="Select country"
+                    className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-900 focus:border-[#22C55E] focus:outline-none focus:ring-2 focus:ring-green-500/20"
                   />
                 </div>
               </div>
@@ -344,7 +343,7 @@ export function SettingsContent() {
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Target Audiences</h2>
-                  <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs text-[#22C55E] bg-green-50 px-2 py-0.5 rounded-full font-medium">
                     {audiences.length}/7
                   </span>
                 </div>
@@ -358,7 +357,7 @@ export function SettingsContent() {
                     value={audienceInput}
                     onChange={(e) => setAudienceInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addAudience()}
-                    className="flex-1 bg-white border-gray-200 h-11"
+                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#22C55E] focus:outline-none focus:ring-2 focus:ring-green-500/20"
                     placeholder="Enter your target audience groups (e.g., Developers, Project Managers)"
                   />
                   <button
@@ -390,7 +389,7 @@ export function SettingsContent() {
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Competitors</h2>
-                  <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs text-[#22C55E] bg-green-50 px-2 py-0.5 rounded-full font-medium">
                     {competitors.length}/7
                   </span>
                 </div>
@@ -480,7 +479,7 @@ export function SettingsContent() {
                   }
                 </p>
                 {gscConnected ? (
-                  <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-50 text-green-700 rounded-lg font-medium border border-green-200">
+                  <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-50 text-[#22C55E] rounded-lg font-medium border border-green-200">
                     <CheckCircle2 className="h-4 w-4" />
                     Connected
                   </div>

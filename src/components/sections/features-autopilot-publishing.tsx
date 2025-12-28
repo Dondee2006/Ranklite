@@ -26,9 +26,9 @@ export default function FeaturesAutopilotPublishing() {
         </div>
         <a
           className="group inline-flex items-center gap-2 rounded-full bg-[#4ADE80] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#22C55E] sm:px-4 sm:text-sm"
-          href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+          href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
         >
-          <span>Start for Free</span>
+          <span>Connect Your Site</span>
           <Image
             alt="btn arrow"
             width={20}

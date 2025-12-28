@@ -166,8 +166,8 @@ export function LinkingConfigurationPage() {
           {/* Left Panel - Source Configuration */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-6">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100">
-                <LinkIcon className="h-4 w-4 text-purple-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <LinkIcon className="h-4 w-4 text-[#22C55E]" />
               </div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Source Configuration
@@ -208,7 +208,7 @@ export function LinkingConfigurationPage() {
                   <select
                     value={linkSource}
                     onChange={(e) => setLinkSource(e.target.value as LinkSource)}
-                    className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-900 focus:border-[#22C55E] focus:outline-none focus:ring-2 focus:ring-green-500/20"
                   >
                     <option value="sitemap">Sitemap</option>
                     <option value="rss">RSS Feed</option>
@@ -241,16 +241,16 @@ export function LinkingConfigurationPage() {
                   value={sitemapUrl}
                   onChange={(e) => setSitemapUrl(e.target.value)}
                   placeholder="Enter your sitemap URL (e.g., https://example.com/sitemap.xml)"
-                  className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#22C55E] focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Using sitemap from your settings
                 </p>
               </div>
 
-              <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 flex gap-3">
-                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-blue-700 leading-relaxed">
+              <div className="rounded-lg bg-green-50 border border-green-100 p-3 flex gap-3">
+                <Info className="h-4 w-4 text-[#22C55E] mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-green-700 leading-relaxed">
                   We scan your sitemap URL (and any nested sitemaps) to find articles for linking.
                   This works best if you have a sitemap that is updated regularly.
                 </p>
@@ -285,7 +285,7 @@ export function LinkingConfigurationPage() {
                 <Button
                   onClick={handleGenerateSuggestions}
                   disabled={isGenerating || detectedLinks.length < 2}
-                  className="w-full bg-purple-600 text-white hover:bg-purple-700 rounded-lg py-5 text-sm font-medium transition-colors"
+                  className="w-full bg-[#22C55E] text-white hover:bg-[#16A34A] rounded-lg py-5 text-sm font-medium transition-colors"
                 >
                   {isGenerating ? (
                     <>
@@ -367,7 +367,7 @@ export function LinkingConfigurationPage() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline truncate block"
+                      className="text-xs text-[#22C55E] hover:text-[#16A34A] hover:underline truncate block"
                     >
                       {link.url}
                     </a>
@@ -385,8 +385,8 @@ export function LinkingConfigurationPage() {
         {linkSuggestions.length > 0 && (
           <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-6">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
-                <LinkIcon className="h-4 w-4 text-blue-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <LinkIcon className="h-4 w-4 text-[#22C55E]" />
               </div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Internal Link Suggestions
@@ -411,7 +411,7 @@ export function LinkingConfigurationPage() {
                           href={suggestion.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                          className="text-[#22C55E] hover:text-[#16A34A] hover:underline"
                         >
                           {suggestion.source_url}
                         </a>
@@ -421,12 +421,12 @@ export function LinkingConfigurationPage() {
                           href={suggestion.target_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                          className="text-[#22C55E] hover:text-[#16A34A] hover:underline"
                         >
                           {suggestion.target_url}
                         </a>
                       </td>
-                      <td className="px-6 py-4 text-blue-600 font-medium">
+                      <td className="px-6 py-4 text-[#22C55E] font-medium">
                         {suggestion.anchor_text}
                       </td>
                       <td className="px-6 py-4">

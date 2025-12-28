@@ -43,7 +43,7 @@ export default function ReportsPage() {
             <h1 className="text-2xl font-semibold text-[#1A1A1A]">Reports</h1>
             <p className="text-sm text-[#6B7280] mt-1">Access and download your SEO and performance reports</p>
           </div>
-          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+          <button className="px-4 py-2 text-sm font-medium text-white bg-[#22C55E] rounded-lg hover:bg-[#16A34A] transition-colors flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Generate New Report
           </button>
@@ -104,8 +104,8 @@ export default function ReportsPage() {
                       <tr key={report.id} className="hover:bg-[#F9FAFB] transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                              <FileText className="h-5 w-5 text-blue-600" />
+                            <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-[#22C55E]" />
                             </div>
                             <span className="text-sm font-medium text-[#1A1A1A]">{report.name}</span>
                           </div>
@@ -132,7 +132,7 @@ export default function ReportsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button className="text-blue-600 hover:text-blue-800 transition-colors p-2 rounded-lg hover:bg-blue-50">
+                          <button className="text-[#22C55E] hover:text-[#16A34A] transition-colors p-2 rounded-lg hover:bg-green-50">
                             <Download className="h-5 w-5" />
                           </button>
                         </td>

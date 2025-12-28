@@ -11,13 +11,13 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`/dashboard/settings?tab=gsc&error=${error}`, request.url)
+        new URL(`/dashboard/integrations?error=${error}`, request.url)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=missing_code", request.url)
+        new URL("/dashboard/integrations?error=missing_code", request.url)
       );
     }
 
@@ -25,14 +25,14 @@ export async function GET(request: NextRequest) {
     const { userId } = JSON.parse(Buffer.from(state, "base64").toString());
 
     const supabase = await createClient();
-    
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user || user.id !== userId) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=unauthorized", request.url)
+        new URL("/dashboard/integrations?error=unauthorized", request.url)
       );
     }
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=config_missing", request.url)
+        new URL("/dashboard/integrations?error=config_missing", request.url)
       );
     }
 
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       const errorData = await tokenResponse.json();
       console.error("Token exchange failed:", errorData);
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=token_exchange_failed", request.url)
+        new URL("/dashboard/integrations?error=token_exchange_failed", request.url)
       );
     }
 
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     if (!site) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=no_site", request.url)
+        new URL("/dashboard/integrations?error=no_site", request.url)
       );
     }
 
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
     if (dbError) {
       console.error("Failed to store GSC tokens:", dbError);
       return NextResponse.redirect(
-        new URL("/dashboard/settings?tab=gsc&error=db_error", request.url)
+        new URL("/dashboard/integrations?error=db_error", request.url)
       );
     }
 
@@ -117,12 +117,12 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.redirect(
-      new URL("/dashboard/settings?tab=gsc&success=true", request.url)
+      new URL("/dashboard/integrations?success=true&integration=gsc", request.url)
     );
   } catch (error) {
     console.error("Error in GSC callback:", error);
     return NextResponse.redirect(
-      new URL("/dashboard/settings?tab=gsc&error=unknown", request.url)
+      new URL("/dashboard/integrations?error=unknown", request.url)
     );
   }
 }

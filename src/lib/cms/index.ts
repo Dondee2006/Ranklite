@@ -1,8 +1,9 @@
 import { WordPressClient } from './wordpress';
 import { ShopifyClient } from './shopify';
 import { NotionClient } from './notion';
+import { WixService } from './wix';
 
-export type CMSType = 'wordpress' | 'shopify' | 'notion';
+export type CMSType = 'wordpress' | 'shopify' | 'notion' | 'wix';
 
 export interface CMSIntegration {
   id: string;
@@ -30,9 +31,15 @@ export function createCMSClient(integration: CMSIntegration) {
         accessToken: integration.access_token,
         databaseId: integration.settings.database_id as string,
       });
+    case 'wix':
+      return new WixService({
+        appId: integration.settings.appId as string,
+        appSecret: integration.settings.appSecret as string,
+        instanceId: integration.settings.instanceId as string,
+      });
     default:
       throw new Error(`Unsupported CMS type: ${integration.cms_type}`);
   }
 }
 
-export { WordPressClient, ShopifyClient, NotionClient };
+export { WordPressClient, ShopifyClient, NotionClient, WixService as WixClient };

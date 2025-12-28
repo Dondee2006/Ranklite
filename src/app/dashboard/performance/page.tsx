@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Loader2, 
-  TrendingUp, 
-  MousePointer2, 
-  Eye, 
-  BarChart3, 
-  ExternalLink,
+import {
   Search,
+  Loader2,
   ArrowUpRight,
-  ArrowDownRight,
-  Link2
+  Globe,
+  BarChart3,
+  Link2,
+  ExternalLink,
+  FileText,
+  TrendingUp,
+  MousePointer2,
+  Eye,
+  ArrowDownRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,10 +67,10 @@ export default function PerformancePage() {
     );
   }
 
-  const totalClicks = data?.gsc.reduce((sum, item) => sum + item.clicks, 0) || 0;
-  const totalImpressions = data?.gsc.reduce((sum, item) => sum + item.impressions, 0) || 0;
-  const avgPos = data?.gsc.length ? (data.gsc.reduce((sum, item) => sum + item.position, 0) / data.gsc.length).toFixed(1) : "0.0";
-  const avgCtr = data?.gsc.length ? ((totalClicks / totalImpressions) * 100).toFixed(2) : "0.00";
+  const totalClicks = data?.gsc?.reduce((sum, item) => sum + item.clicks, 0) || 0;
+  const totalImpressions = data?.gsc?.reduce((sum, item) => sum + item.impressions, 0) || 0;
+  const avgPos = data?.gsc?.length ? (data.gsc.reduce((sum, item) => sum + item.position, 0) / data.gsc.length).toFixed(1) : "0.0";
+  const avgCtr = data?.gsc?.length ? ((totalClicks / totalImpressions) * 100).toFixed(2) : "0.00";
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -84,27 +86,27 @@ export default function PerformancePage() {
       <div className="p-8 space-y-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard 
-            title="Total Clicks" 
-            value={totalClicks.toLocaleString()} 
+          <StatCard
+            title="Total Clicks"
+            value={totalClicks.toLocaleString()}
             icon={<MousePointer2 className="h-5 w-5" />}
             color="blue"
           />
-          <StatCard 
-            title="Total Impressions" 
-            value={totalImpressions.toLocaleString()} 
+          <StatCard
+            title="Total Impressions"
+            value={totalImpressions.toLocaleString()}
             icon={<Eye className="h-5 w-5" />}
             color="purple"
           />
-          <StatCard 
-            title="Avg. Position" 
-            value={avgPos} 
+          <StatCard
+            title="Avg. Position"
+            value={avgPos}
             icon={<TrendingUp className="h-5 w-5" />}
             color="green"
           />
-          <StatCard 
-            title="Avg. CTR" 
-            value={`${avgCtr}%`} 
+          <StatCard
+            title="Avg. CTR"
+            value={`${avgCtr}% `}
             icon={<BarChart3 className="h-5 w-5" />}
             color="orange"
           />
@@ -114,7 +116,7 @@ export default function PerformancePage() {
         <div className="rounded-xl border border-[#E5E5E5] bg-white shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-[#E5E5E5] bg-[#F9FAFB]">
             <h2 className="font-semibold text-[#1A1A1A] flex items-center gap-2">
-              <Search className="h-4 w-4 text-blue-600" />
+              <Search className="h-4 w-4 text-[#22C55E]" />
               Search Performance (Last 30 Days)
             </h2>
           </div>
@@ -130,7 +132,7 @@ export default function PerformancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5E5]">
-                {data?.gsc.length === 0 ? (
+                {!data?.gsc?.length ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-[#6B7280]">
                       No Search Console data available yet.
@@ -163,7 +165,7 @@ export default function PerformancePage() {
         <div className="rounded-xl border border-[#E5E5E5] bg-white shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-[#E5E5E5] bg-[#F9FAFB]">
             <h2 className="font-semibold text-[#1A1A1A] flex items-center gap-2">
-              <Link2 className="h-4 w-4 text-purple-600" />
+              <Link2 className="h-4 w-4 text-[#22C55E]" />
               Backlinks per Page Summary
             </h2>
           </div>
@@ -178,7 +180,7 @@ export default function PerformancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5E5]">
-                {data?.backlinks.length === 0 ? (
+                {!data?.backlinks?.length ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-[#6B7280]">
                       No backlink data available yet.
@@ -192,42 +194,40 @@ export default function PerformancePage() {
                         <p className="text-xs text-[#6B7280]">/{item.slug}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="font-bold text-blue-600">{item.count}</span>
+                        <span className="font-bold text-[#22C55E]">{item.count}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={cn(
                           "px-2 py-1 rounded-md text-xs font-bold",
-                          item.avgDR >= 50 ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                          item.avgDR >= 50 ? "bg-green-100 text-green-700" : "bg-green-50 text-[#22C55E]"
                         )}>
                           DR {item.avgDR}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <a 
-                          href={`${data?.siteUrl}/${item.slug}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800"
+                        <button
+                          onClick={() => window.open(`${data?.siteUrl}/${item.slug}`, '_blank')}
+                          className="text-[#22C55E] hover:text-[#16A34A] transition-colors p-2 rounded-lg hover:bg-green-50"
                         >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </td>
-                    </tr>
+                          <FileText className="h-5 w-5 text-[#22C55E]" />
+                        </button >
+                      </td >
+                    </tr >
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+              </tbody >
+            </table >
+          </div >
+        </div >
+      </div >
+    </div >
   );
 }
 
 function StatCard({ title, value, icon, color }: { title: string, value: string, icon: React.ReactNode, color: string }) {
   const colors: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-600",
-    purple: "bg-purple-50 text-purple-600",
+    blue: "bg-green-50 text-[#22C55E]",
+    purple: "bg-emerald-50 text-emerald-600",
     green: "bg-green-50 text-green-600",
     orange: "bg-orange-50 text-orange-600",
   };

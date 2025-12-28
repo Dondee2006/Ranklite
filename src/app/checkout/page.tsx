@@ -46,7 +46,7 @@ export default function CheckoutPage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto max-w-[1200px] px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-[#FF6B2C] hover:opacity-80 transition-opacity">
+            <Link href="/" className="flex items-center gap-2 text-[#22C55E] hover:opacity-80 transition-opacity">
               <ArrowLeft className="h-4 w-4" />
               <span className="text-sm font-medium">Back</span>
             </Link>
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
-              <span className="hidden text-lg font-bold text-[#FF6B2C]">Flutterwave</span>
+              <span className="hidden text-lg font-bold text-[#22C55E]">Flutterwave</span>
             </div>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function CheckoutPage() {
             <Card className="border-0 shadow-lg shadow-black/5">
               <div className="p-6 space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#FF6B2C] to-[#FF9B5C] flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#22C55E] to-[#10B981] flex items-center justify-center">
                     <User className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
                         placeholder="john@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="pl-10 h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                   </div>
@@ -117,7 +117,7 @@ export default function CheckoutPage() {
                         placeholder="John Doe"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="pl-10 h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="pl-10 h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                   </div>
@@ -134,7 +134,7 @@ export default function CheckoutPage() {
                         placeholder="+1 (555) 000-0000"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="pl-10 h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="pl-10 h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                   </div>
@@ -146,7 +146,7 @@ export default function CheckoutPage() {
             <Card className="border-0 shadow-lg shadow-black/5">
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#FF6B2C] to-[#FF9B5C] flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#22C55E] to-[#10B981] flex items-center justify-center">
                     <CreditCard className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
                         value={cardNumber}
                         onChange={(e) => setCardNumber(e.target.value)}
                         maxLength={19}
-                        className="pl-10 h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="pl-10 h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
                         value={expiryDate}
                         onChange={(e) => setExpiryDate(e.target.value)}
                         maxLength={7}
-                        className="h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -200,20 +200,20 @@ export default function CheckoutPage() {
                         value={cvv}
                         onChange={(e) => setCvv(e.target.value)}
                         maxLength={4}
-                        className="h-11 border-gray-200 focus:border-[#FF6B2C] focus:ring-[#FF6B2C]"
+                        className="h-11 border-gray-200 focus:border-[#22C55E] focus:ring-[#22C55E]"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-4">
+                <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 p-4">
                   <div className="flex gap-3">
-                    <Lock className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Lock className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="text-sm font-medium text-blue-900">
+                      <p className="text-sm font-medium text-green-900">
                         Your payment is secure
                       </p>
-                      <p className="text-xs text-blue-700">
+                      <p className="text-xs text-green-700">
                         This is a mockup. Add your Flutterwave API keys to enable real payments processing.
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#FF6B2C] to-[#FF9B5C] hover:from-[#FF5A1F] hover:to-[#FF8A4C] text-white shadow-lg shadow-orange-500/25 transition-all"
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#22C55E] to-[#10B981] hover:from-[#16A34A] hover:to-[#FF8A4C] text-white shadow-lg shadow-green-500/25 transition-all"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -256,9 +256,9 @@ export default function CheckoutPage() {
           {/* Right: Order Summary */}
           <div className="lg:sticky lg:top-24 h-fit">
             <Card className="border-0 shadow-lg shadow-black/5 overflow-hidden">
-              <div className="bg-gradient-to-br from-[#FF6B2C] to-[#FF9B5C] p-6 text-white">
+              <div className="bg-gradient-to-br from-[#22C55E] to-[#10B981] p-6 text-white">
                 <h3 className="text-lg font-semibold mb-1">Order Summary</h3>
-                <p className="text-sm text-orange-50">Review your purchase</p>
+                <p className="text-sm text-green-50">Review your purchase</p>
               </div>
 
               <div className="p-6 space-y-6">

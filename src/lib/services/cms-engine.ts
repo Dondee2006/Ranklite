@@ -1,5 +1,6 @@
 import { createCMSClient, CMSIntegration } from "@/lib/cms";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { LinkInventoryPool } from "./exchange/inventory-pool";
 
 export interface PublishResult {
     success: boolean;
@@ -55,6 +56,20 @@ export class CMSEngine {
             };
 
             const result = await (client as any).publishArticle(publishPayload);
+
+            // AUTO-INVENTORY: Add the published article to the link exchange inventory automatically
+            if (result.success && result.publishedUrl) {
+                const domain = new URL(result.publishedUrl).hostname;
+                await LinkInventoryPool.submitInventory(userId, article.site_id, [{
+                    page_url: result.publishedUrl,
+                    page_title: article.title,
+                    domain: domain,
+                    niche: article.category || "General",
+                    content_placement: "contextual",
+                    tier: 2, // Ranklite generated content is Tier 2 (Exchange Buffer)
+                    link_type: "dofollow",
+                }]);
+            }
 
             return {
                 success: true,

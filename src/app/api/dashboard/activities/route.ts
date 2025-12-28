@@ -23,7 +23,7 @@ export async function GET() {
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -35,9 +35,10 @@ export async function GET() {
       .order("updated_at", { ascending: false })
       .limit(10);
 
-    const { data: backlinks } = await supabase
-      .from("backlink_tasks")
-      .select("id, platform, status, updated_at, site_id")
+    const { data: exchangeLinks } = await supabase
+      .from("exchange_links")
+      .select("id, source_domain, status, updated_at, target_user_id")
+      .eq("target_user_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(10);
 
@@ -56,13 +57,13 @@ export async function GET() {
         cycle: "Content Creation",
         last_updated: new Date(article.updated_at).toLocaleDateString(),
       })),
-      ...(backlinks || []).map((backlink) => ({
-        id: backlink.id,
-        name: backlink.platform || "Backlink Task",
+      ...(exchangeLinks || []).map((link) => ({
+        id: link.id,
+        name: link.source_domain || "Link Request",
         type: "Backlink" as const,
-        status: backlink.status === "completed" ? "Verified" : backlink.status === "pending" ? "Pending" : "Planned",
-        cycle: "Link Building",
-        last_updated: new Date(backlink.updated_at).toLocaleDateString(),
+        status: link.status === "verified" ? "Verified" : (link.status === "pending" || link.status === "requested") ? "Pending" : "Placed",
+        cycle: "Authority Exchange",
+        last_updated: new Date(link.updated_at).toLocaleDateString(),
       })),
       ...(calendar || []).map((item) => ({
         id: item.id,

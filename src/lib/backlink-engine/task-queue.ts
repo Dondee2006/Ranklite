@@ -15,12 +15,12 @@ export async function createTasksForUser(
   description: string,
   articleId?: string
 ): Promise<{ created: number; skipped: number; blocked: number }> {
-    const { data: platforms } = await supabaseAdmin
-      .from("backlink_platforms")
-      .select("*")
-      .eq("automation_allowed", true)
-      .gte("domain_rating", 40)
-      .order("domain_rating", { ascending: false });
+  const { data: platforms } = await supabaseAdmin
+    .from("backlink_platforms")
+    .select("*")
+    .eq("automation_allowed", true)
+    .gte("domain_rating", 40)
+    .order("domain_rating", { ascending: false });
 
   if (!platforms?.length) {
     return { created: 0, skipped: 0, blocked: 0 };
@@ -190,13 +190,13 @@ export async function updateTaskStatus(
     .eq("id", taskId);
 }
 
-export async function scheduleRetry(task: BacklinkTask): Promise<void> {
+export async function scheduleRetry(task: BacklinkTask, lastError?: string): Promise<void> {
   const newAttemptCount = task.attempt_count + 1;
 
   if (newAttemptCount >= task.max_attempts) {
     await updateTaskStatus(task.id, "failed", {
       attempt_count: newAttemptCount,
-      error_message: "Max retry attempts exceeded",
+      error_message: lastError || "Max retry attempts exceeded",
     });
     return;
   }
@@ -210,6 +210,7 @@ export async function scheduleRetry(task: BacklinkTask): Promise<void> {
     next_attempt_at: nextAttempt.toISOString(),
     scheduled_for: nextAttempt.toISOString(),
     last_attempt_at: new Date().toISOString(),
+    error_message: lastError || task.error_message,
   });
 }
 

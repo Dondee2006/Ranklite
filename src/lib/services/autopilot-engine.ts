@@ -1,7 +1,9 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { ArticleEngine } from "@/lib/services/article-engine";
 import { CMSEngine } from "@/lib/services/cms-engine";
+import { CMSEngine } from "@/lib/services/cms-engine";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { ExchangeAutomationWorker } from "@/lib/services/exchange/automation-worker";
 
 export class AutopilotEngine {
   /**
@@ -48,7 +50,7 @@ export class AutopilotEngine {
         })
         .select()
         .single();
-      
+
       if (insertError) {
         throw new Error(`Failed to initialize settings for ${siteId}: ${insertError.message}`);
       }
@@ -194,6 +196,36 @@ export class AutopilotEngine {
 
           if (updateError) throw updateError;
           currentArticle = updated;
+
+          // --- AUTOMATION HOOK: Attempt Layer 1 Exchange Injection ---
+          try {
+            const exchangeRes = await ExchangeAutomationWorker.processArticleForExchange({
+              userId: site.user_id,
+              content: currentArticle.html_content || currentArticle.content,
+              niche: "General", // TODO: Get from site settings
+              contentType: "html",
+              siteId: site.id
+            });
+
+            if (exchangeRes.success && exchangeRes.injectedContent) {
+              console.log(`[Autopilot] Injected exchange link: ${exchangeRes.linkId}`);
+              // Update article with injected content
+              const { data: injectedArticle } = await supabaseAdmin
+                .from("articles")
+                .update({
+                  html_content: exchangeRes.injectedContent,
+                  updated_at: new Date().toISOString()
+                })
+                .eq("id", currentArticle.id)
+                .select()
+                .single();
+
+              if (injectedArticle) currentArticle = injectedArticle;
+            }
+          } catch (exErr) {
+            console.warn("[Autopilot] Exchange injection skipped:", exErr);
+          }
+          // -----------------------------------------------------------
         }
 
         // Publishing

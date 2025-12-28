@@ -4,6 +4,7 @@ import { Send, Twitter, Linkedin, Github } from "lucide-react";
 const productLinks = [
   { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#howitworks" },
+  { label: "Backlink Exchange", href: "/dashboard/backlink-exchange" },
   { label: "Pricing", href: "/#pricing" },
   { label: "Blog", href: "/blog" },
   { label: "Integrations", href: "/integrations" },
@@ -52,7 +53,7 @@ export default function Footer() {
               <RankliteLogo />
             </Link>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              AI-powered content that ranks. Grow your organic traffic on autopilot.
+              Build Organic Traffic On Autopilot
             </p>
             <div className="flex items-center gap-3">
               {[

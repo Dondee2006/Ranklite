@@ -41,7 +41,7 @@ export default function BillingPage() {
   const [toastMessage, setToastMessage] = useState("");
 
   const handleUpgradeClick = () => {
-    window.location.href = "https://whop.com/checkout/plan_VU6iG0GPMen3j";
+    window.location.href = "https://whop.com/checkout/plan_hwMsQBSgnZtPO";
   };
 
   const getStatusBadge = (isActive: boolean) => {
@@ -157,10 +157,10 @@ export default function BillingPage() {
                       </button>
                     )}
                   </div>
-                  <div className="mt-4 p-3 rounded bg-blue-50 border border-blue-100">
-                    <div className="flex gap-2">
-                      <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                  <div className="mt-4 p-3 rounded bg-green-50 border border-green-100">
+                    <div className="flex gap-2.5">
+                      <Info className="h-4 w-4 text-[#22C55E] flex-shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-green-700 leading-relaxed">
                         Ranklite automatically adjusts publishing and link
                         building to keep your SEO natural and penalty-safe.
                       </p>

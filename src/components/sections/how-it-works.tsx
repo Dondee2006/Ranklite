@@ -10,14 +10,14 @@ const steps = [
   },
   {
     number: "02",
-    title: "Every post gets promoted with backlinks",
-    description: "Each article is supported with automated, dofollow backlinks from real websites.",
-    subtext: "Not random links. Not exchanges. Backlinks tied directly to ranking pages.",
+    title: "Earn & Spend Credits for Backlinks",
+    description: "Your site automatically links to other high-quality partners to earn credits. Spend credits to get relevant backlinks.",
+    subtext: "100% Automated. High Authority. Community Driven.",
   },
   {
     number: "03",
     title: "QA, indexing & performance tracking",
-    description: "We verify links, check indexing, flag failures, and track quality — so you're never guessing if SEO &quot;worked&quot;.",
+    description: "We verify links, check indexing, flag failures, and track quality — so you're never guessing if SEO \"worked\".",
     subtext: "SEO with receipts.",
   },
 ];
@@ -50,10 +50,10 @@ export default function HowItWorks() {
               Leave SEO to us — we generate high-performing content daily to help you outrank competitors effortlessly.
             </p>
             <a
-              href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+              href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
               className="group hidden items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30 lg:flex"
             >
-              Start Generating Backlinks
+              Start Building Traffic
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </a>
           </div>
@@ -86,10 +86,10 @@ export default function HowItWorks() {
 
         <div className="mt-10 flex justify-center lg:hidden">
           <a
-            href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+            href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
             className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20"
           >
-            Start Generating Backlinks
+            Start Building Traffic
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>

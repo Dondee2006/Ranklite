@@ -4,11 +4,12 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { ArticleEngine } from "@/lib/services/article-engine";
 import { CMSEngine } from "@/lib/services/cms-engine";
 import { getUserPlanAndUsage } from "@/lib/usage-limits";
+import { ExchangeAutomationWorker } from "@/lib/services/exchange/automation-worker";
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get("authorization");
   const isCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-  
+
   let user: any = null;
   let targetSites: any[] = [];
 
@@ -84,8 +85,8 @@ async function processSiteAutopilot(site: any) {
 
   const now = new Date();
   const hourUtc = now.getUTCHours();
-  const startHour = settings.publish_time_start ?? 7;
-  const endHour = settings.publish_time_end ?? 9;
+  const startHour = settings.publish_time_start ?? 0;
+  const endHour = settings.publish_time_end ?? 23;
 
   const withinWindow = startHour <= endHour
     ? hourUtc >= startHour && hourUtc <= endHour
@@ -133,41 +134,41 @@ async function processSiteAutopilot(site: any) {
   const alreadyPublished = publishedToday?.length || 0;
   const targetCount = Math.max(settings.articles_per_day || 1, 1);
   const currentCount = (candidates?.length || 0) + alreadyPublished;
-  
-    if (withinWindow && currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
-      const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
-      for (let i = 0; i < seedsToCreate; i++) {
-        const articleType = pickArticleType(settings.preferred_article_types);
-        const keyword = `${site.name} ${articleType} guide ${Math.floor(Math.random() * 1000)}`;
-        const title = `The Ultimate Guide to ${keyword}`;
 
-        // Assign a random time within the window for the seeds
-        const randomHour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
-        const randomMinute = Math.floor(Math.random() * 60);
-        const scheduledTime = `${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}:00`;
+  if (withinWindow && currentCount < targetCount && postsRemaining > (candidates?.length || 0)) {
+    const seedsToCreate = Math.min(targetCount - currentCount, postsRemaining - (candidates?.length || 0));
+    for (let i = 0; i < seedsToCreate; i++) {
+      const articleType = pickArticleType(settings.preferred_article_types);
+      const keyword = `${site.name} ${articleType} guide ${Math.floor(Math.random() * 1000)}`;
+      const title = `The Ultimate Guide to ${keyword}`;
 
-        const { data: inserted } = await supabaseAdmin
-          .from("articles")
-          .insert({
-            site_id: site.id,
-            user_id: site.user_id,
-            title,
-            slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''),
-            keyword,
-            article_type: articleType,
-            status: "planned",
-            scheduled_date: today,
-            scheduled_time: scheduledTime,
-            volume: 500,
-            difficulty: 20
-          })
-          .select()
-          .single();
+      // Assign a random time within the window for the seeds
+      const randomHour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
+      const randomMinute = Math.floor(Math.random() * 60);
+      const scheduledTime = `${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}:00`;
 
-        // We don't push to candidates anymore so they are processed on their specific scheduled time
-        // in future cron runs, avoiding bulk generation and wasting credits.
-      }
+      const { data: inserted } = await supabaseAdmin
+        .from("articles")
+        .insert({
+          site_id: site.id,
+          user_id: site.user_id,
+          title,
+          slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, ''),
+          keyword,
+          article_type: articleType,
+          status: "planned",
+          scheduled_date: today,
+          scheduled_time: scheduledTime,
+          volume: 500,
+          difficulty: 20
+        })
+        .select()
+        .single();
+
+      // We don't push to candidates anymore so they are processed on their specific scheduled time
+      // in future cron runs, avoiding bulk generation and wasting credits.
     }
+  }
 
   if (!candidates || candidates.length === 0) {
     return { success: false, message: "No candidates" };
@@ -223,6 +224,40 @@ async function processSiteAutopilot(site: any) {
 
         if (updateError) throw updateError;
         currentArticle = updated;
+
+        // --- AUTOMATION HOOK: Attempt Layer 1 Exchange Injection ---
+        try {
+          // Fetch niche from site settings if possible
+          const { data: siteProfile } = await supabaseAdmin.from('sites').select('niche').eq('id', site.id).single();
+          const niche = siteProfile?.niche || "General";
+
+          const exchangeRes = await ExchangeAutomationWorker.processArticleForExchange({
+            userId: site.user_id,
+            content: currentArticle.html_content || currentArticle.content,
+            niche: niche,
+            contentType: "html",
+            siteId: site.id
+          });
+
+          if (exchangeRes.success && exchangeRes.injectedContent) {
+            console.log(`[Autopilot] Injected exchange link: ${exchangeRes.linkId}`);
+            const { data: injectedArticle } = await supabaseAdmin
+              .from("articles")
+              .update({
+                html_content: exchangeRes.injectedContent,
+                updated_at: new Date().toISOString()
+              })
+              .eq("id", currentArticle.id)
+              .select()
+              .single();
+
+            if (injectedArticle) currentArticle = injectedArticle;
+          }
+        } catch (exErr) {
+          console.warn("[Autopilot] Exchange injection skipped:", exErr);
+        }
+        // -----------------------------------------------------------
+
       }
 
       const publishResult = await CMSEngine.publishArticleToCMS(site.user_id, currentArticle);
@@ -231,7 +266,7 @@ async function processSiteAutopilot(site: any) {
         const now = new Date().toISOString();
         const cmsExports = currentArticle.cms_exports || {};
         const platform = "notion"; // Default for now, but should ideally be from settings
-        
+
         await supabaseAdmin
           .from("articles")
           .update({

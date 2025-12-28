@@ -34,7 +34,7 @@ export function GoogleSignIn({ text = "Sign in with Google" }: { text?: string }
             className="w-full h-12 flex items-center justify-center gap-3 px-4 py-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-all font-semibold text-gray-700 disabled:opacity-50 shadow-sm"
         >
             {isGoogleLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#22C55E]" />
             ) : (
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path

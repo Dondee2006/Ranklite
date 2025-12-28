@@ -86,7 +86,7 @@ export default function Pricing() {
 
               {/* CTA Button */}
               <a
-                href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
+                href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
               >
                 {plan.cta}

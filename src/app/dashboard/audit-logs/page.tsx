@@ -41,7 +41,7 @@ export default function AuditLogsPage() {
     }
   }
 
-  const filteredLogs = logs.filter(log => 
+  const filteredLogs = logs.filter(log =>
     log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
     log.resource_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     log.user?.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,7 +62,7 @@ export default function AuditLogsPage() {
               placeholder="Search logs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 text-sm border border-[#E5E5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+              className="pl-10 pr-4 py-2 text-sm border border-[#E5E5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22C55E]/20 focus:border-[#22C55E] w-64"
             />
           </div>
         </div>
@@ -114,8 +114,8 @@ export default function AuditLogsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
-                              <User className="h-4 w-4 text-blue-600" />
+                            <div className="h-8 w-8 rounded-full bg-green-50 flex items-center justify-center">
+                              <User className="h-4 w-4 text-[#22C55E]" />
                             </div>
                             <div className="text-sm">
                               <p className="font-medium text-[#1A1A1A]">{log.user?.full_name || "Unknown User"}</p>
@@ -127,8 +127,8 @@ export default function AuditLogsPage() {
                           <span className={cn(
                             "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
                             log.action.includes("delete") ? "bg-red-50 text-red-700" :
-                            log.action.includes("create") ? "bg-green-50 text-green-700" :
-                            "bg-blue-50 text-blue-700"
+                              log.action.includes("create") ? "bg-green-50 text-green-700" :
+                                "bg-green-50 text-[#22C55E]"
                           )}>
                             <Activity className="h-3 w-3 mr-1.5" />
                             {log.action.replace(/_/g, " ")}
@@ -141,9 +141,9 @@ export default function AuditLogsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button 
+                          <button
                             onClick={() => setSelectedLog(log)}
-                            className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                            className="text-xs font-medium text-[#22C55E] hover:text-[#16A34A]"
                           >
                             View Metadata
                           </button>
@@ -163,7 +163,7 @@ export default function AuditLogsPage() {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 border-b border-[#E5E5E5] flex items-center justify-between">
               <h3 className="font-semibold text-[#1A1A1A]">Event Metadata</h3>
-              <button 
+              <button
                 onClick={() => setSelectedLog(null)}
                 className="text-[#6B7280] hover:text-[#1A1A1A]"
               >
@@ -176,7 +176,7 @@ export default function AuditLogsPage() {
               </div>
             </div>
             <div className="px-6 py-4 bg-[#F9FAFB] border-t border-[#E5E5E5] flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedLog(null)}
                 className="px-4 py-2 bg-white border border-[#E5E5E5] rounded-lg text-sm font-medium hover:bg-gray-50"
               >

@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ShieldCheck, 
-  Zap, 
-  Link2, 
-  Globe, 
-  TrendingUp, 
-  CheckCircle2, 
-  AlertCircle, 
-  Loader2, 
-  Plus, 
+import {
+  ShieldCheck,
+  Zap,
+  Link2,
+  Globe,
+  TrendingUp,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Plus,
   ExternalLink,
   Lock,
   ArrowRight,
@@ -59,39 +59,28 @@ export default function BacklinkExchangePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [sites, setSites] = useState<Site[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  const [joining, setJoining] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [savingPrefs, setSavingPrefs] = useState(false);
-  const [formData, setFormData] = useState({
-    site_id: "",
-    verification_method: "meta_tag",
-    niche: "Technology"
-  });
+  const [hasIntegration, setHasIntegration] = useState(false);
 
-  const [prefs, setPrefs] = useState({
-    min_dr_preference: 0,
-    min_traffic_preference: 0,
-    niche_preference: [] as string[]
-  });
+  // ... (existing state)
 
   const loadData = async () => {
     try {
-      const [statsRes, sitesRes] = await Promise.all([
+      const [statsRes, sitesRes, integrationsRes] = await Promise.all([
         fetch("/api/backlinks/exchange/stats"),
-        fetch("/api/sites")
+        fetch("/api/sites"),
+        fetch("/api/cms/integrations") // Check for active integrations
       ]);
-      
+
       const statsData = await statsRes.json();
       const sitesData = await sitesRes.json();
-      
+      const integrationsData = await integrationsRes.json();
+
       setParticipant(statsData.participant);
       setInboundLinks(statsData.inboundLinks || []);
       setOutboundLinks(statsData.outboundLinks || []);
       setTransactions(statsData.transactions || []);
       setStats(statsData.stats);
-      
+
       // Handle both { sites: [...] } and { site: {...} } responses
       if (sitesData.sites) {
         setSites(sitesData.sites);
@@ -99,6 +88,13 @@ export default function BacklinkExchangePage() {
         setSites([sitesData.site]);
       } else {
         setSites([]);
+      }
+
+      // Check integration status
+      if (integrationsData.integrations && integrationsData.integrations.length > 0) {
+        setHasIntegration(true);
+      } else {
+        setHasIntegration(false);
       }
 
       setIsAdmin(statsData.is_super_admin || false);
@@ -117,76 +113,18 @@ export default function BacklinkExchangePage() {
     }
   };
 
-  const handleUpdatePrefs = async () => {
-    if (!participant) return;
-    setSavingPrefs(true);
-    try {
-      const res = await fetch("/api/backlinks/exchange/preferences", {
-        method: "POST",
-        body: JSON.stringify({ 
-          participant_id: participant.id,
-          ...prefs
-        })
-      });
-      if (res.ok) {
-        alert("Preferences updated!");
-      }
-    } catch (error) {
-      alert("Error updating preferences");
-    } finally {
-      setSavingPrefs(false);
-    }
-  };
+  // ... (handlers)
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const handleJoin = async () => {
-    setJoining(true);
-    try {
-      const res = await fetch("/api/backlinks/exchange/join", {
-        method: "POST",
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        await loadData();
-      } else {
-        alert(data.error || "Failed to join network");
-      }
-    } catch (error) {
-      alert("Error joining network");
-    } finally {
-      setJoining(false);
-    }
-  };
-
-  const handleVerify = async () => {
-    if (!participant) return;
-    setVerifying(true);
-    try {
-      const res = await fetch("/api/backlinks/exchange/verify", {
-        method: "POST",
-        body: JSON.stringify({ participant_id: participant.id })
-      });
-      const data = await res.json();
-      if (data.success) {
-        await loadData();
-      } else {
-        alert(data.message || "Verification failed");
-      }
-    } catch (error) {
-      alert("Error verifying site");
-    } finally {
-      setVerifying(false);
-    }
-  };
+  // ... (handleJoin, handleVerify)
 
   if (loading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
       </div>
     );
   }
@@ -195,7 +133,7 @@ export default function BacklinkExchangePage() {
     <div className="min-h-screen bg-[#FAFAFA] p-4 sm:p-8">
       <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A] flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-[#1A1A1A] flex items-center gap-2" style={{ fontFamily: "var(--font-display)" }}>
             <Trophy className="h-6 w-6 text-yellow-500" />
             Backlink Exchange
           </h1>
@@ -204,7 +142,7 @@ export default function BacklinkExchangePage() {
         {participant && (
           <div className="flex items-center gap-4">
             {isAdmin && (
-              <Link 
+              <Link
                 href="/dashboard/backlink-exchange/admin"
                 className="text-xs bg-gray-100 hover:bg-gray-200 text-[#1A1A1A] px-3 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
               >
@@ -219,10 +157,10 @@ export default function BacklinkExchangePage() {
           </div>
         )}
         {!participant && (
-            <button 
-              onClick={() => document.getElementById('join-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-[#2563EB] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#1E40AF] transition-all flex items-center gap-2 shadow-md"
-            >
+          <button
+            onClick={() => document.getElementById('join-form')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#16A34A] transition-all flex items-center gap-2 shadow-md shadow-green-500/10"
+          >
             <Plus className="h-4 w-4" />
             Join Network
           </button>
@@ -231,11 +169,35 @@ export default function BacklinkExchangePage() {
 
       {participant ? (
         <div className="space-y-6">
+
+          {/* Warning Banner */}
+          {!hasIntegration && (
+            <div className="bg-[#FFF4ED] border border-[#FFDCCB] rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="bg-[#FF8A4C]/10 rounded-full p-2 mt-1">
+                  <AlertCircle className="h-5 w-5 text-[#FF8A4C]" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#1A1A1A] flex items-center gap-2">
+                    Website integration required
+                    <span className="text-xs font-normal text-[#6B7280]">• Backlink Exchange will be disabled and you won't receive backlinks from other websites until you integrate your website</span>
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/integrations"
+                className="bg-[#FF8A4C]/10 text-[#FF8A4C] border border-[#FF8A4C]/20 px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#FF8A4C]/20 transition-colors whitespace-nowrap"
+              >
+                Setup Integration
+              </Link>
+            </div>
+          )}
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-6 rounded-xl border border-[#E5E5E5] shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                <div className="h-10 w-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
                   <Zap className="h-5 w-5" />
                 </div>
                 <div>
@@ -268,7 +230,7 @@ export default function BacklinkExchangePage() {
             </div>
             <div className="bg-white p-6 rounded-xl border border-[#E5E5E5] shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
+                <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center" title="Site Traffic">
                   <Globe className="h-5 w-5" />
                 </div>
                 <div>
@@ -282,36 +244,36 @@ export default function BacklinkExchangePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Preferences Column */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm p-6">
+              <div className="mt-0 rounded-xl border border-green-200 bg-green-50 p-6">
                 <h3 className="font-semibold text-[#1A1A1A] mb-4 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-blue-600" />
+                  <ShieldCheck className="h-4 w-4 text-[#22C55E]" />
                   Link Preferences
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-medium text-[#6B7280] uppercase mb-1.5">Minimum DR</label>
-                    <input 
+                    <input
                       type="number"
                       className="w-full bg-[#F9FAFB] border border-[#E5E5E5] rounded-lg p-2 text-sm"
                       value={prefs.min_dr_preference}
-                      onChange={(e) => setPrefs({...prefs, min_dr_preference: parseInt(e.target.value)})}
+                      onChange={(e) => setPrefs({ ...prefs, min_dr_preference: parseInt(e.target.value) })}
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[#6B7280] uppercase mb-1.5">Min Monthly Traffic</label>
-                    <input 
+                    <input
                       type="number"
                       className="w-full bg-[#F9FAFB] border border-[#E5E5E5] rounded-lg p-2 text-sm"
                       value={prefs.min_traffic_preference}
-                      onChange={(e) => setPrefs({...prefs, min_traffic_preference: parseInt(e.target.value)})}
+                      onChange={(e) => setPrefs({ ...prefs, min_traffic_preference: parseInt(e.target.value) })}
                     />
                   </div>
-                  <button 
+                  <button
                     onClick={handleUpdatePrefs}
                     disabled={savingPrefs}
                     className="w-full bg-[#1A1A1A] text-white py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors flex items-center justify-center gap-2"
                   >
-                    {savingPrefs && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {savingPrefs && <Loader2 className="h-4 w-4 animate-spin text-[#22C55E]" />}
                     Save Preferences
                   </button>
                 </div>
@@ -347,47 +309,16 @@ export default function BacklinkExchangePage() {
 
             {/* Links Tables Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Verification Warning */}
-              {participant.verification_status !== 'verified' && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex gap-4">
-                    <div className="h-12 w-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center shrink-0">
-                      <ShieldCheck className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-yellow-800">Verify Website Ownership</h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        {participant.verification_method === 'meta_tag' ? (
-                          <>Add <code>&lt;meta name="ranklite-verification" content="{participant.verification_token}"&gt;</code> to your head.</>
-                        ) : participant.verification_method === 'dns_record' ? (
-                          <>Add TXT record <code>ranklite-verification={participant.verification_token}</code> to your DNS.</>
-                        ) : (
-                          <>Connect your site via CMS settings.</>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={handleVerify}
-                    disabled={verifying}
-                    className="bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-yellow-700 transition-all flex items-center gap-2 shrink-0 disabled:opacity-50"
-                  >
-                    {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    Verify Now
-                  </button>
-                </div>
-              )}
-
               {/* Links Tables */}
               <div className="space-y-6">
                 {/* Inbound Links */}
                 <div className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-[#E5E5E5] flex items-center justify-between">
                     <h3 className="font-semibold text-[#1A1A1A] flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-blue-600" />
+                      <Zap className="h-4 w-4 text-[#22C55E]" />
                       Links You Received
                     </h3>
-                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{inboundLinks.length} Links</span>
+                    <span className="text-xs font-medium text-[#22C55E] bg-green-50 px-2 py-1 rounded-full">{inboundLinks.length} Links</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -412,7 +343,7 @@ export default function BacklinkExchangePage() {
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm font-medium text-[#1A1A1A] truncate max-w-[150px]">{link.source?.site.name || 'Partner Site'}</span>
-                                  <a href={link.linking_url} target="_blank" className="text-blue-500"><ExternalLink className="h-3 w-3" /></a>
+                                  <a href={link.linking_url} target="_blank" className="text-[#22C55E]"><ExternalLink className="h-3 w-3" /></a>
                                 </div>
                               </td>
                               <td className="px-6 py-4 text-sm text-[#6B7280]">{link.anchor_text}</td>
@@ -459,7 +390,7 @@ export default function BacklinkExchangePage() {
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm font-medium text-[#1A1A1A] truncate max-w-[150px]">{link.target?.site.name}</span>
-                                  <a href={link.target_url} target="_blank" className="text-blue-500"><ExternalLink className="h-3 w-3" /></a>
+                                  <a href={link.target_url} target="_blank" className="text-[#22C55E]"><ExternalLink className="h-3 w-3" /></a>
                                 </div>
                               </td>
                               <td className="px-6 py-4 text-sm font-bold text-green-600">+{link.credit_value || 1.0}</td>
@@ -482,7 +413,7 @@ export default function BacklinkExchangePage() {
           <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xl overflow-hidden">
             <div className="p-8 md:p-12">
               <div className="max-w-2xl mx-auto text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-[#22C55E] text-xs font-bold uppercase tracking-wider mb-4">
                   <Zap className="h-3 w-3" />
                   Now Available
                 </div>
@@ -504,7 +435,7 @@ export default function BacklinkExchangePage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-green-50 text-[#22C55E] flex items-center justify-center shrink-0">
                       <TrendingUp className="h-6 w-6" />
                     </div>
                     <div>
@@ -513,7 +444,7 @@ export default function BacklinkExchangePage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                       <Lock className="h-6 w-6" />
                     </div>
                     <div>
@@ -526,10 +457,10 @@ export default function BacklinkExchangePage() {
                 <div className="bg-[#F9FAFB] rounded-xl border border-[#E5E5E5] p-6 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Select Your Site</label>
-                    <select 
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
+                    <select
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500/10 transition-all text-sm"
                       value={formData.site_id}
-                      onChange={(e) => setFormData({...formData, site_id: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, site_id: e.target.value })}
                     >
                       <option value="">Select a site...</option>
                       {sites.map(site => (
@@ -541,10 +472,10 @@ export default function BacklinkExchangePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Verification Method</label>
-                    <select 
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
+                    <select
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500/10 transition-all text-sm"
                       value={formData.verification_method}
-                      onChange={(e) => setFormData({...formData, verification_method: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, verification_method: e.target.value })}
                     >
                       <option value="meta_tag">Meta Tag (Recommended)</option>
                       <option value="dns_record">DNS Record</option>
@@ -553,10 +484,10 @@ export default function BacklinkExchangePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Your Niche</label>
-                    <select 
-                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
+                    <select
+                      className="w-full bg-white border border-[#E5E5E5] rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-[#22C55E]/10 focus:border-[#22C55E] transition-all text-sm"
                       value={formData.niche}
-                      onChange={(e) => setFormData({...formData, niche: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
                     >
                       <option value="Technology">Technology</option>
                       <option value="SaaS">SaaS</option>
@@ -565,11 +496,11 @@ export default function BacklinkExchangePage() {
                       <option value="Health">Health</option>
                     </select>
                   </div>
-                    <button 
-                      onClick={handleJoin}
-                      disabled={joining || !formData.site_id}
-                      className="w-full bg-[#2563EB] text-white py-3 rounded-xl font-bold hover:bg-[#1E40AF] transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50"
-                    >
+                  <button
+                    onClick={handleJoin}
+                    disabled={joining || !formData.site_id}
+                    className="w-full bg-[#22C55E] text-white py-3 rounded-xl font-bold hover:bg-[#16A34A] transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 disabled:opacity-50"
+                  >
                     {joining ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Eligibility & Join"}
                     <ArrowRight className="h-5 w-5" />
                   </button>

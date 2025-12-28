@@ -2,6 +2,7 @@ import { requesty } from "@/lib/ai";
 import { generateText } from "ai";
 import { marked } from "marked";
 import { generateAndUploadImage, ImageStyle } from "@/lib/image-gen";
+import { ExchangeAutomationWorker } from "./exchange/automation-worker";
 
 export interface ArticleEngineOptions {
     site: any;
@@ -31,15 +32,31 @@ export class ArticleEngine {
             youtubeVideoId
         );
 
+        // 3.5. Automated Authority Exchange Injection
+        let finalContent = content;
+        if (settings?.auto_exchange_enabled) {
+            const automationResult = await ExchangeAutomationWorker.processArticleForExchange({
+                userId: article.user_id,
+                content: content,
+                niche: site.niche || "General",
+                contentType: "markdown", // content is generated in markdown
+                siteId: site.id
+            });
+
+            if (automationResult.success && automationResult.injectedContent) {
+                finalContent = automationResult.injectedContent;
+            }
+        }
+
         // 4. Links & Images
         const domain = site.url ? new URL(site.url.startsWith('http') ? site.url : `https://${site.url}`).hostname : "";
-        const internalLinks = this.detectInternalLinks(content, existingArticles || [], domain, settings?.internal_links);
+        const internalLinks = this.detectInternalLinks(finalContent, existingArticles || [], domain, settings?.internal_links);
         const externalLinks = this.generateExternalLinks(article.keyword);
         const images = await this.generateImageSet(article.title, article.keyword, settings);
 
         // 5. Formats
-        const htmlContent = this.generateHTML(content, article.title, images, internalLinks, externalLinks, settings);
-        const markdownContent = this.generateMarkdown(content, article.title, images, internalLinks, externalLinks);
+        const htmlContent = this.generateHTML(finalContent, article.title, images, internalLinks, externalLinks, settings);
+        const markdownContent = this.generateMarkdown(finalContent, article.title, images, internalLinks, externalLinks);
         const metaDescription = await this.generateMetaDescription(article.keyword, article.title, site);
         const slug = article.slug || this.generateSlug(article.title);
 

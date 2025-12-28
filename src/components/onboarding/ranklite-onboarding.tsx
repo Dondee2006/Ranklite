@@ -65,9 +65,9 @@ export function RankliteOnboarding() {
   const testConnection = async () => {
     setTestingConnection(true);
     setConnectionStatus("idle");
-    
+
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     setConnectionStatus("success");
     setTestingConnection(false);
   };
@@ -87,7 +87,7 @@ export function RankliteOnboarding() {
   const handleComplete = async () => {
     setLoading(true);
     setError("");
-    
+
     try {
       const response = await fetch("/api/onboarding/seo-cycle", {
         method: "POST",
@@ -110,7 +110,7 @@ export function RankliteOnboarding() {
       }
 
       setCurrentStep(5);
-      
+
       setTimeout(() => {
         router.push("/dashboard/overview");
         router.refresh();
@@ -123,8 +123,8 @@ export function RankliteOnboarding() {
   };
 
   const renderProgressIndicator = () => {
-    const steps = ["Connect Website", "SEO Cycle", "Integrations"];
-    
+    const steps = ["Connect Website", "SEO Strategy", "Integrations"];
+
     return (
       <div className="flex items-center justify-center gap-3 pb-8">
         {steps.map((label, index) => {
@@ -179,7 +179,7 @@ export function RankliteOnboarding() {
         Welcome to Ranklite
       </h1>
       <p className="mb-8 max-w-lg text-center text-lg text-gray-600">
-        Set up your first automated SEO cycle in 5 minutes
+        Set up your first automated SEO strategy in 5 minutes
       </p>
       <div className="grid max-w-2xl grid-cols-3 gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
         <div className="text-center">
@@ -193,7 +193,7 @@ export function RankliteOnboarding() {
         </div>
         <div className="text-center">
           <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50">
               <span className="text-2xl">⚙️</span>
             </div>
           </div>
@@ -202,7 +202,7 @@ export function RankliteOnboarding() {
         </div>
         <div className="text-center">
           <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50">
               <span className="text-2xl">🚀</span>
             </div>
           </div>
@@ -254,7 +254,7 @@ export function RankliteOnboarding() {
               >
                 {testingConnection ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#22C55E]" />
                     Testing...
                   </>
                 ) : (
@@ -300,12 +300,12 @@ export function RankliteOnboarding() {
           </div>
 
           {formData.cmsType && (
-            <div className="rounded-xl bg-blue-50 p-4">
+            <div className="rounded-xl bg-green-50 p-4">
               <div className="flex gap-3">
-                <div className="text-blue-600">ℹ️</div>
+                <div className="text-green-600">ℹ️</div>
                 <div className="flex-1">
-                  <div className="font-semibold text-blue-900">Setup guide available</div>
-                  <div className="mt-1 text-sm text-blue-700">
+                  <div className="font-semibold text-green-900">Setup guide available</div>
+                  <div className="mt-1 text-sm text-green-700">
                     We&apos;ll guide you through connecting {CMS_TYPES.find(c => c.id === formData.cmsType)?.name} after configuration.
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export function RankliteOnboarding() {
     <div className="flex flex-1 flex-col px-8 py-12">
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-8 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">Configure SEO Cycle</h2>
+          <h2 className="mb-3 text-3xl font-bold text-gray-900">Configure SEO Strategy</h2>
           <p className="text-gray-600">
             Set your automation preferences and quality standards
           </p>
@@ -330,7 +330,7 @@ export function RankliteOnboarding() {
         <div className="space-y-6">
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
             <h3 className="mb-6 text-lg font-bold text-gray-900">Content Generation</h3>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="mb-3 block text-sm font-semibold text-gray-700">
@@ -371,7 +371,7 @@ export function RankliteOnboarding() {
 
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
             <h3 className="mb-6 text-lg font-bold text-gray-900">Quality Standards</h3>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="mb-3 block text-sm font-semibold text-gray-700">
@@ -436,7 +436,7 @@ export function RankliteOnboarding() {
         <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
           {INTEGRATIONS.map((integration) => {
             const isSelected = formData.selectedIntegrations.includes(integration.id);
-            
+
             return (
               <button
                 key={integration.id}
@@ -469,7 +469,7 @@ export function RankliteOnboarding() {
             );
           })}
 
-          <div className="mt-6 rounded-xl bg-blue-50 p-4 text-sm text-blue-800">
+          <div className="mt-6 rounded-xl bg-green-50 p-4 text-sm text-green-800">
             <strong>Note:</strong> You can skip this step and configure integrations later in your dashboard.
           </div>
         </div>
@@ -481,7 +481,7 @@ export function RankliteOnboarding() {
     <div className="flex flex-1 flex-col px-8 py-12">
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-8 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">First Cycle Summary</h2>
+          <h2 className="mb-3 text-3xl font-bold text-gray-900">First Strategy Summary</h2>
           <p className="text-gray-600">
             Review your automated SEO cycle configuration
           </p>
@@ -489,14 +489,14 @@ export function RankliteOnboarding() {
 
         <div className="space-y-6">
           <div className="rounded-2xl border border-gray-200 bg-white shadow-xl">
-            <div className="border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50 p-6">
+            <div className="border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#22C55E]">
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-600">What Ranklite will do automatically:</div>
-                  <div className="text-lg font-bold text-gray-900">Your SEO Cycle</div>
+                  <div className="text-lg font-bold text-gray-900">Your SEO Strategy</div>
                 </div>
               </div>
             </div>
@@ -522,7 +522,7 @@ export function RankliteOnboarding() {
                           Auto-detected
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                          <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
                             {formData.backlinksPerPost} links
                           </span>
                         </td>
@@ -545,17 +545,17 @@ export function RankliteOnboarding() {
               <div className="text-sm font-medium text-green-700">Posts/Month</div>
               <div className="mt-1 text-xs text-green-600">Generated automatically</div>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 text-center shadow-lg">
-              <div className="mb-2 text-3xl font-bold text-blue-900">{parseInt(formData.postsPerMonth) * parseInt(formData.backlinksPerPost)}</div>
-              <div className="text-sm font-medium text-blue-700">Backlinks/Month</div>
-              <div className="mt-1 text-xs text-blue-600">Built within 24 hours</div>
+            <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-6 text-center shadow-lg">
+              <div className="mb-2 text-3xl font-bold text-green-900">{parseInt(formData.postsPerMonth) * parseInt(formData.backlinksPerPost)}</div>
+              <div className="text-sm font-medium text-green-700">Backlinks/Month</div>
+              <div className="mt-1 text-xs text-green-600">Built within 24 hours</div>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100 p-6 text-center shadow-lg">
+            <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 text-center shadow-lg">
               <div className="mb-2 flex items-center justify-center">
-                <CheckCircle className="h-8 w-8 text-purple-900" />
+                <CheckCircle className="h-8 w-8 text-emerald-900" />
               </div>
-              <div className="text-sm font-medium text-purple-700">QA Active</div>
-              <div className="mt-1 text-xs text-purple-600">Quality validated</div>
+              <div className="text-sm font-medium text-emerald-700">QA Active</div>
+              <div className="mt-1 text-xs text-emerald-600">Quality validated</div>
             </div>
           </div>
         </div>
@@ -572,9 +572,9 @@ export function RankliteOnboarding() {
         You&apos;re All Set! 🎉
       </h1>
       <p className="mb-8 max-w-xl text-center text-lg text-gray-600">
-        Your SEO cycle is now active. Ranklite will automatically:
+        Your SEO strategy is now active. Ranklite will automatically:
       </p>
-      
+
       <div className="mb-12 grid max-w-2xl grid-cols-1 gap-4">
         {[
           { icon: "📝", title: "Generate your first 5 posts automatically", desc: "High-quality, SEO-optimized content" },
@@ -657,11 +657,11 @@ export function RankliteOnboarding() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Activating Cycle...
+                    Activating Strategy...
                   </>
                 ) : (
                   <>
-                    Activate Cycle
+                    Activate Strategy
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}

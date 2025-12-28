@@ -17,7 +17,7 @@ interface Activity {
 
 const STATUS_COLORS = {
   Planned: "bg-[#F3F4F6] text-[#6B7280]",
-  Published: "bg-[#DBEAFE] text-[#1E40AF]",
+  Published: "bg-[#F0FDF4] text-[#166534]",
   Promoted: "bg-[#D1FAE5] text-[#065F46]",
   Verified: "bg-[#D1FAE5] text-[#065F46]",
   Pending: "bg-[#FEF3C7] text-[#92400E]",
@@ -70,11 +70,11 @@ export default function DashboardOverviewPage() {
         <div className="mb-6">
           <WelcomeBanner />
         </div>
-        
+
         <div className="rounded-2xl border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-[#6B7280]" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4 px-4">
@@ -82,7 +82,7 @@ export default function DashboardOverviewPage() {
               <p className="text-sm text-[#6B7280] text-center">{error}</p>
               <button
                 onClick={loadActivities}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#2563EB] rounded-md hover:bg-[#1E40AF]"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#22C55E] rounded-md hover:bg-[#16A34A]"
               >
                 Retry
               </button>
@@ -103,7 +103,7 @@ export default function DashboardOverviewPage() {
                         Status
                       </th>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden md:table-cell">
-                        SEO Cycle
+                        Workflow
                       </th>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider hidden lg:table-cell">
                         Last Updated
@@ -149,10 +149,10 @@ export default function DashboardOverviewPage() {
                                 activity.type === "Content"
                                   ? `/dashboard/content`
                                   : activity.type === "Backlink"
-                                  ? `/dashboard/backlinks`
-                                  : `/dashboard/content-planner`
+                                    ? `/dashboard/authority-exchange`
+                                    : `/dashboard/content-planner`
                               }
-                              className="inline-flex items-center gap-1 text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]"
+                              className="inline-flex items-center gap-1 text-sm font-medium text-[#22C55E] hover:text-[#16A34A]"
                             >
                               View
                             </Link>
@@ -185,7 +185,7 @@ export default function DashboardOverviewPage() {
                           className={cn(
                             "px-3 py-1.5 text-sm font-medium rounded-md",
                             currentPage === page
-                              ? "bg-[#2563EB] text-white"
+                              ? "bg-[#22C55E] text-white"
                               : "text-[#6B7280] bg-white border border-[#E5E5E5] hover:bg-[#F9FAFB]"
                           )}
                         >

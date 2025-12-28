@@ -13,6 +13,19 @@ interface SubmissionResponse {
   realSubmission?: boolean;
 }
 
+const fetchPolyfill = async (url: string, init?: any) => {
+  if (typeof fetch !== 'undefined') {
+    return fetch(url, init);
+  }
+  // If global fetch is missing (older Node or isolated context), try to import undici
+  try {
+    const { fetch: undiciFetch } = require('undici');
+    return undiciFetch(url, init);
+  } catch (e) {
+    throw new Error('fetch is not defined and undici fallback failed');
+  }
+};
+
 async function submitViaAPI(
   task: BacklinkTask,
   platform: Platform
@@ -22,7 +35,7 @@ async function submitViaAPI(
   }
 
   try {
-    const response = await fetch(platform.submission_url, {
+    const response = await fetchPolyfill(platform.submission_url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +89,7 @@ async function checkPlatformAccessibility(
   }
 
   try {
-    const response = await fetch(platform.submission_url, {
+    const response = await fetchPolyfill(platform.submission_url, {
       method: "GET",
       headers: {
         "User-Agent":
@@ -265,7 +278,7 @@ export async function processTask(task: BacklinkTask): Promise<WorkerResult> {
     }
 
     if (response.statusCode === 429) {
-      await scheduleRetry(task);
+      await scheduleRetry(task, "Rate limited (429)");
       await logAction(task.user_id, "task_rate_limited", {
         task_id: task.id,
         platform: platform.site_name,
@@ -280,7 +293,7 @@ export async function processTask(task: BacklinkTask): Promise<WorkerResult> {
       };
     }
 
-    await scheduleRetry(task);
+    await scheduleRetry(task, response.error || "Unknown error");
     await logAction(task.user_id, "task_failed", {
       task_id: task.id,
       platform: platform.site_name,

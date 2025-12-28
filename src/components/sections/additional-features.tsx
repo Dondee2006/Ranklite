@@ -18,8 +18,8 @@ const features = [
   },
   {
     icon: Target,
-    title: "Unlimited keywords",
-    description: "Generate unlimited keyword sets until you find the perfect match for your content strategy.",
+    title: "Community Exchange",
+    description: "Join a network of high-quality verified sites. Earn credits by hosting links, spend them to grow authority.",
     gradient: "from-[#22C55E] to-[#10B981]",
   },
   {
@@ -70,11 +70,11 @@ export default function AdditionalFeatures() {
               className="group relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-lg shadow-black/[0.02] transition-all duration-300 hover:border-[#22C55E]/20 hover:shadow-xl lg:rounded-3xl lg:p-8"
             >
               <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-[#F0FDF4] to-[#D1FAE5] opacity-0 blur-2xl transition-opacity group-hover:opacity-60" />
-              
+
               <div className={`relative mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
                 <feature.icon className="h-5 w-5 text-white" strokeWidth={2} />
               </div>
-              
+
               <h3 className="relative mb-2 font-display text-[20px] font-bold tracking-tight text-foreground">
                 {feature.title}
               </h3>

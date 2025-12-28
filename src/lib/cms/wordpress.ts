@@ -67,6 +67,10 @@ export class WordPressClient {
     }) as Promise<WordPressPost>;
   }
 
+  async getPost(id: number | string) {
+    return this.request(`/posts/${id}`) as Promise<WordPressPost>;
+  }
+
   async updatePost(id: number, data: Partial<{
     title: string;
     content: string;

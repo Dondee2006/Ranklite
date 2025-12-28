@@ -225,14 +225,33 @@ export class LinkInventoryPool {
 
     if (!inventory) return false;
 
-    const isIndexed = Math.random() > 0.3;
+    let isIndexed = false;
+    try {
+      // Real reachability check
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+      const res = await fetch(inventory.page_url, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'RankliteBot/1.0' }
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) isIndexed = true;
+    } catch (err) {
+      console.log(`[Inventory] Verification failed for ${inventory.page_url}`, err);
+    }
+
+    // Auto-verify for now if reachable, assuming "indexed" means "live and reachable"
+    // True "google index" check would require GSC API which is expensive/rate-limited.
 
     await supabaseAdmin
       .from("link_inventory")
       .update({
         is_indexed: isIndexed,
         last_verified_at: new Date().toISOString(),
-        verification_status: isIndexed ? "verified" : "pending",
+        verification_status: isIndexed ? "verified" : "rejected", // If unreachable, reject (or keep pending? reject is safer)
+        // If rejected, maybe reason="Unreachable"
+        rejection_reason: isIndexed ? null : "URL unreachable",
         updated_at: new Date().toISOString(),
       })
       .eq("id", inventoryId);

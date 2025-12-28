@@ -17,7 +17,7 @@ interface BlogPost {
 
 const STATUS_COLORS = {
   Planned: "bg-[#F3F4F6] text-[#6B7280]",
-  Generated: "bg-[#DBEAFE] text-[#1E40AF]",
+  Generated: "bg-[#ECFDF5] text-[#059669]",
   Published: "bg-[#D1FAE5] text-[#065F46]",
 };
 
@@ -60,7 +60,7 @@ export default function ContentPage() {
         <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-[#6B7280]" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -131,7 +131,7 @@ export default function ContentPage() {
                         <td className="px-6 py-4 text-right">
                           <Link
                             href={`/dashboard/content/${post.id}`}
-                            className="inline-flex items-center gap-1 text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]"
+                            className="inline-flex items-center gap-1 text-sm font-medium text-[#22C55E] hover:text-[#16A34A]"
                           >
                             View
                           </Link>

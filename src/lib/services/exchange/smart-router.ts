@@ -75,8 +75,17 @@ export class SmartLinkRouter {
     }
 
     validRoutes.sort((a, b) => {
-      const scoreA = a.domainRating * 0.4 + a.qualityScore * 0.3 + a.hopDistance * 5;
-      const scoreB = b.domainRating * 0.4 + b.qualityScore * 0.3 + b.hopDistance * 5;
+      // Prioritize Tier 1 (Money Sites) for receiving links in automated mode
+      const tierScore = a.tier === 1 ? 50 : a.tier === 2 ? 20 : 0;
+      const relevanceScore = options.niche && a.pageUrl.toLowerCase().includes(options.niche.toLowerCase()) ? 30 : 0;
+
+      const scoreA = a.domainRating * 0.4 + a.qualityScore * 0.3 + a.hopDistance * 5 + tierScore + relevanceScore;
+
+      // We repeat the logic for B here for clarity in the sort
+      const bTierScore = b.tier === 1 ? 50 : b.tier === 2 ? 20 : 0;
+      const bRelScore = options.niche && b.pageUrl.toLowerCase().includes(options.niche.toLowerCase()) ? 30 : 0;
+      const scoreB = b.domainRating * 0.4 + b.qualityScore * 0.3 + b.hopDistance * 5 + bTierScore + bRelScore;
+
       return scoreB - scoreA;
     });
 
@@ -422,6 +431,8 @@ export class SmartLinkRouter {
         tier1_enabled: false,
         tier2_enabled: true,
         tier3_enabled: true,
+        auto_exchange_enabled: false,
+        automation_risk_level: "conservative",
       };
 
       await supabaseAdmin.from("exchange_settings").insert(defaultSettings);

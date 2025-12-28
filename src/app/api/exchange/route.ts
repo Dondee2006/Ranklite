@@ -68,6 +68,8 @@ export async function GET(request: NextRequest) {
         tier1Enabled: settings.tier1_enabled,
         tier2Enabled: settings.tier2_enabled,
         tier3Enabled: settings.tier3_enabled,
+        autoExchangeEnabled: settings.auto_exchange_enabled,
+        automationRiskLevel: settings.automation_risk_level,
       },
     });
   } catch (error) {
@@ -91,13 +93,13 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "submit_inventory": {
         const { siteId, pages } = body;
-        
+
         if (!pages || !Array.isArray(pages) || pages.length === 0) {
           return NextResponse.json({ error: "Pages array is required" }, { status: 400 });
         }
 
         const result = await LinkInventoryPool.submitInventory(user.id, siteId, pages);
-        
+
         return NextResponse.json({
           success: true,
           submitted: result.submitted,
@@ -173,7 +175,7 @@ export async function POST(request: NextRequest) {
 
       case "update_settings": {
         const { settings } = body;
-        
+
         await SmartLinkRouter.updateUserSettings(user.id, {
           auto_accept_requests: settings.autoAccept,
           min_incoming_dr: settings.minIncomingDR,
@@ -182,6 +184,8 @@ export async function POST(request: NextRequest) {
           tier1_enabled: settings.tier1Enabled,
           tier2_enabled: settings.tier2Enabled,
           tier3_enabled: settings.tier3Enabled,
+          auto_exchange_enabled: settings.autoExchangeEnabled,
+          automation_risk_level: settings.automationRiskLevel,
         });
 
         return NextResponse.json({ success: true });

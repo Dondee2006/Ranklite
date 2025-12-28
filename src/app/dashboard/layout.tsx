@@ -37,10 +37,9 @@ const NAV_SECTIONS = [
     id: "seo-engine",
     label: "SEO ENGINE",
     items: [
-      { id: "seo-cycle", label: "SEO Cycle", href: "/dashboard/seo-cycle", icon: RefreshCw },
       { id: "content-planner", label: "Content Planner", href: "/dashboard/content-planner", icon: Calendar },
       { id: "content", label: "Content", href: "/dashboard/content", icon: FileText },
-      { id: "backlinks", label: "Backlinks", href: "/dashboard/backlinks", icon: Link2 },
+      { id: "authority-exchange", label: "Authority Exchange", href: "/dashboard/authority-exchange", icon: Link2 },
       { id: "qa-validation", label: "QA & Validation", href: "/dashboard/qa-validation", icon: ShieldCheck },
     ],
   },
@@ -59,16 +58,16 @@ const NAV_SECTIONS = [
       { id: "integrations", label: "Integrations", href: "/dashboard/integrations", icon: Plug },
     ],
   },
-    {
-      id: "configuration",
-      label: "CONFIGURATION",
-      items: [
-        { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
-        { id: "article-settings", label: "Article Settings", href: "/dashboard/articles-settings", icon: FileText },
-        { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
-        { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
-      ],
-    },
+  {
+    id: "configuration",
+    label: "CONFIGURATION",
+    items: [
+      { id: "settings", label: "Settings", href: "/dashboard/settings", icon: Settings },
+      { id: "article-settings", label: "Article Settings", href: "/dashboard/articles-settings", icon: FileText },
+      { id: "billing", label: "Billing 💳", href: "/dashboard/billing", icon: CreditCard },
+      { id: "feature-flags", label: "Feature Flags", href: "/dashboard/feature-flags", icon: Flag },
+    ],
+  },
   {
     id: "audit",
     label: "AUDIT",
@@ -93,14 +92,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email || "");
-        
+
         // Fetch website data
         const { data: siteData } = await supabase
           .from("sites")
           .select("name, website_url")
           .eq("user_id", user.id)
           .single();
-        
+
         if (siteData) {
           setWebsiteName(siteData.name || "Website");
           setWebsiteUrl(siteData.website_url || "");
@@ -134,8 +133,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}>
         <div className="flex items-center justify-between px-4 py-6 border-b border-[#E5E5E5]">
           <div className="flex items-center gap-2">
-            {websiteUrl && !faviconError ? (
-              <img 
+            {websiteName.toLowerCase().includes("ranklite") || (websiteUrl && websiteUrl.includes("ranklite")) ? (
+              <img
+                src="/icon.svg"
+                alt="Ranklite"
+                className="h-7 w-7 rounded-md"
+              />
+            ) : websiteUrl && !faviconError ? (
+              <img
                 src={`https://www.google.com/s2/favicons?domain=${websiteUrl}&sz=128`}
                 alt={websiteName}
                 className="h-7 w-7 rounded-md"
@@ -204,7 +209,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {mobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />

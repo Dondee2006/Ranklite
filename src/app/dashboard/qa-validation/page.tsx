@@ -1,245 +1,657 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Loader2, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  TrendingUp,
+  ExternalLink,
+  Download,
+  Loader2,
+  Shield,
+  Link2,
+  BarChart3,
+  Clock,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ValidationRecord {
-  id: string;
-  source: string;
-  http_status: number | null;
-  anchor_found: boolean;
-  link_type: "Dofollow" | "Nofollow" | "Unknown";
-  indexing_status: "Indexed" | "Pending" | "Not Indexed";
-  verification_status: "Verified" | "Warning" | "Failed" | "Pending";
-  last_checked: string;
+interface QAReport {
+  summary: {
+    total_backlinks: number;
+    validated: number;
+    broken: number;
+    indexed: number;
+    not_indexed: number;
+    high_quality: number;
+    low_quality: number;
+    dofollow: number;
+    nofollow: number;
+  };
+  validation_results: Array<{
+    backlink_id: string;
+    source_name: string;
+    linking_url: string;
+    exists: boolean;
+    correct_url: boolean;
+    anchor_text_found: string | null;
+    is_dofollow: boolean | null;
+    html_placement: string | null;
+    response_code: number | null;
+    error: string | null;
+  }>;
+  indexing_results: Array<{
+    backlink_id: string;
+    source_name: string;
+    linking_url: string;
+    is_indexed_google: boolean | null;
+    robots_txt_allows: boolean | null;
+    indexing_error: string | null;
+    days_since_creation: number;
+  }>;
+  quality_assessments: Array<{
+    backlink_id: string;
+    source_name: string;
+    source_domain: string;
+    domain_rating: number | null;
+    traffic: string | null;
+    is_relevant: boolean;
+    quality_score: "high" | "medium" | "low" | "spam";
+    quality_notes: string;
+  }>;
+  errors: Array<{
+    backlink_id: string;
+    source_name: string;
+    error_type: string;
+    description: string;
+  }>;
+  generated_at: string;
 }
 
-const VERIFICATION_COLORS = {
-  Verified: "bg-[#D1FAE5] text-[#065F46]",
-  Warning: "bg-[#FEF3C7] text-[#92400E]",
-  Failed: "bg-[#FEE2E2] text-[#991B1B]",
-  Pending: "bg-[#F3F4F6] text-[#6B7280]",
-};
-
-const VERIFICATION_ICONS = {
-  Verified: CheckCircle,
-  Warning: AlertTriangle,
-  Failed: AlertCircle,
-  Pending: Loader2,
-};
-
 export default function QAValidationPage() {
-  const [records, setRecords] = useState<ValidationRecord[]>([]);
+  const [report, setReport] = useState<QAReport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<
+    "overview" | "validation" | "indexing" | "quality" | "errors"
+  >("overview");
 
-  useEffect(() => {
-    loadRecords();
-  }, []);
-
-  async function loadRecords() {
-    setLoading(true);
+  async function syncArticles() {
     try {
-      const response = await fetch("/api/qa-validation");
+      setLoading(true);
+      const response = await fetch("/api/exchange/sync-inventory", { method: "POST" });
       const data = await response.json();
-      setRecords(data.records || []);
-    } catch (error) {
-      console.error("Failed to load validation records:", error);
+      if (!response.ok) throw new Error(data.error || "Sync failed");
+      alert(data.message || "Articles synced successfully");
+      // Reload report
+      const reportRes = await fetch("/api/qa-validation");
+      if (reportRes.ok) setReport(await reportRes.json());
+    } catch (err: any) {
+      alert("Failed to sync: " + err.message);
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredRecords = records.filter(r => {
-    if (filterStatus && r.verification_status !== filterStatus) return false;
-    return true;
-  });
+  useEffect(() => {
+    async function loadReport() {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/qa-validation");
+        if (!response.ok) {
+          throw new Error("Failed to generate report");
+        }
+        const data = await response.json();
+        setReport(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load report");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadReport();
+  }, []);
 
-  const stats = {
-    verified: records.filter(r => r.verification_status === "Verified").length,
-    warning: records.filter(r => r.verification_status === "Warning").length,
-    failed: records.filter(r => r.verification_status === "Failed").length,
-    pending: records.filter(r => r.verification_status === "Pending").length,
+  const downloadReport = () => {
+    if (!report) return;
+    const blob = new Blob([JSON.stringify(report, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backlink-qa-report-${new Date().toISOString()}.json`;
+    a.click();
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAFFFE] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-[#22C55E] mx-auto mb-4" />
+          <p className="text-muted-foreground">Generating QA Report...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            This may take a few minutes
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#FAFFFE] flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-foreground font-semibold mb-2">Error</p>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!report) return null;
+
+  const validationRate = (report.summary.validated / report.summary.total_backlinks) * 100;
+  const indexingRate = report.summary.indexed / report.summary.total_backlinks * 100;
+  const qualityRate = (report.summary.high_quality / report.summary.total_backlinks) * 100;
+  const dofollowRate = (report.summary.dofollow / (report.summary.dofollow + report.summary.nofollow)) * 100;
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      <header className="border-b border-[#E5E5E5] bg-white px-8 py-5">
+    <div className="min-h-screen bg-[#FAFFFE]">
+      <header className="sticky top-0 z-30 border-b border-border bg-white px-8 py-5">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-[#1A1A1A]">QA & Validation</h1>
-          <select
-            value={filterStatus || ""}
-            onChange={(e) => setFilterStatus(e.target.value || null)}
-            className="px-3 py-1.5 text-sm border border-[#E5E5E5] rounded-md bg-white text-[#6B7280]"
+          <div>
+            <h1
+              className="text-xl font-semibold text-foreground"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              QA & Validation
+            </h1>
+            <button
+              onClick={syncArticles}
+              className="ml-4 px-3 py-1 bg-primary text-primary-foreground text-sm rounded hover:bg-primary/90"
+            >
+              Sync Articles to Network
+            </button>
+            <p className="text-sm text-muted-foreground mt-1">
+              Generated: {new Date(report.generated_at).toLocaleString()}
+            </p>
+          </div>
+          <button
+            onClick={downloadReport}
+            className="flex items-center gap-2 rounded-lg bg-[#22C55E] px-4 py-2 text-sm font-medium text-white hover:bg-[#16A34A] transition-all"
           >
-            <option value="">All Status</option>
-            <option value="Verified">Verified</option>
-            <option value="Warning">Warning</option>
-            <option value="Failed">Failed</option>
-            <option value="Pending">Pending</option>
-          </select>
+            <Download className="h-4 w-4" />
+            Download Report
+          </button>
         </div>
       </header>
 
       <div className="p-8">
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="rounded-lg border border-[#D1FAE5] bg-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[#6B7280]">Verified</p>
-                <p className="text-2xl font-bold text-[#065F46]">{stats.verified}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                <CheckCircle2 className="h-5 w-5 text-[#22C55E]" />
               </div>
-              <CheckCircle className="h-8 w-8 text-[#10B981]" />
+              <span className="text-2xl font-bold text-[#22C55E]">
+                {validationRate.toFixed(0)}%
+              </span>
             </div>
+            <p className="text-sm font-medium text-foreground">Validation Rate</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {report.summary.validated} of {report.summary.total_backlinks} validated
+            </p>
           </div>
-          <div className="rounded-lg border border-[#FEF3C7] bg-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[#6B7280]">Warning</p>
-                <p className="text-2xl font-bold text-[#92400E]">{stats.warning}</p>
+
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                <BarChart3 className="h-5 w-5 text-[#22C55E]" />
               </div>
-              <AlertTriangle className="h-8 w-8 text-[#FCD34D]" />
+              <span className="text-2xl font-bold text-[#22C55E]">
+                {indexingRate.toFixed(0)}%
+              </span>
             </div>
+            <p className="text-sm font-medium text-foreground">Indexing Rate</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {report.summary.indexed} indexed by Google
+            </p>
           </div>
-          <div className="rounded-lg border border-[#FEE2E2] bg-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[#6B7280]">Failed</p>
-                <p className="text-2xl font-bold text-[#991B1B]">{stats.failed}</p>
+
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
+                <Shield className="h-5 w-5 text-emerald-600" />
               </div>
-              <AlertCircle className="h-8 w-8 text-[#F87171]" />
+              <span className="text-2xl font-bold text-emerald-600">
+                {qualityRate.toFixed(0)}%
+              </span>
             </div>
+            <p className="text-sm font-medium text-foreground">High Quality</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {report.summary.high_quality} high-quality links
+            </p>
           </div>
-          <div className="rounded-lg border border-[#E5E7EB] bg-white p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-[#6B7280]">Pending</p>
-                <p className="text-2xl font-bold text-[#374151]">{stats.pending}</p>
+
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                <Link2 className="h-5 w-5 text-[#22C55E]" />
               </div>
-              <Loader2 className="h-8 w-8 text-[#9CA3AF]" />
+              <span className="text-2xl font-bold text-[#22C55E]">
+                {dofollowRate.toFixed(0)}%
+              </span>
             </div>
+            <p className="text-sm font-medium text-foreground">Dofollow Rate</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {report.summary.dofollow} dofollow links
+            </p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-[#6B7280]" />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-[#E5E5E5] bg-[#F9FAFB]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Source
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      HTTP Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Anchor Found
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Link Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Indexing
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Verification
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Last Checked
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E5E5E5]">
-                  {filteredRecords.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-sm text-[#6B7280]">
-                        No validation records found
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredRecords.map((record) => {
-                      const Icon = VERIFICATION_ICONS[record.verification_status] || AlertCircle;
-                      return (
-                        <tr key={record.id} className="hover:bg-[#F9FAFB] transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-[#1A1A1A]">{record.source}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              record.http_status === 200 ? "bg-[#D1FAE5] text-[#065F46]" : 
-                              !record.http_status ? "bg-[#F3F4F6] text-[#6B7280]" :
-                              "bg-[#FEE2E2] text-[#991B1B]"
-                            )}>
-                              {record.http_status || "N/A"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "text-sm font-medium",
-                              record.anchor_found ? "text-[#10B981]" : "text-[#DC2626]"
-                            )}>
-                              {record.anchor_found ? "Yes" : "No"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              record.link_type === "Dofollow" ? "bg-[#D1FAE5] text-[#065F46]" : "bg-[#F3F4F6] text-[#6B7280]"
-                            )}>
-                              {record.link_type}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              record.indexing_status === "Indexed" ? "bg-[#D1FAE5] text-[#065F46]" :
-                              record.indexing_status === "Pending" ? "bg-[#FEF3C7] text-[#92400E]" :
-                              "bg-[#F3F4F6] text-[#6B7280]"
-                            )}>
-                              {record.indexing_status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium",
-                              VERIFICATION_COLORS[record.verification_status] || "bg-[#F3F4F6] text-[#6B7280]"
-                            )}>
-                              <Icon className={cn("h-3.5 w-3.5", record.verification_status === "Pending" && "animate-spin")} />
-                              {record.verification_status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-[#6B7280]">{record.last_checked}</div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Link
-                              href={`/dashboard/qa-validation/${record.id}`}
-                              className="text-sm font-medium text-[#2563EB] hover:text-[#1E40AF]"
-                            >
-                              View Details
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <div className="mb-6 border-b border-border bg-white rounded-t-2xl overflow-hidden">
+          <div className="flex gap-2 p-2">
+            {[
+              { id: "overview", label: "Overview", icon: TrendingUp },
+              { id: "validation", label: "Validation", icon: CheckCircle2 },
+              { id: "indexing", label: "Indexing", icon: BarChart3 },
+              { id: "quality", label: "Quality", icon: Shield },
+              { id: "errors", label: "Errors", icon: AlertTriangle },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedTab(tab.id as typeof selectedTab)}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all",
+                  selectedTab === tab.id
+                    ? "bg-[#22C55E] text-white"
+                    : "text-muted-foreground hover:bg-gray-100"
+                )}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
+
+        {
+          selectedTab === "overview" && (
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-semibold mb-4">Summary Statistics</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg bg-gray-50">
+                    <p className="text-sm text-muted-foreground">Total Backlinks</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {report.summary.total_backlinks}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50">
+                    <p className="text-sm text-green-700">Validated</p>
+                    <p className="text-2xl font-bold text-green-700">
+                      {report.summary.validated}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-red-50">
+                    <p className="text-sm text-red-700">Broken</p>
+                    <p className="text-2xl font-bold text-red-700">
+                      {report.summary.broken}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50">
+                    <p className="text-sm text-[#22C55E]">Indexed</p>
+                    <p className="text-2xl font-bold text-[#22C55E]">
+                      {report.summary.indexed}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-emerald-50">
+                    <p className="text-sm text-emerald-700">High Quality</p>
+                    <p className="text-2xl font-bold text-emerald-700">
+                      {report.summary.high_quality}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-orange-50">
+                    <p className="text-sm text-orange-700">Low Quality</p>
+                    <p className="text-2xl font-bold text-orange-700">
+                      {report.summary.low_quality}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {report.errors.length > 0 && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <h2 className="text-lg font-semibold text-red-900">
+                      Critical Issues Found: {report.errors.length}
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {report.errors.slice(0, 5).map((err, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 p-3 rounded-lg bg-white"
+                      >
+                        <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium text-red-900">{err.source_name}</p>
+                          <p className="text-sm text-red-700">
+                            {err.error_type}: {err.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        {
+          selectedTab === "validation" && (
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Validation Results</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b border-border">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Source
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        URL
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Link Type
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Anchor Text
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {report.validation_results.map((result) => (
+                      <tr key={result.backlink_id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 text-sm font-medium text-foreground">
+                          {result.source_name}
+                        </td>
+                        <td className="py-3 px-4">
+                          <a
+                            href={result.linking_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-[#22C55E] hover:underline flex items-center gap-1"
+                          >
+                            <span className="truncate max-w-[200px]">
+                              {result.linking_url}
+                            </span>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                          </a>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {result.exists ? (
+                            <span className="inline-flex items-center gap-1 text-green-600">
+                              <CheckCircle2 className="h-4 w-4" />
+                              <span className="text-xs">Active</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-red-600">
+                              <XCircle className="h-4 w-4" />
+                              <span className="text-xs">Broken</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {result.is_dofollow === true ? (
+                            <span className="inline-block px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                              Dofollow
+                            </span>
+                          ) : result.is_dofollow === false ? (
+                            <span className="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
+                              Nofollow
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">N/A</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">
+                          {result.anchor_text_found || "Not found"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          selectedTab === "indexing" && (
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Indexing Status</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b border-border">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Source
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Google Indexed
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Robots.txt
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Days Old
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        URL
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {report.indexing_results.map((result) => (
+                      <tr key={result.backlink_id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 text-sm font-medium text-foreground">
+                          {result.source_name}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {result.is_indexed_google === true ? (
+                            <span className="inline-flex items-center gap-1 text-green-600">
+                              <CheckCircle2 className="h-4 w-4" />
+                            </span>
+                          ) : result.is_indexed_google === false ? (
+                            <span className="inline-flex items-center gap-1 text-red-600">
+                              <XCircle className="h-4 w-4" />
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Unknown</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {result.robots_txt_allows === true ? (
+                            <span className="text-green-600">✓</span>
+                          ) : result.robots_txt_allows === false ? (
+                            <span className="text-red-600">✗</span>
+                          ) : (
+                            <span className="text-muted-foreground">?</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 text-xs",
+                              result.days_since_creation > 7
+                                ? "text-orange-600"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            <Clock className="h-3 w-3" />
+                            {result.days_since_creation}d
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <a
+                            href={result.linking_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-[#22C55E] hover:underline truncate max-w-[200px] inline-block"
+                          >
+                            {result.linking_url}
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          selectedTab === "quality" && (
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Quality Assessment</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b border-border">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Source
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        DR
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Traffic
+                      </th>
+                      <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Quality
+                      </th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+                        Notes
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {report.quality_assessments.map((assessment) => (
+                      <tr key={assessment.backlink_id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4 text-sm font-medium text-foreground">
+                          {assessment.source_name}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span
+                            className={cn(
+                              "inline-block px-2 py-1 rounded-lg text-xs font-bold text-white",
+                              (assessment.domain_rating || 0) >= 70
+                                ? "bg-green-500"
+                                : (assessment.domain_rating || 0) >= 40
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
+                            )}
+                          >
+                            {assessment.domain_rating || "N/A"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                          {assessment.traffic || "N/A"}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span
+                            className={cn(
+                              "inline-block px-3 py-1 rounded-full text-xs font-medium",
+                              assessment.quality_score === "high"
+                                ? "bg-green-100 text-green-700"
+                                : assessment.quality_score === "medium"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : assessment.quality_score === "low"
+                                    ? "bg-orange-100 text-orange-700"
+                                    : "bg-red-100 text-red-700"
+                            )}
+                          >
+                            {assessment.quality_score.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">
+                          {assessment.quality_notes}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        }
+
+        {
+          selectedTab === "errors" && (
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">
+                Error Log ({report.errors.length})
+              </h2>
+              <div className="space-y-3">
+                {report.errors.map((err, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 p-4 rounded-lg border border-red-200 bg-red-50"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0",
+                        err.error_type === "Broken Link"
+                          ? "bg-red-100"
+                          : err.error_type === "Not Indexed"
+                            ? "bg-orange-100"
+                            : "bg-yellow-100"
+                      )}
+                    >
+                      {err.error_type === "Broken Link" ? (
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      ) : err.error_type === "Not Indexed" ? (
+                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-foreground">
+                          {err.source_name}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+                          {err.error_type}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{err.description}</p>
+                    </div>
+                  </div>
+                ))}
+                {report.errors.length === 0 && (
+                  <div className="text-center py-8">
+                    <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                    <p className="text-foreground font-medium">No errors found!</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      All backlinks passed validation
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        }
+      </div >
+    </div >
   );
 }

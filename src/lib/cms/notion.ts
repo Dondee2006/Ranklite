@@ -48,6 +48,13 @@ export class NotionClient {
     return await this.client.pages.create(params);
   }
 
+  async appendBlocks(pageId: string, blocks: any[]) {
+    return await this.client.blocks.children.append({
+      block_id: pageId,
+      children: blocks,
+    });
+  }
+
   textToBlocks(text: string) {
     if (!text) return [];
     // Simple implementation: split by double paragraphs
@@ -132,9 +139,73 @@ export class NotionClient {
     }
   }
 
+  async getPageWithContent(pageId: string): Promise<BlogPost | null> {
+    try {
+      const page = await this.getPage(pageId);
+      const blocks = await this.getPageBlocks(pageId);
+      const post = this.transformPageToPost(page as any);
+
+      const htmlContent = this.blocksToHtml(blocks);
+
+      return {
+        ...post,
+        content: htmlContent,
+      } as any;
+    } catch (error) {
+      console.error('Error fetching page with content:', error);
+      return null;
+    }
+  }
+
+  private blocksToHtml(blocks: any[]): string {
+    return blocks.map(block => {
+      const type = block.type;
+      const content = block[type]?.rich_text?.map((t: any) => {
+        let text = t.plain_text;
+        if (t.annotations.bold) text = `<strong>${text}</strong>`;
+        if (t.annotations.italic) text = `<em>${text}</em>`;
+        if (t.annotations.strikethrough) text = `<del>${text}</del>`;
+        if (t.annotations.underline) text = `<u>${text}</u>`;
+        if (t.annotations.code) text = `<code>${text}</code>`;
+
+        if (t.href) {
+          text = `<a href="${t.href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
+        return text;
+      }).join('') || '';
+
+      switch (type) {
+        case 'paragraph':
+          return `<p>${content}</p>`;
+        case 'heading_1':
+          return `<h1>${content}</h1>`;
+        case 'heading_2':
+          return `<h2>${content}</h2>`;
+        case 'heading_3':
+          return `<h3>${content}</h3>`;
+        case 'bulleted_list_item':
+          return `<li>${content}</li>`;
+        case 'numbered_list_item':
+          return `<li>${content}</li>`;
+        case 'image':
+          const url = block.image.type === 'external' ? block.image.external.url : block.image.file.url;
+          return `<img src="${url}" alt="Notion Image" />`;
+        case 'code':
+          return `<pre><code>${block.code.rich_text.map((t: any) => t.plain_text).join('')}</code></pre>`;
+        case 'quote':
+          return `<blockquote>${content}</blockquote>`;
+        case 'divider':
+          return `<hr />`;
+        default:
+          return '';
+      }
+    }).join('\n');
+  }
+
   // Helper to transform Notion page to unified BlogPost
   private transformPageToPost(page: { id: string; properties: any; created_time: string }): BlogPost {
     const properties = page.properties;
+    console.log(`[NOTION-DEBUG] Raw properties for page ${page.id}:`, Object.keys(properties));
 
     const rawTitle = properties.Title?.title[0]?.plain_text ||
       properties.Name?.title[0]?.plain_text ||
@@ -156,9 +227,21 @@ export class NotionClient {
     const seoDescription = properties['Meta Description']?.rich_text[0]?.plain_text || '';
 
     let coverImage = undefined;
-    if (properties['Cover Image']?.files?.length > 0) {
-      const file = properties['Cover Image'].files[0];
-      coverImage = file.type === 'file' ? file.file.url : file.external.url;
+
+    // 1. Check native page cover (top of page in Notion)
+    if ((page as any).cover) {
+      const cover = (page as any).cover;
+      coverImage = cover.type === 'external' ? cover.external.url : (cover.file?.url || cover.external?.url);
+    }
+
+    // 2. Check 'Cover Image' or 'Files & media' or 'Thumbnail' property (custom properties)
+    const possibleImageProps = ['Cover Image', 'Files & media', 'Thumbnail', 'Featured Image'];
+    for (const propName of possibleImageProps) {
+      if (properties[propName]?.files?.length > 0) {
+        const file = properties[propName].files[0];
+        coverImage = file.type === 'file' ? file.file.url : file.external.url;
+        break; // Stop at first found image
+      }
     }
 
     // Estimate read time

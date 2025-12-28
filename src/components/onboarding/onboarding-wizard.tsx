@@ -452,7 +452,7 @@ export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-foreground">Target Audiences</h3>
-              <span className="rounded-full bg-[#F0FDF4] px-2 py-0.5 text-xs font-medium text-[#16A34A]">
+              <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
                 {formData.targetAudiences.length}/7
               </span>
             </div>
@@ -493,7 +493,7 @@ export function OnboardingWizard({ isAddingNewSite = false }: { isAddingNewSite?
           <div className="border-t border-border pt-6">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-foreground">Competitors</h3>
-              <span className="rounded-full bg-[#F0FDF4] px-2 py-0.5 text-xs font-medium text-[#16A34A]">
+              <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
                 {formData.competitors.length}/7
               </span>
             </div>

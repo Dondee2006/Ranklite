@@ -420,4 +420,49 @@ export class CreditSystem {
       avgBalancePerUser: activeUsers > 0 ? Math.round((totalCredits / activeUsers) * 100) / 100 : 0,
     };
   }
+
+  /**
+   * Automated scan of the entire link graph to process verifications and clawbacks
+   */
+  static async runNetworkMaintenance(): Promise<{
+    verified: number;
+    clawedBack: number;
+    processed: number;
+  }> {
+    const { data: links } = await supabaseAdmin
+      .from("exchange_link_graph")
+      .select("id")
+      .or("credits_status.eq.pending,credits_status.eq.awarded")
+      .eq("is_live", true);
+
+    if (!links) return { verified: 0, clawedBack: 0, processed: 0 };
+
+    let verified = 0;
+    let clawedBack = 0;
+
+    for (const linkRecord of links) {
+      // In a real system, we would perform an actual HTTP check here.
+      // For the automated MVP, we call our existing processLinkVerification logic
+      const statusBefore = await this.getLinkCreditsStatus(linkRecord.id);
+      await this.processLinkVerification(linkRecord.id);
+      const statusAfter = await this.getLinkCreditsStatus(linkRecord.id);
+
+      if (statusBefore === "pending" && statusAfter === "awarded") {
+        verified++;
+      } else if (statusAfter === "clawedback") {
+        clawedBack++;
+      }
+    }
+
+    return { verified, clawedBack, processed: links.length };
+  }
+
+  private static async getLinkCreditsStatus(linkId: string): Promise<string> {
+    const { data } = await supabaseAdmin
+      .from("exchange_link_graph")
+      .select("credits_status")
+      .eq("id", linkId)
+      .single();
+    return data?.credits_status || "unknown";
+  }
 }

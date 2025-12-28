@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { runWorkerCycle, getQueueStats, logAction, createTasksForUser } from "@/lib/backlink-engine";
+import { runWorkerCycle, getQueueStats, logAction, createTasksForUser, cleanupStuckTasks } from "@/lib/backlink-engine";
 
 const AGENT_STEPS = [
   { step: "Scanning directories", duration: 3000 },
@@ -78,6 +78,9 @@ export async function POST() {
     let newBacklink = null;
     let taskCreationResult = null;
 
+    // Self-healing: Cleanup stuck tasks
+    await cleanupStuckTasks(user.id);
+
     if (nextStep.step === "Discovering opportunities" && websiteUrl) {
       const stats = await getQueueStats(user.id);
       if (stats.pending === 0 && stats.processing === 0) {
@@ -93,7 +96,7 @@ export async function POST() {
 
     if (nextStep.step === "Processing submissions") {
       workerResult = await runWorkerCycle(user.id);
-      
+
       if (workerResult?.success && workerResult.backlink_url) {
         const { data: backlink } = await supabaseAdmin
           .from("backlinks")
@@ -102,7 +105,7 @@ export async function POST() {
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
-        
+
         newBacklink = backlink;
       }
     }
@@ -116,7 +119,7 @@ export async function POST() {
 
     const totalBacklinks = allBacklinks?.length || 0;
     const uniqueSources = new Set(allBacklinks?.map(b => b.source_domain)).size;
-    const avgDR = totalBacklinks > 0
+    const avgDR = totalBacklinks > 0 && allBacklinks
       ? Math.round(allBacklinks.reduce((sum, b) => sum + (b.domain_rating || 0), 0) / totalBacklinks)
       : 0;
 

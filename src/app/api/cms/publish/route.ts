@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createCMSClient, WordPressClient, ShopifyClient, NotionClient } from '@/lib/cms';
 import { WixService } from '@/lib/cms/wix';
 import { WebflowService } from '@/lib/cms/webflow';
+import { BacklinkExchangeModule, InventoryPage } from "@/lib/modules/backlink-exchange";
 
 export async function POST(request: NextRequest) {
   try {
@@ -157,6 +158,56 @@ export async function POST(request: NextRequest) {
 
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       publishedUrl = (result as { url?: string }).url || `${integration.site_url}/${slug}`;
+    }
+
+    // --- AUTOMATION HOOK: Sync to Link Inventory ---
+    try {
+      if (publishedUrl) {
+        // Attempt to find the full site profile to get DR/Niche
+        const { data: siteProfile } = await supabase
+          .from('sites')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        const domain = new URL(publishedUrl).hostname;
+
+        const inventoryPage: InventoryPage = {
+          pageUrl: publishedUrl,
+          pageTitle: title,
+          domain: domain,
+          domainRating: siteProfile?.domain_authority || 0,
+          niche: siteProfile?.niche || "General",
+          tier: 2, // Default
+          linkType: 'dofollow',
+          contentPlacement: 'contextual'
+        };
+
+        await BacklinkExchangeModule.submitInventory(
+          user.id,
+          siteProfile?.id || null, // pass site_id if we have it
+          [inventoryPage]
+        );
+        console.log(`[Auto-Sync] Article indexed to inventory: ${publishedUrl}`);
+      }
+    } catch (syncErr) {
+      console.warn("[Auto-Sync] Failed to sync to inventory:", syncErr);
+      // Don't block response
+    }
+
+    // --- UPDATE ARTICLE WITH CMS META ---
+    if (articleId && publishedUrl) {
+      await supabase
+        .from('articles')
+        .update({
+          status: 'published',
+          published_at: new Date().toISOString(),
+          cms_post_id: (result as { id: string | number }).id.toString(),
+          published_url: publishedUrl,
+          cms_target: integration.cms_type,
+          integration_id: integration_id,
+        })
+        .eq('id', articleId);
     }
 
     return NextResponse.json({

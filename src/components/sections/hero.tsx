@@ -1,16 +1,17 @@
 import Link from "next/link";
 import { TrendingUp, Zap, Target, BarChart3, Star } from "lucide-react";
+import { GoogleJoinButton } from "@/components/ui/google-join-button";
 
-function StatBubble({ 
-  icon: Icon, 
-  label, 
-  value, 
-  color, 
-  position 
-}: { 
-  icon: React.ElementType; 
-  label: string; 
-  value: string; 
+function StatBubble({
+  icon: Icon,
+  label,
+  value,
+  color,
+  position
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
   color: string;
   position: string;
 }) {
@@ -32,7 +33,7 @@ function StatBubble({
 function CircularProgress({ value, label }: { value: number; label: string }) {
   const circumference = 2 * Math.PI * 40;
   const strokeDashoffset = circumference - (value / 100) * circumference;
-  
+
   return (
     <div className="absolute -left-6 top-24 hidden lg:block animate-float animation-delay-2000">
       <div className="rounded-2xl bg-white p-5 shadow-xl shadow-black/[0.08] ring-1 ring-black/[0.03]">
@@ -87,7 +88,7 @@ export default function HeroSection() {
           <div className="absolute -left-[20%] -top-[30%] h-[700px] w-[700px] rounded-full bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] opacity-60 blur-3xl" />
           <div className="absolute -right-[15%] -top-[20%] h-[600px] w-[600px] rounded-full bg-gradient-to-bl from-[#D1FAE5] to-[#ECFDF5] opacity-50 blur-3xl" />
           <div className="absolute left-1/2 top-1/4 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-[#22C55E]/5 blur-3xl animate-blob" />
-          
+
           <svg className="absolute bottom-0 left-0 right-0 w-full" viewBox="0 0 1440 200" fill="none" preserveAspectRatio="none">
             <path d="M0,100 C360,180 720,20 1080,100 C1260,140 1380,120 1440,100 L1440,200 L0,200 Z" fill="#F0FDF4" fillOpacity="0.5" />
             <path d="M0,140 C240,180 480,100 720,140 C960,180 1200,100 1440,140 L1440,200 L0,200 Z" fill="#FAFFFE" fillOpacity="0.8" />
@@ -100,19 +101,19 @@ export default function HeroSection() {
 
         <section className="relative pb-20 pt-32 lg:pb-32 lg:pt-44">
           <CircularProgress value={94} label="SEO Score" />
-          
-          <StatBubble 
-            icon={TrendingUp} 
-            label="Traffic Growth" 
-            value="+248%" 
+
+          <StatBubble
+            icon={TrendingUp}
+            label="Traffic Growth"
+            value="+248%"
             color="bg-gradient-to-br from-[#22C55E] to-[#16A34A]"
             position="right-[5%] top-32 animation-delay-2000"
           />
-          
-          <StatBubble 
-            icon={Target} 
-            label="Keywords Ranked" 
-            value="1,247" 
+
+          <StatBubble
+            icon={Target}
+            label="Keywords Ranked"
+            value="1,247"
             color="bg-gradient-to-br from-[#10B981] to-[#059669]"
             position="-right-2 top-64 animation-delay-4000"
           />
@@ -131,34 +132,26 @@ export default function HeroSection() {
               </div>
 
               <h1 className="font-display text-[42px] font-extrabold leading-[1.08] tracking-[-1.5px] text-foreground sm:text-[52px] lg:text-[68px]">
-                Automated <span className="text-[#22C55E]">Backlinks</span> - Without Exchanges
+                Build <span className="text-[#22C55E]">Organic Traffic</span> On Autopilot
               </h1>
 
               <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-relaxed text-muted-foreground sm:text-[19px] lg:mt-8">
                 Ranklite creates a 30-day AI content plan, auto-publishes blog posts, builds high-quality backlinks to each post, and validates everything — so your site ranks without manual SEO work.
               </p>
 
-                <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
-                  <a
-                    href="https://whop.com/checkout/plan_VU6iG0GPMen3j"
-                    className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
-                  >
-                    <span className="relative z-10">Start Generating Backlinks</span>
-                    <svg className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#16A34A] to-[#15803D] opacity-0 transition-opacity group-hover:opacity-100" />
-                  </a>
-                
-                <Link
-                  href="#demo"
-                  className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-border bg-white px-8 py-4 text-[16px] font-semibold text-foreground transition-all hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] sm:w-auto"
+              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:mt-12">
+                <a
+                  href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
+                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
                 >
-                  <svg className="h-5 w-5 text-[#10B981]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
+                  <span className="relative z-10">Start Generating Backlinks</span>
+                  <svg className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  Watch Demo
-                </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#16A34A] to-[#15803D] opacity-0 transition-opacity group-hover:opacity-100" />
+                </a>
+
+                <GoogleJoinButton className="w-full sm:w-auto" />
               </div>
 
               <div className="mt-12 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:mt-16">
@@ -180,7 +173,7 @@ export default function HeroSection() {
                     +2k
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col items-center gap-1 sm:items-start">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (

@@ -52,10 +52,10 @@ const ARTICLE_TYPES = [
 ];
 
 const SEARCH_INTENTS = [
-    { value: "informational", label: "Informational", color: "bg-blue-100 text-blue-700" },
-    { value: "transactional", label: "Transactional", color: "bg-green-100 text-green-700" },
-    { value: "commercial", label: "Commercial", color: "bg-purple-100 text-purple-700" },
-    { value: "navigational", label: "Navigational", color: "bg-orange-100 text-orange-700" },
+    { value: "informational", label: "Informational", color: "bg-green-50 text-green-700" },
+    { value: "transactional", label: "Transactional", color: "bg-emerald-100 text-emerald-700" },
+    { value: "commercial", label: "Commercial", color: "bg-green-100 text-[#22C55E]" },
+    { value: "navigational", label: "Navigational", color: "bg-orange-50 text-orange-700" },
 ];
 
 interface Article {
@@ -109,22 +109,22 @@ function getArticleTypeLabel(type: string) {
 
 function getStatusBadgeStyle(status: string) {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
-        planned: { bg: "bg-blue-100", text: "text-blue-700", label: "Planned" },
-        generated: { bg: "bg-purple-100", text: "text-purple-700", label: "Generated" },
-        qa_validated: { bg: "bg-amber-100", text: "text-amber-700", label: "QA Validated" },
+        planned: { bg: "bg-green-50", text: "text-green-700", label: "Planned" },
+        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Generated" },
+        qa_validated: { bg: "bg-green-100", text: "text-[#22C55E]", label: "QA Validated" },
         published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Published" },
-        backlinks_queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Backlinks Queued" },
+        backlinks_queued: { bg: "bg-green-50", text: "text-green-700", label: "Backlinks Queued" },
     };
     return styles[status] || styles.planned;
 }
 
 function getStatusIndicator(status: string) {
     const indicators: Record<string, { bg: string; text: string; label: string }> = {
-        planned: { bg: "bg-blue-100", text: "text-blue-700", label: "Planned" },
-        generated: { bg: "bg-purple-100", text: "text-purple-700", label: "Generated" },
-        qa_validated: { bg: "bg-amber-100", text: "text-amber-700", label: "QA Validated" },
+        planned: { bg: "bg-green-50", text: "text-green-700", label: "Planned" },
+        generated: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Generated" },
+        qa_validated: { bg: "bg-green-100", text: "text-[#22C55E]", label: "QA Validated" },
         published: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Published" },
-        backlinks_queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Backlinks Queued" },
+        backlinks_queued: { bg: "bg-green-50", text: "text-green-700", label: "Backlinks Queued" },
     };
     return indicators[status] || indicators.planned;
 }
@@ -132,9 +132,9 @@ function getStatusIndicator(status: string) {
 function getBacklinksStatusBadge(status?: string) {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
         pending: { bg: "bg-gray-100", text: "text-gray-600", label: "Pending" },
-        queued: { bg: "bg-cyan-100", text: "text-cyan-700", label: "Queued" },
-        in_progress: { bg: "bg-yellow-100", text: "text-yellow-700", label: "In Progress" },
-        completed: { bg: "bg-green-100", text: "text-green-700", label: "Completed" },
+        queued: { bg: "bg-green-50", text: "text-green-700", label: "Queued" },
+        in_progress: { bg: "bg-green-100", text: "text-[#22C55E]", label: "In Progress" },
+        completed: { bg: "bg-emerald-100", text: "text-emerald-700", label: "Completed" },
     };
     return styles[status || 'pending'] || styles.pending;
 }
@@ -174,9 +174,9 @@ function getArticleTypeIcon(type: string) {
 
 function getStatusColor(status: string) {
     const colors: Record<string, string> = {
-        planned: "bg-blue-100 text-blue-700",
-        generated: "bg-purple-100 text-purple-700",
-        qa_validated: "bg-amber-100 text-amber-700",
+        planned: "bg-green-50 text-green-700",
+        generated: "bg-emerald-100 text-emerald-700",
+        qa_validated: "bg-green-100 text-[#22C55E]",
         published: "bg-emerald-100 text-emerald-700",
         draft: "bg-gray-100 text-gray-700",
     };
@@ -537,17 +537,17 @@ export default function ContentPlannerPage() {
                             onClick={generateMonthlyCalendar}
                             disabled={generating}
                             type="button"
-                            className="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                            className="gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white"
                         >
-                            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                            {generating ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Sparkles className="h-4 w-4" />}
                             Generate 30 Articles
                         </Button>
                         <Button
                             onClick={() => setShowAutopilotModal(true)}
                             variant="outline"
-                            className="gap-2"
+                            className="gap-2 border-green-100 hover:bg-green-50"
                         >
-                            <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-emerald-500")} />
+                            <Zap className={cn("h-4 w-4", autopilotSettings.enabled && "text-[#22C55E]")} />
                             Autopilot {autopilotSettings.enabled ? "ON" : "OFF"}
                         </Button>
                     </div>
@@ -654,7 +654,7 @@ export default function ContentPlannerPage() {
                                                             "min-h-[160px] rounded-xl border p-4 transition-all duration-200 group relative",
                                                             d.isValidDay
                                                                 ? dayArticles.length > 0
-                                                                    ? "bg-white border-gray-100 hover:border-emerald-200 hover:shadow-lg cursor-default"
+                                                                    ? "bg-white border-gray-100 hover:border-green-200 hover:shadow-lg cursor-default"
                                                                     : "bg-white border-gray-50 cursor-default"
                                                                 : "bg-gray-50/10 border-transparent"
                                                         )}
@@ -684,8 +684,8 @@ export default function ContentPlannerPage() {
                                                                         <div className="flex items-center gap-2 mb-2">
                                                                             <div className={cn(
                                                                                 "h-1.5 w-1.5 rounded-full shrink-0",
-                                                                                dayArticles[0].status === 'published' ? "bg-emerald-500" :
-                                                                                    dayArticles[0].status === 'generated' ? "bg-purple-500" : "bg-blue-500"
+                                                                                dayArticles[0].status === 'published' ? "bg-[#22C55E]" :
+                                                                                    dayArticles[0].status === 'generated' ? "bg-emerald-500" : "bg-green-500"
                                                                             )} />
                                                                             <span className="text-[9px] font-bold text-gray-500 uppercase tracking-normal truncate">
                                                                                 {getArticleTypeLabel(dayArticles[0].article_type)}: {dayArticles[0].search_intent.charAt(0).toUpperCase() + dayArticles[0].search_intent.slice(1)}
@@ -712,7 +712,7 @@ export default function ContentPlannerPage() {
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant="secondary"
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
+                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] border border-transparent transition-all tracking-normal shadow-sm"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
                                                                                         router.push(`/dashboard/content/${dayArticles[0].id}`);
@@ -725,7 +725,7 @@ export default function ContentPlannerPage() {
                                                                                     size="sm"
                                                                                     variant="secondary"
                                                                                     disabled={generatingArticle === dayArticles[0].id}
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 border border-transparent transition-all tracking-normal shadow-sm"
+                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] border border-transparent transition-all tracking-normal shadow-sm"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
                                                                                         generateArticleContent(dayArticles[0].id);
@@ -745,7 +745,7 @@ export default function ContentPlannerPage() {
                                                                                     size="sm"
                                                                                     variant="secondary"
                                                                                     disabled
-                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 transition-all tracking-normal"
+                                                                                    className="w-full h-8 mt-4 text-[10px] font-bold bg-green-50 text-[#22C55E] border border-green-100 transition-all tracking-normal"
                                                                                 >
                                                                                     <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                                                                                     Generating...
@@ -792,7 +792,7 @@ export default function ContentPlannerPage() {
 
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+                            <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
                         </div>
                     ) : (
                         <div className="overflow-x-auto">

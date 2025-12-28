@@ -58,7 +58,7 @@ export default function ProblemsSolution() {
               <p className="text-[15px] font-medium text-foreground lg:text-[17px]">
                 The AI-powered SEO engine that replaces your entire content toolkit.
               </p>
-              
+
               <ul className="mt-5 space-y-3">
                 {[
                   "Smart Keyword Discovery",
@@ -66,7 +66,7 @@ export default function ProblemsSolution() {
                   "Automatic Content Scoring",
                   "AI Images & Media",
                   "Multi-Language Publishing",
-                  "Backlink Suggestions",
+                  "Automated Link Exchange",
                   "On-Page Recommendations",
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-3">

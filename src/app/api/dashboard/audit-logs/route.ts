@@ -23,16 +23,20 @@ export async function GET() {
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // specific query for exchange logs
     const { data: logs, error } = await supabase
-      .from("activity_logs")
+      .from("exchange_automation_logs")
       .select(`
-        *,
-        user:user_profiles!fk_activity_logs_user_profiles(email, full_name)
+        id,
+        created_at,
+        action,
+        metadata:details,
+        site_id
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
@@ -40,7 +44,18 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ logs });
+    // Transform logs to match frontend interface
+    const formattedLogs = logs.map(log => ({
+      ...log,
+      resource_type: "Automation System",
+      resource_id: log.site_id || "N/A",
+      user: {
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.email || "User"
+      }
+    }));
+
+    return NextResponse.json({ logs: formattedLogs });
   } catch (error) {
     console.error("Error fetching audit logs:", error);
     return NextResponse.json({ error: "Failed to load audit logs" }, { status: 500 });
