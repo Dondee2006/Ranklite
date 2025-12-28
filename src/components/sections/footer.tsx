@@ -53,7 +53,7 @@ export default function Footer() {
               <RankliteLogo />
             </Link>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              Build Organic Traffic On Autopilot
+              Build Organic Growth On Autopilot
             </p>
             <div className="flex items-center gap-3">
               {[

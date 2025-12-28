@@ -1,0 +1,33 @@
+﻿--- SITE AUTOPILOT STATUS ---
+
+Site: Ranklite (cd2703a5-2655-4162-a8e4-84e676b73a71)
+  Autopilot: ENABLED
+  Quota: 1 per day
+  Window: 0 - 23 UTC
+  Last Sync: undefined
+
+Site: Ranklite (9fd43caa-b12d-4e45-bb23-a7f5083972bd)
+  Autopilot: ENABLED
+  Quota: 1 per day
+  Window: 0 - 23 UTC
+  Last Sync: undefined
+
+Site: Temp Test Site (be30fec5-4d2f-4af0-b675-8a49811c2f6c)
+  Autopilot settings NOT FOUND
+
+--- USER PLANS & USAGE ---
+
+User: undefined
+  No plan found
+  No usage found
+
+--- ARTICLES FOR TODAY (2025-12-28) ---
+- [generated] Using AI for Superior Content Optimization | Time: ANY | Site: Ranklite
+- [planned] 12 Creative Advanced SEO marketing for experts Ideas to Dominate Your Niche | Time: ANY | Site: Ranklite
+
+--- RECENT PUBLISHED ---
+- [published] Keyword Suggestions Reimagined: Harnessing AI for SEO | Pub: 2025-12-26T23:13:10.659+00:00 | Site: Ranklite
+- [published] The Definitive Guide on How to SEO marketing for beginners: complete roadmap from Scratch | Pub: 2025-12-26T22:36:22.734+00:00 | Site: Ranklite
+- [published] The 2025 Ultimate Guide to How to automate SEO marketing for growth Mastery | Pub: 2025-12-26T22:21:06.612+00:00 | Site: Ranklite
+- [published] The SEO marketing guide for 2025 FAQ: Expert Insights for 2025 | Pub: 2025-12-26T22:21:03.827+00:00 | Site: Ranklite
+- [published] Best Ranklite: Pros, Cons & Verdict | Pub: 2025-12-26T22:20:57.641+00:00 | Site: Ranklite

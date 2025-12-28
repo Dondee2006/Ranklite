@@ -65,16 +65,16 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     }, { onConflict: "site_id" });
 
-    const { data: starterPlan } = await supabase
+    const { data: proPlan } = await supabase
       .from("plans")
       .select("id")
-      .eq("name", "Starter")
+      .eq("id", "pro")
       .single();
 
-    if (starterPlan) {
+    if (proPlan) {
       await supabase.from("user_plans").insert({
         user_id: user.id,
-        plan_id: starterPlan.id,
+        plan_id: proPlan.id,
         status: "active",
         start_date: new Date().toISOString(),
       });

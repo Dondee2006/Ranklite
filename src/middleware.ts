@@ -16,7 +16,8 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/privacy") ||
     request.nextUrl.pathname.startsWith("/cookies") ||
     request.nextUrl.pathname.startsWith("/blog") ||
-    request.nextUrl.pathname.startsWith("/integrations");
+    request.nextUrl.pathname.startsWith("/integrations") ||
+    request.nextUrl.pathname.startsWith("/api");
 
   if (isPublicPage) {
     const headers = supabaseResponse.headers;
@@ -87,6 +88,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
