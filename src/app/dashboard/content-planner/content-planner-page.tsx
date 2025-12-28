@@ -264,7 +264,7 @@ export default function ContentPlannerPage() {
                 console.error("Failed to auto-generate initial articles:", error);
             }
         })();
-    }, [articles, generating, loading, searchParams]);
+    }, [articles, generating, loading, searchParams, generateMonthlyCalendar]);
 
     const handleCloseWelcome = () => {
         setShowWelcomeModal(false);
@@ -336,7 +336,7 @@ export default function ContentPlannerPage() {
         }
     }, [autopilotSettings.enabled, runAutopilotPublish]);
 
-    async function generateMonthlyCalendar() {
+    const generateMonthlyCalendar = useCallback(async () => {
         setGenerating(true);
         try {
             const now = new Date();
@@ -392,7 +392,7 @@ export default function ContentPlannerPage() {
             toast.error("Failed to start generation. Please check the console for details.");
             setGenerating(false);
         }
-    }
+    }, [loadArticles]);
 
     async function generateArticleContent(articleId: string) {
         setGeneratingArticle(articleId);
