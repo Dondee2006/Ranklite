@@ -27,8 +27,24 @@ export async function GET(request: Request) {
                 },
             }
         );
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error) {
+        const { error, data } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error && data.user) {
+            // Check if user has an active plan
+            const { data: userPlan } = await supabase
+                .from("user_plans")
+                .select("status, current_period_end")
+                .eq("user_id", data.user.id)
+                .single();
+
+            const hasActivePlan = userPlan &&
+                userPlan.status === "active" &&
+                new Date(userPlan.current_period_end) > new Date();
+
+            // If no active plan, redirect to checkout
+            if (!hasActivePlan) {
+                return NextResponse.redirect("https://whop.com/checkout/plan_hwMsQBSgnZtPO");
+            }
+
             return NextResponse.redirect(`${origin}${next}`);
         }
     }
