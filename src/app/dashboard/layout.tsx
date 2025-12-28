@@ -86,6 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [faviconError, setFaviconError] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function loadUserData() {
@@ -104,10 +105,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           setWebsiteName(siteData.name || "Website");
           setWebsiteUrl(siteData.website_url || "");
         }
+
+        // --- PAYMENT WALL CHECK ---
+        const ADMIN_EMAILS = ["dondorian7@gmail.com"]; // Matches your bypass
+        const isAdmin = ADMIN_EMAILS.includes(user.email || "");
+
+        if (isAdmin) {
+          setIsAuthorized(true);
+        } else {
+          const { data: userPlan } = await supabase
+            .from("user_plans")
+            .select("status, current_period_end")
+            .eq("user_id", user.id)
+            .single();
+
+          const hasActivePlan = userPlan &&
+            userPlan.status === "active" &&
+            new Date(userPlan.current_period_end) > new Date();
+
+          if (!hasActivePlan && pathname !== "/dashboard/billing") {
+            setIsAuthorized(false);
+            router.push("/dashboard/billing");
+          } else {
+            setIsAuthorized(true);
+          }
+        }
+      } else {
+        router.push("/login");
       }
     }
     loadUserData();
-  }, [supabase]);
+  }, [supabase, pathname, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -215,8 +243,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      <main className="lg:ml-[200px] flex-1 w-full">
-        {children}
+      <main className="lg:ml-[200px] flex-1 w-full relative">
+        {isAuthorized === null ? (
+          <div className="flex h-full items-center justify-center">
+            <RefreshCw className="h-8 w-8 text-[#10B981] animate-spin" />
+          </div>
+        ) : !isAuthorized && pathname !== "/dashboard/billing" ? (
+          <div className="flex h-full items-center justify-center bg-white/80 backdrop-blur-sm z-[100]">
+            <div className="text-center animate-in fade-in duration-500">
+              <CreditCard className="mx-auto h-12 w-12 text-[#10B981] mb-4" />
+              <h2 className="text-xl font-bold text-gray-900">Subscription Required</h2>
+              <p className="text-gray-500 mt-2">Redirecting to billing...</p>
+            </div>
+          </div>
+        ) : (
+          children
+        )}
       </main>
     </div>
   );
