@@ -87,8 +87,6 @@ interface Article {
     backlinks_count?: number;
     cluster_name?: string;
     is_pillar?: boolean;
-    volume?: number;
-    difficulty?: number;
 }
 
 interface AutopilotSettings {
@@ -233,38 +231,6 @@ export default function ContentPlannerPage() {
         }
     }, [searchParams]);
 
-    useEffect(() => {
-        // Auto-generate the initial 30 articles after onboarding *once the user is subscribed*
-        // (so the user never needs to click "Generate 30 Articles").
-        // Only auto-run on the first post-onboarding visit
-        if (searchParams.get("welcome") !== "true") return;
-
-        if (loading) return;
-        if (generating) return;
-        if (autoGenerateLock.current) return;
-
-        const hasGeneratedArticles = articles.some((a) => a.status === "generated");
-        if (hasGeneratedArticles) return;
-
-        autoGenerateLock.current = true;
-
-        (async () => {
-            try {
-                const planRes = await fetch("/api/billing/current-plan");
-                const planData = await planRes.json();
-
-                const postsPerMonth = planData?.plan?.posts_per_month ?? 0;
-                const planStatus = planData?.status;
-
-                // Only auto-generate after the paid tier (30 posts/month) is active
-                if (planStatus !== "active" || postsPerMonth < 30) return;
-
-                await generateMonthlyCalendar();
-            } catch (error) {
-                console.error("Failed to auto-generate initial articles:", error);
-            }
-        })();
-    }, [articles, generating, loading, searchParams, generateMonthlyCalendar]);
 
     const handleCloseWelcome = () => {
         setShowWelcomeModal(false);
@@ -393,6 +359,35 @@ export default function ContentPlannerPage() {
             setGenerating(false);
         }
     }, [loadArticles]);
+
+    // Auto-generate initial articles after onboarding
+    useEffect(() => {
+        if (searchParams.get("welcome") !== "true") return;
+        if (loading) return;
+        if (generating) return;
+        if (autoGenerateLock.current) return;
+
+        const hasGeneratedArticles = articles.some((a) => a.status === "generated");
+        if (hasGeneratedArticles) return;
+
+        autoGenerateLock.current = true;
+
+        (async () => {
+            try {
+                const planRes = await fetch("/api/billing/current-plan");
+                const planData = await planRes.json();
+
+                const postsPerMonth = planData?.plan?.posts_per_month ?? 0;
+                const planStatus = planData?.status;
+
+                if (planStatus !== "active" || postsPerMonth < 30) return;
+
+                await generateMonthlyCalendar();
+            } catch (error) {
+                console.error("Failed to auto-generate initial articles:", error);
+            }
+        })();
+    }, [articles, generating, loading, searchParams, generateMonthlyCalendar]);
 
     async function generateArticleContent(articleId: string) {
         setGeneratingArticle(articleId);
