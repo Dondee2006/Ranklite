@@ -683,7 +683,7 @@ export default function ContentPlannerPage() {
                                                                                     dayArticles[0].status === 'generated' ? "bg-emerald-500" : "bg-green-500"
                                                                             )} />
                                                                             <span className="text-[9px] font-bold text-gray-500 uppercase tracking-normal truncate">
-                                                                                {getArticleTypeLabel(dayArticles[0].article_type)}: {dayArticles[0].search_intent.charAt(0).toUpperCase() + dayArticles[0].search_intent.slice(1)}
+                                                                                {getArticleTypeLabel(dayArticles[0].article_type)}: {dayArticles[0].search_intent ? dayArticles[0].search_intent.charAt(0).toUpperCase() + dayArticles[0].search_intent.slice(1) : 'Informational'}
                                                                             </span>
                                                                         </div>
 
