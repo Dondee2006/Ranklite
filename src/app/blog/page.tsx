@@ -1,5 +1,7 @@
-import { ArrowRight } from "lucide-react";
+import Header from "@/components/sections/header";
+import Footer from "@/components/sections/footer";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 const blogPosts = [
     {
@@ -34,35 +36,28 @@ const blogPosts = [
     }
 ];
 
-export default function BlogSection() {
+export default function BlogPage() {
     return (
-        <section className="py-16 lg:py-24 bg-gradient-to-b from-white to-[#F9FAFB]" id="blog">
-            <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
-                {/* Header */}
-                <div className="mb-12 text-center">
-                    <span className="text-xs font-semibold text-[#22C55E] uppercase tracking-[1.44px] mb-4 block">
-                        LATEST FROM OUR BLOG
-                    </span>
-                    <h2 className="mb-4 font-display text-[42px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[52px] lg:text-[56px]">
-                        Learn from{" "}
-                        <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
-                            SEO Experts
-                        </span>
-                    </h2>
+        <div className="min-h-screen bg-background text-foreground">
+            <Header />
+            <main className="container mx-auto max-w-[1320px] px-5 py-20 md:px-8">
+                <div className="mb-16 text-center">
+                    <h1 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[52px] lg:text-[64px]">
+                        Ranklite <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">Blog</span>
+                    </h1>
                     <p className="mx-auto mt-6 max-w-2xl text-[18px] leading-relaxed text-muted-foreground">
-                        Discover actionable insights, growth strategies, and the latest in AI-powered SEO.
+                        Expert insights on AI-powered SEO, content automation, and organic growth strategies.
                     </p>
                 </div>
 
-                {/* Blog Posts Grid */}
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {blogPosts.map((post) => (
                         <Link
                             key={post.id}
                             href={`/blog/${post.slug}`}
                             className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all hover:shadow-xl hover:-translate-y-1"
                         >
-                            <div className="h-48 bg-muted flex items-center justify-center overflow-hidden relative">
+                            <div className="h-48 overflow-hidden relative">
                                 <img
                                     src={post.image}
                                     alt={post.title}
@@ -91,18 +86,8 @@ export default function BlogSection() {
                         </Link>
                     ))}
                 </div>
-
-                {/* View All Posts CTA */}
-                <div className="flex justify-center">
-                    <Link
-                        href="/blog"
-                        className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                        View All Posts
-                        <ArrowRight size={18} />
-                    </Link>
-                </div>
-            </div>
-        </section>
+            </main>
+            <Footer />
+        </div>
     );
 }

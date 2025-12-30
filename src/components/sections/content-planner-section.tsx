@@ -6,7 +6,7 @@ import CalendarPreview from "@/components/ui/calendar-preview";
 
 export default function ContentPlannerSection() {
     return (
-        <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#F9FAFB] py-20 lg:py-32">
+        <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#F9FAFB] py-20 lg:py-32" id="content-planner">
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute left-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-[#DCFCE7] to-transparent opacity-20 blur-3xl" />
                 <div className="absolute right-1/4 bottom-1/3 h-[500px] w-[500px] rounded-full bg-gradient-to-bl from-[#D1FAE5] to-transparent opacity-15 blur-3xl" />

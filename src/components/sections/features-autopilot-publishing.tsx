@@ -48,7 +48,7 @@ const WixLogo = () => (
 
 export default function FeaturesAutopilotPublishing() {
   return (
-    <section className="py-16 bg-gradient-to-b from-white to-[#F9FAFB]">
+    <section className="py-16 bg-gradient-to-b from-white to-[#F9FAFB]" id="autopilot">
       <div className="container mx-auto max-w-[1200px] px-6">
         <div className="text-center mb-12">
           <span className="inline-flex items-center gap-2 rounded-full bg-[#F0FDF4] px-4 py-1.5 text-[13px] font-semibold text-[#16A34A] mb-4">
