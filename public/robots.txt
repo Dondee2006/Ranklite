@@ -4,3 +4,4 @@ Allow: /
 
 # Host
 Host: https://www.ranklite.site
+Sitemap: https://www.ranklite.site/sitemap.xml
