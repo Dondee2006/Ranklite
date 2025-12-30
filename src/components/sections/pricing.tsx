@@ -1,160 +1,135 @@
-import { Check, X, ArrowRight } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default function Pricing() {
-  const plans = [
-    {
-      name: "Pro Tier",
-      subtitle: "Perfect for: Small businesses, founders, and content-driven sites that want full SEO automation",
-      price: 59,
-      period: "/month",
-      description: "Ranklite gives you all core features Outrank offers — but at ~$40/month less.",
-      features: [
-        { text: "30 SEO articles generated on autopilot per month", included: true },
-        { text: "AI-generated images included per article", included: true },
-        { text: "Automatic publishing to multiple CMS (WordPress, Wix, Webflow)", included: true },
-        { text: "Full keyword research & optimization for Google ranking", included: true },
-        { text: "Performance dashboard (traffic, rankings, publishing status)", included: true },
-        { text: "High-quality backlink starter pack", included: true },
-        { text: "Optional light human QA for higher-ranking content", included: true },
-        { text: "3-day free trial ($1 activation fee)", included: true },
-      ],
-      cta: "Start 3-Day Free Trial",
-      ctaLink: "/signup",
-      popular: true,
-    },
+  const features = [
+    { text: "30 SEO articles per month", highlight: false },
+    { text: "AI-generated images included", highlight: false },
+    { text: "Auto-publishing to WordPress, Wix, Webflow and many other platforms", highlight: "other platforms" },
+    { text: "Full keyword research & optimization", highlight: false },
+    { text: "Performance dashboard access", highlight: false },
+    { text: "High-quality backlink starter pack", highlight: false },
+    { text: "Optional light human QA", highlight: false },
+    { text: "3-day trial ($1 activation fee)", highlight: false },
   ];
 
   return (
-    <section className="relative overflow-hidden bg-[#F8FAFB] py-20 lg:py-32" id="pricing">
-      <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#F9FAFB] py-20 lg:py-32" id="pricing">
+      <div className="container mx-auto max-w-[1200px] px-5 md:px-8">
         {/* Header */}
         <div className="mx-auto mb-14 max-w-[800px] text-center lg:mb-20">
-          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-[#22C55E] sm:text-[48px] lg:text-[56px]">
-            Choose Your Plan (Updated)
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#F0FDF4] px-4 py-1.5 text-[13px] font-semibold text-[#16A34A]">
+            Simple Pricing
+          </span>
+          <h2 className="font-display text-[42px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[48px] lg:text-[56px]">
+            One plan.{" "}
+            <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
+              Everything included.
+            </span>
           </h2>
-          <p className="mx-auto mt-5 max-w-[620px] text-[18px] leading-relaxed text-[#4A5568] lg:text-[20px]">
-            Select the perfect plan for your SEO needs
+          <p className="mx-auto mt-5 max-w-[620px] text-[18px] leading-relaxed text-muted-foreground lg:text-[20px]">
+            Get full access to all features with our all-in-one plan
           </p>
         </div>
 
         {/* Pricing Card */}
-        <div className="mx-auto max-w-[900px]">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className="relative overflow-hidden rounded-3xl border-2 border-[#22C55E] bg-white p-10 shadow-2xl"
-            >
-              {/* Popular Badge */}
-              {plan.popular && (
-                <div className="absolute top-0 right-8 -translate-y-1/2">
-                  <span className="inline-flex items-center rounded-full bg-[#22C55E] px-6 py-2 text-[14px] font-bold text-white shadow-lg">
-                    MOST POPULAR
-                  </span>
+        <div className="mx-auto max-w-[1000px]">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#22C55E] via-[#16A34A] to-[#15803D] p-8 shadow-2xl lg:p-12">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+
+            <div className="relative grid gap-8 lg:grid-cols-[auto_1fr]">
+              {/* Left: Price & CTA */}
+              <ScrollReveal variant="slide-left" delay={0.2}>
+                <div className="flex flex-col items-start lg:min-w-[320px]">
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold text-white mb-2">All in One</h3>
+                    <p className="text-green-100 text-sm">For ambitious entrepreneurs</p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-7xl font-bold text-white">$25</span>
+                      <div className="flex flex-col">
+                        <span className="text-xl text-green-100 line-through">$59</span>
+                        <span className="text-lg text-green-100">/monthly</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTA Button */}
+                  <a
+                    href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
+                    className="group mb-4 flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-lg font-bold text-[#16A34A] shadow-lg transition-all hover:bg-green-50 hover:shadow-xl hover:scale-105"
+                  >
+                    Get Started for Free
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </a>
+
+                  <p className="text-center text-sm text-green-100 w-full">
+                    <span className="font-semibold">Cancel anytime.</span> No questions asked!
+                  </p>
                 </div>
-              )}
+              </ScrollReveal>
 
-              {/* Plan Header */}
-              <div className="mb-8 text-center">
-                <h3 className="font-display text-[36px] font-bold text-[#1A202C]">{plan.name}</h3>
-                <p className="mt-3 text-[16px] leading-relaxed text-[#718096]">{plan.subtitle}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-8 text-center">
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-display text-[64px] font-bold text-[#22C55E]">${plan.price}</span>
-                  <span className="text-[20px] text-[#718096]">{plan.period}</span>
-                </div>
-                <p className="mt-3 text-[15px] text-[#22C55E] font-semibold">
-                  📈 {plan.description}
-                </p>
-              </div>
-
-              {/* Features */}
-              <ul className="mb-10 grid gap-4 sm:grid-cols-2">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    {feature.included ? (
-                      <Check className="h-5 w-5 text-[#22C55E] flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <X className="h-5 w-5 text-[#E53E3E] flex-shrink-0 mt-0.5" />
-                    )}
-                    <span className="text-[15px] text-[#4A5568] leading-relaxed">{feature.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <a
-                href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#22C55E] py-5 text-[18px] font-bold text-white shadow-lg transition-all hover:bg-[#16A34A] hover:shadow-xl"
-              >
-                {plan.cta}
-                <ArrowRight className="h-5 w-5" />
-              </a>
-              <p className="mt-4 text-center text-[13px] text-[#718096]">
-                * A one-time <strong>$1.00 USD</strong> activation fee applies to start the trial.
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Additional Info Sections */}
-        <div className="mx-auto mt-20 max-w-[1000px] space-y-16">
-          {/* How Ranklite Is Different */}
-          <div className="rounded-3xl border border-[#E2E8F0] bg-white p-10">
-            <h3 className="mb-6 text-center font-display text-[32px] font-bold text-[#1A202C]">
-              🧠 How Ranklite Is Different
-            </h3>
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <h4 className="mb-4 text-[18px] font-bold text-[#1A202C]">Most SEO tools give you:</h4>
-                <ul className="space-y-2">
-                  <li className="text-[15px] text-[#718096]">• Data dashboards</li>
-                  <li className="text-[15px] text-[#718096]">• To-do lists</li>
-                  <li className="text-[15px] text-[#718096]">• Manual work</li>
+              {/* Right: Features */}
+              <div className="lg:pl-8 lg:border-l lg:border-white/20">
+                <ScrollReveal delay={0.3}>
+                  <h4 className="text-lg font-semibold text-white mb-6">What's included:</h4>
+                </ScrollReveal>
+                <ul className="grid gap-4 sm:grid-cols-2">
+                  {features.map((feature, i) => (
+                    <ScrollReveal
+                      key={i}
+                      delay={0.4 + (i * 0.05)}
+                      variant="fade-in"
+                    >
+                      <li className="flex items-start gap-3">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 flex-shrink-0 mt-0.5">
+                          <Check className="h-4 w-4 text-white" strokeWidth={3} />
+                        </div>
+                        <span className="text-[15px] text-white/90 leading-relaxed">
+                          {typeof feature.highlight === 'string' ? (
+                            <>
+                              {feature.text.split(feature.highlight)[0]}
+                              <Link href="/integrations" className="text-green-100 underline hover:text-white transition-colors">
+                                {feature.highlight}
+                              </Link>
+                              {feature.text.split(feature.highlight)[1]}
+                            </>
+                          ) : (
+                            feature.text
+                          )}
+                        </span>
+                      </li>
+                    </ScrollReveal>
+                  ))}
                 </ul>
               </div>
-              <div className="rounded-2xl bg-[#22C55E]/10 p-6">
-                <h4 className="mb-4 text-[18px] font-bold text-[#1A202C]">Ranklite does the work for you.</h4>
-                <div className="space-y-2 text-[15px] text-[#4A5568] leading-relaxed">
-                  <p>We automatically control publishing, link building, and SEO pacing behind the scenes — so Google sees natural growth, not automation.</p>
-                  <p className="font-semibold">You never touch settings. You never guess. You just grow.</p>
-                </div>
-              </div>
             </div>
-          </div>
-
-          {/* SEO-Safe by Design */}
-          <div className="rounded-3xl border border-[#E2E8F0] bg-white p-10">
-            <h3 className="mb-6 text-center font-display text-[28px] font-bold text-[#1A202C]">
-              🔒 SEO-Safe by Design
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-3 mb-6">
-              <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-50 p-4">
-                <X className="h-5 w-5 text-red-500" />
-                <span className="text-[15px] font-medium">No link blasts</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-50 p-4">
-                <X className="h-5 w-5 text-red-500" />
-                <span className="text-[15px] font-medium">No content flooding</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-50 p-4">
-                <X className="h-5 w-5 text-red-500" />
-                <span className="text-[15px] font-medium">No spam tactics</span>
-              </div>
-            </div>
-            <p className="text-center text-[15px] text-[#718096]">
-              Ranklite adapts in real time to keep your site safe — even as it scales.
-            </p>
           </div>
         </div>
 
-        {/* MVP Note */}
-        <div className="mx-auto mt-12 max-w-[600px] text-center">
-          <p className="text-[13px] text-[#A0AEC0]">
-            🧪 <strong>MVP Note:</strong> Billing is integrated safe and secure via Whop.
-          </p>
+        {/* Trust badges */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-muted-foreground mb-4">Trusted by ambitious entrepreneurs worldwide</p>
+          <div className="flex items-center justify-center gap-8 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Check className="h-4 w-4 text-[#22C55E]" />
+              <span>3-day free trial</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Check className="h-4 w-4 text-[#22C55E]" />
+              <span>Cancel anytime</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Check className="h-4 w-4 text-[#22C55E]" />
+              <span>24/7 Support</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

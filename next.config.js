@@ -11,6 +11,20 @@ const nextConfig = {
   },
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
+  async redirects() {
+    return [
+      {
+        source: '/blog',
+        destination: 'https://ranklitesite.feather.blog/',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug',
+        destination: 'https://ranklitesite.feather.blog/',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;

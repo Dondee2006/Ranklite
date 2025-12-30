@@ -10,7 +10,7 @@ const tools = [
     description: "Generate hundreds of relevant keyword ideas for your content strategy in seconds.",
     icon: Search,
     color: "from-[#22C55E] to-[#16A34A]",
-    href: "/tools/keyword-generator",
+    href: "/tools#keyword-generator",
   },
   {
     id: "content-brief",
@@ -18,7 +18,7 @@ const tools = [
     description: "Create comprehensive content briefs with SEO guidelines and structure recommendations.",
     icon: FileText,
     color: "from-[#3B82F6] to-[#2563EB]",
-    href: "/tools/content-brief",
+    href: "/tools#content-brief",
   },
   {
     id: "seo-title",
@@ -26,7 +26,7 @@ const tools = [
     description: "Generate click-worthy, SEO-optimized titles that rank and convert.",
     icon: Type,
     color: "from-[#8B5CF6] to-[#7C3AED]",
-    href: "/tools/seo-title",
+    href: "/tools#seo-title",
   },
   {
     id: "summarizer",
@@ -34,7 +34,7 @@ const tools = [
     description: "Summarize long articles into concise, easy-to-digest key points.",
     icon: List,
     color: "from-[#F59E0B] to-[#D97706]",
-    href: "/tools/summarizer",
+    href: "/tools#summarizer",
   },
 ];
 
@@ -63,8 +63,9 @@ export default function ToolsPage() {
           {tools.map((tool) => (
             <Link
               key={tool.id}
+              id={tool.id}
               href={tool.href}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white p-8 shadow-sm transition-all hover:shadow-lg"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white p-8 shadow-sm transition-all hover:shadow-lg scroll-mt-24"
             >
               <div className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br ${tool.color} shadow-lg shadow-green-500/20`}>
                 <tool.icon className="h-8 w-8 text-white" />

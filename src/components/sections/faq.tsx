@@ -11,15 +11,15 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "What exactly does Ranklite do?",
-    answer: "Ranklite is a complete SEO automation platform. We create a 30-day content calendar tailored to your niche, write and publish blog posts automatically, build high-quality backlinks for each article, and validate everything through QA checks—all without you lifting a finger."
+    answer: "Ranklite is a complete SEO automation platform. We create a 30-day content calendar tailored to your niche, write and publish blog posts automatically, and build authority through our AI-powered Backlink Exchange—all without you lifting a finger."
   },
   {
     question: "What are backlinks, and why do they matter for my articles or blog posts?",
     answer: "Backlinks are links from other websites that point to your article. They act as a vote of confidence, showing search engines that your content is credible and valuable. More high-quality backlinks can improve your article's visibility and ranking on search engines."
   },
   {
-    question: "How does Ranklite handle backlink generation for my content?",
-    answer: "Ranklite automatically generates backlinks for each article automatically published, attaching them directly to your posts. The system uses relevant anchor text and distributes links across diverse, trustworthy sources, boosting your SEO while keeping the process seamless and safe."
+    question: "How does Ranklite handle the Backlink Exchange for my content?",
+    answer: "Ranklite uses an AI-powered Authority Exchange network. Instead of risky 'link blasts,' our system automatically exchanges high-quality, contextual backlinks with other reputable sites in our network. This ensures your content earns authority naturally and safely, boosting your rankings without manual outreach."
   },
   {
     question: "Do I need SEO experience to use Ranklite?",
@@ -27,7 +27,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "How long does it take to see results?",
-    answer: "Most users start seeing organic traffic increases within 30-60 days. Unlike traditional SEO that can take 6+ months, Ranklite's automated content publishing and backlink generation accelerate the timeline significantly while staying within Google's guidelines."
+    answer: "Most users start seeing organic traffic increases within 30-60 days. Unlike traditional SEO that can take 6+ months, Ranklite's automated content publishing and AI Authority Exchange accelerate the timeline significantly while staying within Google's guidelines."
   },
   {
     question: "Will this work for my industry/niche?",
@@ -35,7 +35,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Is this safe for my website's SEO?",
-    answer: "Absolutely. Ranklite is built with SEO safety as the foundation. We control publishing pace, backlink velocity, and content quality to ensure Google sees natural, organic growth—not automated spam. No link blasts, no content flooding, no penalties."
+    answer: "Absolutely. Ranklite is built with SEO safety as the foundation. We control publishing pace, backlink velocity, and content quality to ensure Google sees natural, organic traffic—not automated spam. No link blasts, no content flooding, no penalties."
   },
   {
     question: "What if I already have content on my site?",

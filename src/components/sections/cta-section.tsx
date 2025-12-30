@@ -56,7 +56,7 @@ export default function CtaSection() {
               </span>
               your
               <br className="hidden sm:block" />
-              organic growth?
+              organic traffic?
             </h2>
 
             <p className="mx-auto mt-5 max-w-[500px] text-[16px] leading-relaxed text-white/60 sm:text-[18px]">

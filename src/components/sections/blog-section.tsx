@@ -1,18 +1,39 @@
-import { Calendar, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { notion } from "@/lib/cms/notion";
 
-export default async function BlogSection() {
-    const allPosts = await notion.getBlogPosts();
-    // Get the latest 3 published posts
-    const latestPosts = allPosts.slice(0, 3);
-
-    if (latestPosts.length === 0) {
-        return null; // Don't render section if no posts
+const blogPosts = [
+    {
+        id: 1,
+        title: "How to Build High-Authority Backlinks in 2026",
+        excerpt: "Discover the latest strategies for building authority signals that AI agents and search engines trust.",
+        category: "Backlinks",
+        date: "Dec 28, 2025",
+        readTime: "6 min read",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
+    },
+    {
+        id: 2,
+        title: "Automating Your Content Strategy with AI",
+        excerpt: "Learn how to use Ranklite to automate your content calendar and keep your site fresh on autopilot.",
+        category: "Automation",
+        date: "Dec 15, 2025",
+        readTime: "4 min read",
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2532&auto=format&fit=crop"
+    },
+    {
+        id: 3,
+        title: "SEO for Small Business: A Growth Guide",
+        excerpt: "Simple, effective SEO tactics that small businesses can use to compete with the big players.",
+        category: "Guide",
+        date: "Dec 05, 2025",
+        readTime: "8 min read",
+        image: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?q=80&w=2340&auto=format&fit=crop"
     }
+];
 
+export default function BlogSection() {
     return (
-        <section className="py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50" id="blog">
+        <section className="py-16 lg:py-24 bg-gradient-to-b from-white to-[#F9FAFB]" id="blog">
             <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
                 {/* Header */}
                 <div className="mb-12 text-center">
@@ -32,36 +53,27 @@ export default async function BlogSection() {
 
                 {/* Blog Posts Grid */}
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
-                    {latestPosts.map((post) => (
+                    {blogPosts.map((post) => (
                         <Link
                             key={post.id}
-                            href={`/blog/${post.slug}`}
+                            href="https://ranklitesite.feather.blog/"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all hover:shadow-xl hover:-translate-y-1"
                         >
                             <div className="h-48 bg-muted flex items-center justify-center overflow-hidden relative">
-                                {post.coverImage ? (
-                                    <img
-                                        src={post.coverImage}
-                                        alt={post.title}
-                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 bg-gradient-to-br from-[#22C55E] to-[#16A34A] opacity-20" />
-                                )}
+                                <img
+                                    src={post.image}
+                                    alt={post.title}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
                                 <div className="absolute top-4 right-4 rounded-full bg-white/95 px-3 py-1 text-[12px] font-semibold text-foreground backdrop-blur-sm shadow-sm">
                                     {post.category}
                                 </div>
                             </div>
                             <div className="flex flex-1 flex-col p-6">
                                 <div className="mb-3 flex items-center gap-4 text-[13px] text-muted-foreground">
-                                    <div className="flex items-center gap-1">
-                                        <Calendar className="h-3.5 w-3.5" />
-                                        {new Date(post.date).toLocaleDateString("en-US", {
-                                            month: "short",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        })}
-                                    </div>
+                                    <div>{post.date}</div>
                                     <div>{post.readTime}</div>
                                 </div>
                                 <h3 className="mb-3 font-display text-[20px] font-semibold leading-snug text-foreground transition-colors group-hover:text-[#22C55E] line-clamp-2">
@@ -82,7 +94,9 @@ export default async function BlogSection() {
                 {/* View All Posts CTA */}
                 <div className="flex justify-center">
                     <Link
-                        href="/blog"
+                        href="https://ranklitesite.feather.blog/"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
                         View All Posts

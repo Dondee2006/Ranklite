@@ -37,10 +37,10 @@ const apiEndpoints = [
 ];
 
 const quickLinks = [
-  { title: "API Authentication", href: "/docs/api/auth", description: "Learn how to authenticate API requests" },
-  { title: "Generate Content", href: "/docs/api/generate", description: "Create SEO-optimized articles programmatically" },
-  { title: "Manage Articles", href: "/docs/api/articles", description: "CRUD operations for your content" },
-  { title: "Rate Limits", href: "/docs/api/limits", description: "Understand API usage limits and quotas" },
+  { title: "API Authentication", href: "#authentication", description: "Learn how to authenticate API requests" },
+  { title: "Generate Content", href: "#endpoints", description: "Create SEO-optimized articles programmatically" },
+  { title: "Manage Articles", href: "#endpoints", description: "CRUD operations for your content" },
+  { title: "Rate Limits", href: "#rate-limits", description: "Understand API usage limits and quotas" },
 ];
 
 export default function ApiDocsPage() {
@@ -79,7 +79,7 @@ export default function ApiDocsPage() {
           ))}
         </div>
 
-        <div className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm">
+        <div id="authentication" className="mb-16 rounded-2xl border border-border bg-white p-8 shadow-sm scroll-mt-24">
           <div className="mb-6 flex items-start gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] shadow-md shadow-green-500/20">
               <Lock className="h-6 w-6 text-white" />
@@ -98,14 +98,14 @@ export default function ApiDocsPage() {
           </div>
           <p className="mt-4 text-[14px] text-muted-foreground">
             Get your API key from your{" "}
-            <Link href="/dashboard/settings" className="text-[#22C55E] hover:underline">
+            <Link href="/dashboard/overview" className="text-[#22C55E] hover:underline">
               account settings
             </Link>
             .
           </p>
         </div>
 
-        <div className="mb-16">
+        <div id="endpoints" className="mb-16 scroll-mt-24">
           <h2 className="mb-8 font-display text-[32px] font-semibold text-foreground">API Endpoints</h2>
           <div className="space-y-4">
             {apiEndpoints.map((endpoint, index) => (
@@ -180,14 +180,14 @@ export default function ApiDocsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8">
+        <div id="rate-limits" className="rounded-2xl border border-amber-200 bg-amber-50 p-8 scroll-mt-24">
           <div className="flex items-start gap-4">
             <AlertCircle className="h-6 w-6 shrink-0 text-amber-600" />
             <div>
               <h3 className="mb-2 text-[18px] font-semibold text-amber-900">Rate Limits</h3>
               <p className="text-[15px] leading-relaxed text-amber-800">
                 API requests are rate limited to ensure fair usage. Free accounts are limited to 100 requests per day, Pro accounts get 10,000 requests per day. View detailed rate limit information in the{" "}
-                <Link href="/docs/api/limits" className="font-semibold underline">
+                <Link href="#rate-limits" className="font-semibold underline">
                   Rate Limits documentation
                 </Link>
                 .

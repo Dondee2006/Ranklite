@@ -4,18 +4,18 @@ import { Send, Twitter, Linkedin, Github } from "lucide-react";
 const productLinks = [
   { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#howitworks" },
-  { label: "Backlink Exchange", href: "/dashboard/backlink-exchange" },
+
   { label: "Pricing", href: "/#pricing" },
-  { label: "Blog", href: "/blog" },
+  { label: "Blog", href: "https://ranklitesite.feather.blog/" },
   { label: "Integrations", href: "/integrations" },
 ];
 
 const resourceLinks = [
   { label: "Free SEO Tools", href: "/tools" },
-  { label: "Keyword Generator", href: "/tools/keyword-generator" },
-  { label: "Content Brief", href: "/tools/content-brief" },
-  { label: "SEO Title Generator", href: "/tools/seo-title" },
-  { label: "Article Summarizer", href: "/tools/summarizer" },
+  { label: "Keyword Generator", href: "/tools#keyword-generator" },
+  { label: "Content Brief", href: "/tools#content-brief" },
+  { label: "SEO Title Generator", href: "/tools#seo-title" },
+  { label: "Article Summarizer", href: "/tools#summarizer" },
 ];
 
 const documentationLinks = [
@@ -53,7 +53,7 @@ export default function Footer() {
               <RankliteLogo />
             </Link>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              Build Organic Growth On Autopilot
+              Build Organic Traffic On Autopilot
             </p>
             <div className="flex items-center gap-3">
               {[
@@ -144,7 +144,7 @@ export default function Footer() {
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
           <p className="text-[14px] text-muted-foreground">
-            © 2025 Ranklite. All rights reserved.
+            © Ranklite. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-[14px] text-muted-foreground">
             <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>

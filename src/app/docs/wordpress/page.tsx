@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Plug, Download, Settings, CheckCircle, ChevronRight, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Ranklite - Build Organic Traffic on Autopilot | WordPress Integration",
+  description: "Learn how to automatically publish your AI-generated content to WordPress using the Ranklite plugin.",
+};
 
 const features = [
   "Automatic content publishing to WordPress",
@@ -131,7 +137,7 @@ export default function WordPressDocsPage() {
               <ol className="list-decimal space-y-2 pl-6 text-[15px] text-muted-foreground">
                 <li>
                   Log in to your{" "}
-                  <Link href="/dashboard" className="text-[#22C55E] hover:underline">
+                  <Link href="/dashboard/overview" className="text-[#22C55E] hover:underline">
                     Ranklite dashboard
                   </Link>
                 </li>

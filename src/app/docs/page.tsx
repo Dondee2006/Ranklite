@@ -12,9 +12,9 @@ const docCategories = [
     color: "from-[#22C55E] to-[#16A34A]",
     articles: [
       { title: "Quick Start Guide", href: "/docs/quick-start" },
-      { title: "Creating Your First Article", href: "/docs/first-article" },
-      { title: "Understanding the Dashboard", href: "/docs/dashboard-overview" },
-      { title: "Account Setup", href: "/docs/account-setup" },
+      { title: "Creating Your First Article", href: "/docs#getting-started" },
+      { title: "Understanding the Dashboard", href: "/docs#getting-started" },
+      { title: "Account Setup", href: "/docs#getting-started" },
     ],
   },
   {
@@ -25,9 +25,9 @@ const docCategories = [
     color: "from-[#3B82F6] to-[#2563EB]",
     articles: [
       { title: "WordPress Integration", href: "/docs/wordpress" },
-      { title: "Webflow Setup", href: "/docs/webflow" },
-      { title: "Shopify Integration", href: "/docs/shopify" },
-      { title: "Google Search Console", href: "/docs/gsc" },
+      { title: "Webflow Setup", href: "/docs#integrations" },
+      { title: "Shopify Integration", href: "/docs#integrations" },
+      { title: "Google Search Console", href: "/docs#integrations" },
     ],
   },
   {
@@ -37,10 +37,10 @@ const docCategories = [
     icon: Code,
     color: "from-[#8B5CF6] to-[#7C3AED]",
     articles: [
-      { title: "API Authentication", href: "/docs/api/auth" },
-      { title: "Generate Content", href: "/docs/api/generate" },
-      { title: "Manage Articles", href: "/docs/api/articles" },
-      { title: "Rate Limits", href: "/docs/api/limits" },
+      { title: "API Authentication", href: "/docs/api#authentication" },
+      { title: "Generate Content", href: "/docs/api#endpoints" },
+      { title: "Manage Articles", href: "/docs/api#endpoints" },
+      { title: "Rate Limits", href: "/docs/api#rate-limits" },
     ],
   },
   {

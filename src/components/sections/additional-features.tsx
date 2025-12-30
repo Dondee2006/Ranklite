@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BookOpen, Wand2, Target, Server, MessageSquare, Shield, Layers } from "lucide-react";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 const features = [
   {
@@ -50,38 +51,46 @@ export default function AdditionalFeatures() {
       </div>
 
       <div className="container mx-auto max-w-[1320px] px-5 md:px-8">
-        <div className="mx-auto mb-14 max-w-[700px] text-center lg:mb-20">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#D1FAE5] px-4 py-1.5 text-[13px] font-semibold text-[#10B981]">
-            <Layers className="h-3.5 w-3.5" />
-            More Features
-          </span>
-          <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[40px] lg:text-[52px]">
-            Everything you need to{" "}
-            <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
-              do your best work
+        <ScrollReveal>
+          <div className="mx-auto mb-14 max-w-[700px] text-center lg:mb-20">
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#D1FAE5] px-4 py-1.5 text-[13px] font-semibold text-[#10B981]">
+              <Layers className="h-3.5 w-3.5" />
+              More Features
             </span>
-          </h2>
-        </div>
+            <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[40px] lg:text-[52px]">
+              Everything you need to{" "}
+              <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
+                do your best work
+              </span>
+            </h2>
+          </div>
+        </ScrollReveal>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {features.map((feature, index) => (
-            <div
+            <ScrollReveal
               key={index}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-lg shadow-black/[0.02] transition-all duration-300 hover:border-[#22C55E]/20 hover:shadow-xl lg:rounded-3xl lg:p-8"
+              delay={0.1 * index}
+              variant="fade-up"
+              className="h-full"
             >
-              <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-[#F0FDF4] to-[#D1FAE5] opacity-0 blur-2xl transition-opacity group-hover:opacity-60" />
+              <div
+                className="group relative h-full overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-lg shadow-black/[0.02] transition-all duration-300 hover:border-[#22C55E]/20 hover:shadow-xl lg:rounded-3xl lg:p-8"
+              >
+                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-[#F0FDF4] to-[#D1FAE5] opacity-0 blur-2xl transition-opacity group-hover:opacity-60" />
 
-              <div className={`relative mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
-                <feature.icon className="h-5 w-5 text-white" strokeWidth={2} />
+                <div className={`relative mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
+                  <feature.icon className="h-5 w-5 text-white" strokeWidth={2} />
+                </div>
+
+                <h3 className="relative mb-2 font-display text-[20px] font-bold tracking-tight text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="relative text-[15px] leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
-
-              <h3 className="relative mb-2 font-display text-[20px] font-bold tracking-tight text-foreground">
-                {feature.title}
-              </h3>
-              <p className="relative text-[15px] leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

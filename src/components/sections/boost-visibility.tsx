@@ -41,22 +41,22 @@ export default function BoostVisibility() {
             <h2 className="font-display text-[32px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[40px] lg:text-[52px]">
               Boost your domain authority with{" "}
               <span className="bg-gradient-to-r from-[#22C55E] to-[#10B981] bg-clip-text text-transparent">
-                AI-Powered Backlink Generation
+                AI-Powered Authority Exchange
               </span>
             </h2>
             <p className="mt-5 max-w-[550px] text-[16px] leading-relaxed text-muted-foreground lg:text-[17px]">
-              Join Ranklite&apos;s automated backlink generator and build high-quality links that increase your rankings, domain trust, and organic traffic — without cold outreach or manual submissions.
+              Join Ranklite&apos;s automated backlink exchange and build high-quality, contextual links that increase your rankings, domain trust, and organic traffic — all without cold outreach or manual submissions.
             </p>
             <p className="mt-4 flex items-center gap-2 text-[15px] font-medium text-foreground">
               <Link2 className="h-4 w-4 text-[#22C55E]" />
-              Publish content → Ranklite generates backlinks → You grow.
+              Publish content → Ranklite distributes links through the Authority Exchange → You grow.
             </p>
           </div>
           <a
             href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
             className="group flex w-fit items-center gap-2 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-green-500/20 transition-all hover:shadow-xl hover:shadow-green-500/30"
           >
-            Generate Backlinks Instantly →
+            Start Earning & Receiving Authority Links
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
         </div>
@@ -66,8 +66,8 @@ export default function BoostVisibility() {
             <div className="mb-5 aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-[#FAFFFE] to-[#F0FDF4] p-5">
               <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
                 <div>
-                  <span className="text-[14px] font-semibold text-foreground">Backlink Generator</span>
-                  <span className="block text-[11px] text-muted-foreground">AI-Powered Links</span>
+                  <span className="text-[14px] font-semibold text-foreground">Authority Exchange</span>
+                  <span className="block text-[11px] text-muted-foreground">AI-Powered Network</span>
                 </div>
                 <div className="relative h-5 w-9 rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] shadow-inner">
                   <div className="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm" />
@@ -80,10 +80,10 @@ export default function BoostVisibility() {
               </div>
             </div>
             <h4 className="mb-2 font-display text-[20px] font-bold tracking-tight text-foreground">
-              Automatic Backlink Generation
+              Automatic Authority Exchange
             </h4>
             <p className="text-[15px] leading-relaxed text-muted-foreground">
-              Ranklite&apos;s AI automatically generates high-quality backlinks to your content. No cold outreach or manual submissions required.
+              Ranklite&apos;s AI automatically exchanges high-quality backlinks through our network. No cold outreach or manual submissions required.
             </p>
           </div>
 

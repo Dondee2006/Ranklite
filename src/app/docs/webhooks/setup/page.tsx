@@ -52,7 +52,7 @@ export default function WebhookSetupPage() {
               <div className="flex-1">
                 <h3 className="mb-3 font-display text-[22px] font-semibold text-foreground">Navigate to Webhooks Settings</h3>
                 <p className="text-[16px] leading-relaxed text-muted-foreground">
-                  Go to your <Link href="/dashboard/settings" className="text-[#22C55E] hover:underline">Dashboard → Settings → Webhooks</Link> or access directly through the Integrations menu.
+                  Go to your <Link href="/dashboard/overview" className="text-[#22C55E] hover:underline">Dashboard → Settings → Webhooks</Link> or access directly through the Integrations menu.
                 </p>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 const steps = [
   {
@@ -61,26 +62,31 @@ export default function HowItWorks() {
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-8">
           {steps.map((step, index) => (
-            <div
+            <ScrollReveal
               key={index}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-lg shadow-black/[0.03] transition-all hover:border-[#22C55E]/20 hover:shadow-xl lg:rounded-3xl"
+              delay={index * 0.15}
+              className="h-full"
             >
-              <div className="absolute right-4 top-4 text-[48px] font-bold leading-none text-[#F0FDF4] transition-colors group-hover:text-[#DCFCE7]" style={{ fontFamily: "var(--font-display)" }}>
-                {step.number}
-              </div>
+              <div
+                className="group relative h-full overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-lg shadow-black/[0.03] transition-all hover:border-[#22C55E]/20 hover:shadow-xl lg:rounded-3xl"
+              >
+                <div className="absolute right-4 top-4 text-[48px] font-bold leading-none text-[#F0FDF4] transition-colors group-hover:text-[#DCFCE7]" style={{ fontFamily: "var(--font-display)" }}>
+                  {step.number}
+                </div>
 
-              <div className="pr-16">
-                <h4 className="mb-3 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
-                  {step.title}
-                </h4>
-                <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
-                  {step.description}
-                </p>
-                <p className="text-[14px] font-medium leading-relaxed text-[#22C55E]">
-                  {step.subtext}
-                </p>
+                <div className="pr-16">
+                  <h4 className="mb-3 font-display text-[20px] font-bold tracking-tight text-foreground lg:text-[22px]">
+                    {step.title}
+                  </h4>
+                  <p className="mb-4 text-[15px] leading-relaxed text-muted-foreground">
+                    {step.description}
+                  </p>
+                  <p className="text-[14px] font-medium leading-relaxed text-[#22C55E]">
+                    {step.subtext}
+                  </p>
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 

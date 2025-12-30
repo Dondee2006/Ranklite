@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { ArrowLeft, CheckCircle, Zap, Clock } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Ranklite - Build Organic Traffic on Autopilot | Quick Start Guide",
+  description: "Get up and running with Ranklite in under 5 minutes. Learn how to set up your first site and generate AI content.",
+};
 
 export default function QuickStartPage() {
   return (
@@ -170,10 +176,10 @@ export default function QuickStartPage() {
             <div className="rounded-2xl bg-gradient-to-br from-[#F0FDF4] to-white p-8">
               <h2 className="mb-4 font-display text-[24px] font-semibold text-foreground">Next Steps</h2>
               <div className="space-y-3">
-                <Link href="/docs/first-article" className="block rounded-lg border border-border bg-white p-4 text-[16px] font-medium text-foreground transition-all hover:border-[#22C55E] hover:bg-[#F0FDF4] hover:text-[#22C55E]">
+                <Link href="/docs#getting-started" className="block rounded-lg border border-border bg-white p-4 text-[16px] font-medium text-foreground transition-all hover:border-[#22C55E] hover:bg-[#F0FDF4] hover:text-[#22C55E]">
                   → Learn how to create your first article
                 </Link>
-                <Link href="/docs/dashboard-overview" className="block rounded-lg border border-border bg-white p-4 text-[16px] font-medium text-foreground transition-all hover:border-[#22C55E] hover:bg-[#F0FDF4] hover:text-[#22C55E]">
+                <Link href="/docs#getting-started" className="block rounded-lg border border-border bg-white p-4 text-[16px] font-medium text-foreground transition-all hover:border-[#22C55E] hover:bg-[#F0FDF4] hover:text-[#22C55E]">
                   → Explore the dashboard
                 </Link>
                 <Link href="/docs/wordpress" className="block rounded-lg border border-border bg-white p-4 text-[16px] font-medium text-foreground transition-all hover:border-[#22C55E] hover:bg-[#F0FDF4] hover:text-[#22C55E]">

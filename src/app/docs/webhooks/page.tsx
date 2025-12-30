@@ -119,7 +119,7 @@ export default function WebhooksDocsPage() {
               <div>
                 <p className="text-[15px] text-muted-foreground">
                   Go to your{" "}
-                  <Link href="/dashboard/settings" className="font-medium text-[#22C55E] hover:underline">
+                  <Link href="/dashboard/overview" className="font-medium text-[#22C55E] hover:underline">
                     Dashboard Settings
                   </Link>{" "}
                   and navigate to the Webhooks section.

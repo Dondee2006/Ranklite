@@ -132,7 +132,7 @@ export default function HeroSection() {
               </div>
 
               <h1 className="font-display text-[42px] font-extrabold leading-[1.08] tracking-[-1.5px] text-foreground sm:text-[52px] lg:text-[68px]">
-                Build <span className="text-[#22C55E]">Organic Growth</span> On Autopilot
+                Build <span className="text-[#22C55E]">Organic Traffic</span> On Autopilot
               </h1>
 
               <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-relaxed text-muted-foreground sm:text-[19px] lg:mt-8">
@@ -144,7 +144,7 @@ export default function HeroSection() {
                   href="https://whop.com/checkout/plan_hwMsQBSgnZtPO"
                   className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] px-8 py-4 text-[16px] font-semibold text-white shadow-xl shadow-green-500/25 transition-all hover:shadow-2xl hover:shadow-green-500/30 sm:w-auto"
                 >
-                  <span className="relative z-10">Start Generating Backlinks</span>
+                  <span className="relative z-10">Get Started for Free</span>
                   <svg className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
