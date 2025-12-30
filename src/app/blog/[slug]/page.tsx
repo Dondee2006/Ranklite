@@ -3,6 +3,7 @@ import Footer from "@/components/sections/footer";
 import Link from "next/link";
 import { ArrowLeft, Clock, Calendar, Share2, ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 const blogPosts = [
     {
@@ -94,9 +95,11 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <main>
                 {/* Hero Section */}
                 <div className="relative h-[400px] w-full overflow-hidden lg:h-[600px]">
-                    <img
+                    <Image
                         src={post.image}
                         alt={post.title}
+                        fill
+                        priority
                         className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
@@ -140,7 +143,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 overflow-hidden rounded-full bg-muted">
-                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" alt="Author" />
+                                    <Image
+                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
+                                        alt="Author"
+                                        width={48}
+                                        height={48}
+                                    />
                                 </div>
                                 <div>
                                     <div className="font-semibold">Ranklite Team</div>

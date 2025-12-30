@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { TrendingUp, Zap, Target, BarChart3, Star } from "lucide-react";
 import { GoogleJoinButton } from "@/components/ui/google-join-button";
+import Image from "next/image";
 
 function StatBubble({
   icon: Icon,
@@ -166,7 +166,13 @@ export default function HeroSection() {
                       key={i}
                       className="h-11 w-11 overflow-hidden rounded-full border-[3px] border-white shadow-md"
                     >
-                      <img src={src} alt="" className="h-full w-full object-cover" />
+                      <Image
+                        src={src}
+                        alt="User Avatar"
+                        width={44}
+                        height={44}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                   ))}
                   <div className="flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-[#22C55E] to-[#16A34A] text-xs font-bold text-white shadow-md">

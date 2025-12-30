@@ -3,6 +3,7 @@ import Footer from "@/components/sections/footer";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
     title: "SEO & Content Marketing Blog",
@@ -64,9 +65,11 @@ export default function BlogPage() {
                             className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-all hover:shadow-xl hover:-translate-y-1"
                         >
                             <div className="h-48 overflow-hidden relative">
-                                <img
+                                <Image
                                     src={post.image}
                                     alt={post.title}
+                                    width={400}
+                                    height={200}
                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                                 <div className="absolute top-4 right-4 rounded-full bg-white/95 px-3 py-1 text-[12px] font-semibold text-foreground backdrop-blur-sm shadow-sm">
