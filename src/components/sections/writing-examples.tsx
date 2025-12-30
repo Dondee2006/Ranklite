@@ -127,9 +127,7 @@ export default function WritingExamples() {
                   Explore our blog where every article is crafted with Ranklite:
                 </p>
                 <Link
-                  href="https://ranklitesite.feather.blog/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/blog"
                   className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
                 >
                   Explore the Blog
@@ -214,9 +212,7 @@ export default function WritingExamples() {
               Explore our blog where every article is crafted with Ranklite:
             </p>
             <Link
-              href="https://ranklitesite.feather.blog/"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/blog"
               className="inline-flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white font-semibold text-base px-8 py-3.5 rounded-full transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
               Explore the Blog
