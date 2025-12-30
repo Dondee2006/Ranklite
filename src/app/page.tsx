@@ -17,7 +17,7 @@ import FAQSection from "@/components/sections/faq";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/sections/footer";
 import BlogSection from "@/components/sections/blog-section";
-import VideoSection from "@/components/sections/video-section";
+
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default function Home() {
@@ -31,10 +31,6 @@ export default function Home() {
 
                 <ScrollReveal>
                     <ProblemsSolution />
-                </ScrollReveal>
-
-                <ScrollReveal>
-                    <VideoSection />
                 </ScrollReveal>
 
                 <ScrollReveal>
