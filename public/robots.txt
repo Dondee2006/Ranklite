@@ -1,10 +1,6 @@
-# Allow all crawlers
+# *
 User-agent: *
 Allow: /
 
-# Disallow dashboard and API routes
-Disallow: /dashboard/
-Disallow: /api/
-Disallow: /checkout/
-
-
+# Host
+Host: https://www.ranklite.site
