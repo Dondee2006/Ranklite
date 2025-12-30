@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "SEO & Content Marketing Blog",
+    description: "Expert insights, strategies, and guides on AI-powered SEO, content automation, and growing your organic traffic.",
+};
 
 const blogPosts = [
     {

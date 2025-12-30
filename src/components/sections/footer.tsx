@@ -6,7 +6,7 @@ const productLinks = [
   { label: "How it works", href: "/#howitworks" },
 
   { label: "Pricing", href: "/#pricing" },
-  { label: "Blog", href: "https://ranklitesite.feather.blog/" },
+  { label: "Blog", href: "/blog" },
   { label: "Integrations", href: "/integrations" },
 ];
 

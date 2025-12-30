@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Book, Code, Webhook, Plug, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Documentation",
+  description: "Learn how to use Ranklite to automate your SEO. Guides on setup, integrations, API reference, and webhooks.",
+};
 
 const docCategories = [
   {

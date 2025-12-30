@@ -3,19 +3,27 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import JsonLd from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Ranklite - Build Organic Traffic on Autopilot",
+  title: {
+    default: "Ranklite - Build Organic Traffic on Autopilot",
+    template: "%s | Ranklite"
+  },
   description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
   keywords: ["SEO", "organic traffic", "content marketing", "backlinks", "ChatGPT", "Google ranking", "autopilot SEO"],
   authors: [{ name: "Ranklite" }],
-  metadataBase: new URL(process.env.SITE_URL || 'https://yourdomain.com'),
+  metadataBase: new URL('https://ranklite.site'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: "Ranklite - Build Organic Traffic on Autopilot",
     description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
-    url: process.env.SITE_URL || 'https://yourdomain.com',
+    url: 'https://ranklite.site',
     siteName: "Ranklite",
     type: "website",
+    locale: 'en_US',
     images: [
       {
         url: "/og-image.png",
@@ -30,6 +38,7 @@ export const metadata: Metadata = {
     title: "Ranklite - Build Organic Traffic on Autopilot",
     description: "Get recommended by ChatGPT & Rank on Google. Get done-for-you Blog Posts, Backlinks and Free Tools while you sleep.",
     images: ["/og-image.png"],
+    creator: "@ranklite",
   },
   robots: {
     index: true,
@@ -60,6 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
+        <JsonLd />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

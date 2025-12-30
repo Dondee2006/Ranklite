@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Integrations",
+  description: "Connect Ranklite with WordPress, Webflow, Shopify, Notion, and more to automate your content workflow.",
+};
 
 const integrations = [
   {
@@ -70,8 +76,8 @@ export default function IntegrationsPage() {
             <button
               key={category}
               className={`rounded-full border px-5 py-2 text-[14px] font-medium transition-all ${category === "All"
-                  ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
-                  : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
+                ? "border-[#22C55E] bg-[#F0FDF4] text-[#22C55E]"
+                : "border-border bg-white text-muted-foreground hover:border-[#22C55E]/30 hover:bg-[#F0FDF4] hover:text-[#22C55E]"
                 }`}
             >
               {category}

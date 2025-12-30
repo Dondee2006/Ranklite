@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Users, Target, Zap, Award } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn about Ranklite's mission to make SEO accessible to everyone through AI-powered content automation and organic growth strategies.",
+};
 
 export default function AboutPage() {
   return (

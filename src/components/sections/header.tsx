@@ -47,7 +47,7 @@ export default function Header() {
                 {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
                   <li key={item}>
                     <Link
-                      href={item === "Blog" ? "https://ranklitesite.feather.blog/" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
+                      href={item === "Blog" ? "/blog" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
                       className="rounded-full px-5 py-2.5 text-[15px] font-medium text-foreground/80 transition-all hover:bg-[#F0FDF4] hover:text-foreground"
                     >
                       {item}
@@ -95,7 +95,7 @@ export default function Header() {
                 {["Features", "How it Works", "Pricing", "Blog"].map((item) => (
                   <li key={item}>
                     <Link
-                      href={item === "Blog" ? "https://ranklitesite.feather.blog/" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
+                      href={item === "Blog" ? "/blog" : `/#${item.toLowerCase().replace(/\s+/g, "")}`}
                       className="block rounded-xl px-4 py-3 text-center text-[15px] font-medium text-foreground transition-colors hover:bg-[#F0FDF4]"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

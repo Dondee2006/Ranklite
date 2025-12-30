@@ -2,6 +2,12 @@ import Header from "@/components/sections/header";
 import Footer from "@/components/sections/footer";
 import { Sparkles, Search, FileText, Type, List } from "lucide-react";
 import Link from "next/link";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Free SEO Tools",
+  description: "Boost your search engine rankings with our 100% free AI-powered SEO tools. Keyword generators, title optimizers, and more.",
+};
 
 const tools = [
   {
