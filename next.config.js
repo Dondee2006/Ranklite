@@ -21,6 +21,10 @@ const nextConfig = {
         source: "/blog/:slug*",
         destination: "https://ranklitesite.feather.blog/:slug*",
       },
+      {
+        source: "/_feather/:path*",
+        destination: "https://ranklitesite.feather.blog/_feather/:path*",
+      },
     ];
   },
 };
