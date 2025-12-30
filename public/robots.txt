@@ -3,5 +3,5 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://www.ranklite.site
-Sitemap: https://www.ranklite.site/sitemap.xml
+Host: https://ranklite.site
+Sitemap: https://ranklite.site/sitemap.xml
