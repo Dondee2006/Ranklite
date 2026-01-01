@@ -52,7 +52,7 @@ export default function Pricing() {
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-display text-7xl font-bold text-white">$25</span>
+                      <span className="font-display text-7xl font-bold text-white">$35</span>
                       <div className="flex flex-col">
                         <span className="text-xl text-green-100 line-through">$59</span>
                         <span className="text-lg text-green-100">/monthly</span>
