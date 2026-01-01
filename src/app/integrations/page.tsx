@@ -3,52 +3,63 @@ import Footer from "@/components/sections/footer";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { Metadata } from "next";
+import { WordPressLogo, WebflowLogo, ShopifyLogo, NotionLogo, WixLogo } from "@/components/icons/cms-logos";
 
 export const metadata: Metadata = {
   title: "Integrations",
   description: "Connect Ranklite with WordPress, Webflow, Shopify, Notion, and more to automate your content workflow.",
 };
 
-const integrations = [
+// Define integration type to handle component logos
+type Integration = {
+  name: string;
+  description: string;
+  LogoComponent?: React.ComponentType<{ className?: string }>;
+  logoUrl?: string;
+  category: string;
+  features: string[];
+};
+
+const integrations: Integration[] = [
   {
     name: "WordPress",
     description: "Publish content directly to your WordPress site with our seamless integration.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-7-1765811773699.png?width=8000&height=8000&resize=contain",
+    LogoComponent: WordPressLogo,
     category: "CMS",
     features: ["Auto-publish", "Custom post types", "Categories & tags"],
   },
   {
     name: "Webflow",
     description: "Sync your AI-generated content with Webflow CMS collections.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/images-5-1765811932379.png?width=8000&height=8000&resize=contain",
+    LogoComponent: WebflowLogo,
     category: "CMS",
     features: ["CMS integration", "Dynamic content", "Custom fields"],
   },
   {
     name: "Shopify",
     description: "Create SEO-optimized product descriptions and blog posts for your Shopify store.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Shopify-Emblem-1765811813073.png?width=8000&height=8000&resize=contain",
+    LogoComponent: ShopifyLogo,
     category: "E-commerce",
     features: ["Product descriptions", "Blog posts", "Meta optimization"],
   },
   {
     name: "Notion",
     description: "Export your content to Notion databases for easy collaboration.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Notion-Logo-PNG-File-1765811836015.png?width=8000&height=8000&resize=contain",
+    LogoComponent: NotionLogo,
     category: "Productivity",
     features: ["Database sync", "Templates", "Collaboration"],
   },
   {
     name: "Wix",
     description: "Publish AI-generated content to your Wix blog and pages.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/wix-logo_brandlogos.net_w0pfv-512x512-1765811889324.png?width=8000&height=8000&resize=contain",
+    LogoComponent: WixLogo,
     category: "CMS",
     features: ["Blog integration", "Page builder", "SEO tools"],
   },
   {
     name: "Google Search Console",
     description: "Analyze search performance and generate content based on real data.",
-    logo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/google-search-console-icon-logo-png_seeklogo-624699-1765811853676.png?width=8000&height=8000&resize=contain",
+    logoUrl: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/google-search-console-icon-logo-png_seeklogo-624699-1765811853676.png?width=8000&height=8000&resize=contain",
     category: "Analytics",
     features: ["Search data", "Keyword insights", "Performance tracking"],
   },
@@ -93,13 +104,19 @@ export default function IntegrationsPage() {
             >
               <div className="flex items-center gap-4 border-b border-border p-6">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-md">
-                  <Image
-                    src={integration.logo}
-                    alt={`${integration.name} logo`}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8"
-                  />
+                  {integration.LogoComponent ? (
+                    <div className="h-8 w-8 flex items-center justify-center">
+                      <integration.LogoComponent className="h-full w-full object-contain" />
+                    </div>
+                  ) : (
+                    <Image
+                      src={integration.logoUrl || ""}
+                      alt={`${integration.name} logo`}
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 object-contain"
+                    />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-display text-[20px] font-semibold text-foreground">{integration.name}</h3>
